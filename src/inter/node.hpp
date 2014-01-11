@@ -1,5 +1,7 @@
 #pragma once
 
+#include <lexer/lexer.hpp>
+
 #include <exception>
 #include <stdexcept>
 #include <iostream>
@@ -18,7 +20,7 @@ class Node {
     void emit(const std::string &label);
 
   protected:
-    Node(); // TODO: Requires the lexer to complete
+    Node();
     virtual ~Node();
 
     std::size_t lexline_;
@@ -28,7 +30,7 @@ class Node {
 };
 
 inline
-Node::Node() : lexline_(0/*Lexer::current_line()*/) {
+Node::Node() : lexline_(lexer::Lexer::current_line()) {
 }
 
 inline
@@ -55,6 +57,6 @@ void Node::emit_label(const std::uint32_t &i) {
 
 inline
 void emit(const std::string &message) {
-    std::cout << message;
+    std::cout << '\t' << message;
 }
 } // namespace inter

@@ -11,15 +11,17 @@ class Operator : public Expression {
     Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
     ~Operator();
 
-    std::shared_ptr<Expression> reduce();
+    std::shared_ptr<Expression> reduce() override;
 };
 
 inline
 std::shared_ptr<Operator> Operator::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type) {
+    return std::make_shared<Operator>(token, type);
 }
 
 inline
-Operator::Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type) : Expression(token, type) {
+Operator::Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type)
+  : Expression(token, type) {
 }
 
 inline
@@ -28,8 +30,8 @@ Operator::~Operator() {
 
 inline
 std::shared_ptr<Expression> Operator::reduce() {
-    boost::shared_ptr<Expression> expr = gen();
-    boost::shared_ptr<Temporary> temp = Temporary::create(type());
+    std::shared_ptr<Expression> expr = gen();
+    std::shared_ptr<Temporary> temp = Temporary::create(type());
     emit(temp->to_string() + " = " + expr->to_string());
     return temp;
 }

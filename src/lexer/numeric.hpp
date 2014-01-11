@@ -15,12 +15,15 @@ class NumericType : public Token {
     explicit NumericType(const T &value);
     ~NumericType();
 
-    T value() const;
-    std::string to_string() const;
+    value_type value() const;
+    std::string to_string() const override;
 
   private:
     T value_;
 };
+
+typedef NumericType<double, Token::kReal> Real;
+typedef NumericType<std::int64_t, Token::kInteger> Number;
 
 template<typename T, std::uint32_t TAG>
 std::shared_ptr<NumericType<T, TAG>> create(const T &value) {

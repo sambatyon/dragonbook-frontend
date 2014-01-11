@@ -20,7 +20,7 @@ class Temporary : public Expression {
 
     std::uint32_t number() const;
 
-    std::string to_string() const;
+    std::string to_string() const override;
 
   private:
     static std::uint32_t count_;

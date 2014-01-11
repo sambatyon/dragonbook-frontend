@@ -16,14 +16,14 @@ class Expression : public Node, public std::enable_shared_from_this<Expression> 
     explicit Expression(std::shared_ptr<lexer::Token> oper, std::shared_ptr<symbols::Type> type);
     virtual ~Expression();
 
-    std::shared_ptr<Expression> get_ptr();
+    virtual std::shared_ptr<Expression> get_ptr();
     virtual std::shared_ptr<Expression> gen();
-    std::shared_ptr<Expression> reduce();
+    virtual std::shared_ptr<Expression> reduce();
 
     virtual void jumping(const std::uint32_t &to, const std::uint32_t &from);
-    virtual void emit_jumps(const std::string &test, const std::uint32_t &to, const std::uint32_t &from);
+    void emit_jumps(const std::string &test, const std::uint32_t &to, const std::uint32_t &from);
 
-    virtual std::string to_string();
+    virtual std::string to_string() const;
 
     std::shared_ptr<lexer::Token> oper() const;
     std::shared_ptr<symbols::Type> type() const;
@@ -69,14 +69,16 @@ void Expression::jumping(const std::uint32_t &to, const std::uint32_t &from) {
 }
 
 inline
-std::string Expression::to_string() {
+std::string Expression::to_string() const {
     return oper_->to_string();
 }
 
+inline
 std::shared_ptr<lexer::Token> Expression::oper() const {
     return oper_;
 }
 
+inline
 std::shared_ptr<symbols::Type> Expression::type() const {
     return type_;
 }

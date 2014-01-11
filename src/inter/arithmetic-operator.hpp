@@ -19,9 +19,9 @@ class Arithmetic : public Operator {
     std::shared_ptr<Expression> expr1() const;
     std::shared_ptr<Expression> expr2() const;
 
-    std::shared_ptr<Expression> gen();
+    std::shared_ptr<Expression> gen() override;
 
-    std::string to_string();
+    std::string to_string() const override;
 
   private:
     std::shared_ptr<Expression> expr1_;
@@ -31,18 +31,18 @@ class Arithmetic : public Operator {
 inline
 std::shared_ptr<Arithmetic> Arithmetic::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
                                                std::shared_ptr<Expression> expr2) {
-    return std::make_shared<Arithmetic>(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
-                                        std::shared_ptr<Expression> expr2);
+    return std::make_shared<Arithmetic>(token, expr1, expr2);
 }
 
 inline
 Arithmetic::Arithmetic(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
-                       std::shared_ptr<Expression> expr2) : Operator(token, std::shared_ptr())
+                       std::shared_ptr<Expression> expr2) : Operator(token, std::shared_ptr<symbols::Type>())
                                                           , expr1_(expr1), expr2_(expr2) {
-    symbols::Type type = Type::max(expr1->type().get(), expr2->type().get());
+    auto type = symbols::Type::max(expr1->type().get(), expr2->type().get());
     if (type == nullptr)
-        throw std::runtime_error("Arithmentic expression has no valid types");
-    type_ = type->get_ptr();
+        error("Arithmentic expression has no valid types");
+    else
+        type_ = type->getptr();
 }
 
 inline
@@ -65,7 +65,7 @@ std::shared_ptr<Expression> Arithmetic::gen() {
 }
 
 inline
-std::string Arithmetic::to_string() {
+std::string Arithmetic::to_string() const {
     return expr1_->to_string() + " " + oper_->to_string() + " " + expr2_->to_string();
 }
 } // namespace inter

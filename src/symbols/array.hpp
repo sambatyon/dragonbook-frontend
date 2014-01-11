@@ -8,21 +8,21 @@
 namespace symbols {
 class Array : public Type {
   public:
-    static shared_ptr<Array> create(const std::size_t &element_count, std::shared_ptr<Type> type);
+    static std::shared_ptr<Array> create(const std::size_t &element_count, std::shared_ptr<Type> type);
     Array(const std::size_t &element_count, std::shared_ptr<Type> type);
     ~Array();
 
     std::shared_ptr<Type> type() const;
     std::size_t element_count() const;
 
-    std::string to_string() const;
+    std::string to_string() const override;
 
   private:
     std::shared_ptr<Type> type_;
     std::size_t element_count_;
 };
 
-shared_ptr<Array> Array::create(const std::size_t &element_count, std::shared_ptr<Type> type) {
+std::shared_ptr<Array> Array::create(const std::size_t &element_count, std::shared_ptr<Type> type) {
     return std::make_shared<Array>(element_count, type);
 }
 
@@ -43,7 +43,7 @@ std::size_t Array::element_count() const {
 
 std::string Array::to_string() const {
     std::stringstream ss;
-    ss << "[" << element_count_ << "] " << type->to_string();
+    ss << "[" << element_count_ << "] " << type_->to_string();
     return ss.str();
 }
 } // namespace symbols

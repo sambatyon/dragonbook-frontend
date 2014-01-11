@@ -1,7 +1,6 @@
 #include <lexer/lexer.hpp>
 
-#include <lexer/real.hpp>
-#include <lexer/number.hpp>
+#include <lexer/numeric.hpp>
 
 #include <symbols/type.hpp>
 

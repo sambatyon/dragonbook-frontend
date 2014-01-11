@@ -13,7 +13,8 @@ class Type : public lexer::Word, public std::enable_shared_from_this<Type> {
     static std::shared_ptr<Type> character;
     static std::shared_ptr<Type> boolean;
 
-    static std::shared_ptr<Type> create(const std::string &lexeme, const std::uint32_t &tag, const std::uint8_t &width);
+    static std::shared_ptr<Type> create(const std::string &lexeme, const std::uint32_t &tag,
+                                        const std::uint8_t &width);
     static Type *max(Type *type_left, Type *type_right);
 
     Type(const std::string &lexeme, const std::uint32_t &tag, const std::uint8_t &width);

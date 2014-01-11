@@ -27,12 +27,12 @@ inline
 std::shared_ptr<Identifier> Identifier::create(std::shared_ptr<lexer::Word> identifier,
                                                std::shared_ptr<symbols::Type> type,
                                                std::uint32_t offset) {
-    return std::make_shared<Identifier>(Identifier, type, offset);
+    return std::make_shared<Identifier>(identifier, type, offset);
 }
 
 inline
 Identifier::Identifier(std::shared_ptr<lexer::Word> identifier, std::shared_ptr<symbols::Type> type,
-                       std::uint32_t offset) : Expression(Identifier, type), offset_(offset) {
+                       std::uint32_t offset) : Expression(identifier, type), offset_(offset) {
 }
 
 inline
@@ -40,7 +40,7 @@ Identifier::~Identifier() {
 }
 
 inline
-std::uint32_t offset() const {
+std::uint32_t Identifier::offset() const {
     return offset_;
 }
 } // namespace inter

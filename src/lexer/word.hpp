@@ -25,7 +25,7 @@ class Word : public Token {
     virtual ~Word();
 
     std::string lexeme() const;
-    virtual std::string to_string() const;
+    virtual std::string to_string() const override;
 
   private:
     std::string lexeme_;

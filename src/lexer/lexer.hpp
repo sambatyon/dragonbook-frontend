@@ -13,7 +13,7 @@
 namespace lexer {
 class Lexer {
   public:
-    static std::uint32_t current_line(); // Eventually, current_line should stop being static to make the scaner
+    static std::uint32_t current_line(); // Eventually, current_line should stop being static
                                          // in order to make the scaner reentrant
     static std::shared_ptr<Lexer> create();
 
