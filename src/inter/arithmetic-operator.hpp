@@ -14,14 +14,14 @@ class Arithmetic : public Operator {
                                               std::shared_ptr<Expression> expr2);
     Arithmetic(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
                std::shared_ptr<Expression> expr2);
-    ~Arithmetic();
+    virtual ~Arithmetic();
 
     std::shared_ptr<Expression> expr1() const;
     std::shared_ptr<Expression> expr2() const;
 
-    std::shared_ptr<Expression> gen() override;
+    virtual std::shared_ptr<Expression> gen() override;
 
-    std::string to_string() const override;
+    virtual std::string to_string() const override;
 
   private:
     std::shared_ptr<Expression> expr1_;

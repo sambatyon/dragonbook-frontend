@@ -14,29 +14,29 @@ class Type : public lexer::Word, public std::enable_shared_from_this<Type> {
     static std::shared_ptr<Type> boolean;
 
     static std::shared_ptr<Type> create(const std::string &lexeme, const std::uint32_t &tag,
-                                        const std::uint8_t &width);
+                                        const std::size_t &width);
     static Type *max(Type *type_left, Type *type_right);
 
-    Type(const std::string &lexeme, const std::uint32_t &tag, const std::uint8_t &width);
+    Type(const std::string &lexeme, const std::uint32_t &tag, const std::size_t &width);
     virtual ~Type();
 
     std::shared_ptr<Type> getptr();
     bool operator==(const Type &other) const;
 
-    std::uint8_t width() const;
+    std::size_t width() const;
     bool is_numeric() const;
 
   private:
-    std::uint8_t width_;
+    std::size_t width_;
 };
 
 inline
-std::shared_ptr<Type> Type::create(const std::string &lexeme, const std::uint32_t &tag, const std::uint8_t &width) {
+std::shared_ptr<Type> Type::create(const std::string &lexeme, const std::uint32_t &tag, const std::size_t &width) {
     return std::make_shared<Type>(lexeme, tag, width);
 }
 
 inline
-Type::Type(const std::string &lexeme, const std::uint32_t &tag, const std::uint8_t &width)
+Type::Type(const std::string &lexeme, const std::uint32_t &tag, const std::size_t &width)
         : lexer::Word(lexeme, tag), width_(width) {
 }
 
@@ -51,7 +51,7 @@ std::shared_ptr<Type> Type::getptr() {
 }
 
 inline
-std::uint8_t Type::width() const {
+std::size_t Type::width() const {
     return width_;
 }
 } // namespace symbols

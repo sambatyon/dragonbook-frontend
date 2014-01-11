@@ -10,7 +10,7 @@
 namespace symbols {
 class Environment : std::enable_shared_from_this<Environment> {
   public:
-    static shared_ptr<Environment> create(std::shared_ptr<Environment> previous);
+    static std::shared_ptr<Environment> create(std::shared_ptr<Environment> previous);
     explicit Environment(std::shared_ptr<Environment> previous);
 
     void put(std::shared_ptr<lexer::Token> token, std::shared_ptr<inter::Identifier> id);
@@ -25,12 +25,12 @@ class Environment : std::enable_shared_from_this<Environment> {
 };
 
 inline
-shared_ptr<Environment> Environment::create(std::shared_ptr<Environment> previous) {
-    return std::make_shared<Environment>(preivous);
+std::shared_ptr<Environment> Environment::create(std::shared_ptr<Environment> previous) {
+    return std::make_shared<Environment>(previous);
 }
 
 inline
-Environment::Environment(std::shared_ptr<Environment> previous) : preivous_(preivous), table_() {
+Environment::Environment(std::shared_ptr<Environment> previous) : previous_(previous), table_() {
 }
 
 inline
@@ -40,7 +40,7 @@ void Environment::put(std::shared_ptr<lexer::Token> token, std::shared_ptr<inter
 
 inline
 std::shared_ptr<inter::Identifier> Environment::get(std::shared_ptr<lexer::Token> token) const {
-    for (auto env = this->shared_from_this(); env.get() != nullptr; env = env.preivous_) {
+    for (auto env = this->shared_from_this(); env.get() != nullptr; env = env->previous_) {
         auto found = env->table_.find(token);
         if (found != env->table_.end())
             return found->second;

@@ -9,9 +9,9 @@ class Operator : public Expression {
   public:
     static std::shared_ptr<Operator> create(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
     Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
-    ~Operator();
+    virtual ~Operator();
 
-    std::shared_ptr<Expression> reduce() override;
+    virtual std::shared_ptr<Expression> reduce() override;
 };
 
 inline

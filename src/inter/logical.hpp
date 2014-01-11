@@ -10,16 +10,16 @@ class Logical : public Expression {
     static std::shared_ptr<Logical> create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
                                            std::shared_ptr<Expression> expr2);
     Logical(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1, std::shared_ptr<Expression> expr2);
-    ~Logical();
+    virtual ~Logical();
 
     std::shared_ptr<Expression> expr1() const;
     std::shared_ptr<Expression> expr2() const;
 
-    static std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left,
-                                                std::shared_ptr<symbols::Type> right);
-    std::shared_ptr<Expression> gen() override;
+    virtual std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left,
+                                                 std::shared_ptr<symbols::Type> right);
+    virtual std::shared_ptr<Expression> gen() override;
 
-    std::string to_string() const override;
+    virtual std::string to_string() const override;
 
   private:
     std::shared_ptr<Expression> expr1_;
