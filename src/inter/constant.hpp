@@ -34,7 +34,7 @@ Constant::Constant(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols:
 }
 
 inline
-Constant::Constant(std::int64_t value) : Expression(lexer::Number::create(value), symbols::Type::integer) {
+Constant::Constant(std::int64_t value) : Expression(std::make_shared<lexer::Number>(value), symbols::Type::integer) {
 }
 
 inline

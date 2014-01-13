@@ -56,7 +56,7 @@ void Node::emit_label(const std::uint32_t &i) {
 }
 
 inline
-void emit(const std::string &message) {
+void Node::emit(const std::string &message) {
     std::cout << '\t' << message;
 }
 } // namespace inter

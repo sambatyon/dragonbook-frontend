@@ -91,7 +91,7 @@ std::shared_ptr<Token> Lexer::scan() {
             readch();
         } while (std::isdigit(peek_));
         if (peek_ != '.')
-            return Number::create(value);
+            return std::make_shared<Number>(value);
         auto dvalue = static_cast<double>(value);
         auto power = 10.0;
         for (;;) {
@@ -101,7 +101,7 @@ std::shared_ptr<Token> Lexer::scan() {
             dvalue = dvalue + static_cast<double>(peek_ - '0') / power;
             power *= 10.0;
         }
-        return Real::create(dvalue);
+        return std::make_shared<Real>(dvalue);
     }
     if (std::isalpha(peek_)) {
         std::string str;

@@ -16,10 +16,10 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
-FILE(GLOB sources "lexer/*.cpp" "symbols/*.cpp" "inter/*.cpp")
-FILE(GLOB headers "lexer/*.hpp" "symbols/*.hpp" "inter/*.hpp")
+FILE(GLOB sources "lexer/*.cpp" "symbols/*.cpp" "inter/*.cpp" "parser/*.cpp" "main.cpp")
+FILE(GLOB headers "lexer/*.hpp" "symbols/*.hpp" "inter/*.hpp" "parser/*.hpp")
 
 SOURCE_GROUP("Source Files" FILES ${sources})
 SOURCE_GROUP("Header Files" FILES ${headers})
 
-ADD_LIBRARY(frontend STATIC ${sources} ${headers})
+ADD_EXECUTABLE(frontend ${sources} ${headers})
