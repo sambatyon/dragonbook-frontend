@@ -10,6 +10,7 @@ public:
     static std::shared_ptr<Constant> kFalse;
 
     static std::shared_ptr<Constant> create(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
+    static std::shared_ptr<Constant> create(std::int64_t value);
     Constant(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
     explicit Constant(std::int64_t value);
     ~Constant();
@@ -20,6 +21,11 @@ public:
 inline
 std::shared_ptr<Constant> Constant::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type) {
     return std::make_shared<Constant>(token, type);
+}
+
+inline
+std::shared_ptr<Constant> Constant::create(std::int64_t value) {
+    return std::make_shared<Constant>(value);
 }
 
 inline

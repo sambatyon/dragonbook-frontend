@@ -31,13 +31,14 @@ class Parser {
     void move();
     void error(std::string what);
 
-    void match(std::uint32_t tag);
+    void match(const std::uint32_t &tag);
     std::shared_ptr<inter::Statement> block();
     void decls();
 
     std::shared_ptr<symbols::Type> type();
-    std::shared_ptr<symbols::Type> dimension();
+    std::shared_ptr<symbols::Type> dimension(std::shared_ptr<symbols::Type>);
 
+    std::shared_ptr<inter::Statement> statements();
     std::shared_ptr<inter::Statement> statement();
     std::shared_ptr<inter::Statement> assign();
 

@@ -10,7 +10,7 @@ class While : public Statement {
     While();
     ~While();
 
-    void init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr);
+    void init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt);
 
     void gen(const std::uint32_t &b, const std::uint32_t &a) override;
 
@@ -36,7 +36,7 @@ While::~While() {
 }
 
 inline
-void While::init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr) {
+void While::init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt) {
     stmt_ = stmt;
     expr_ = expr;
     if (expr->type() != symbols::Type::boolean)

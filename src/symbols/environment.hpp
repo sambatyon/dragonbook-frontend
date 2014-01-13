@@ -8,7 +8,7 @@
 #include <utility>
 
 namespace symbols {
-class Environment : std::enable_shared_from_this<Environment> {
+class Environment : public std::enable_shared_from_this<Environment> {
   public:
     static std::shared_ptr<Environment> create(std::shared_ptr<Environment> previous);
     explicit Environment(std::shared_ptr<Environment> previous);

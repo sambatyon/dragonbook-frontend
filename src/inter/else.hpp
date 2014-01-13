@@ -6,8 +6,8 @@
 namespace inter {
 class Else : public Statement {
   public:
-    std::shared_ptr<Else> create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement_if,
-                                 std::shared_ptr<Statement> statement_else);
+    static std::shared_ptr<Else> create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement_if,
+                                        std::shared_ptr<Statement> statement_else);
     Else(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement_if,
          std::shared_ptr<Statement> statement_else);
     ~Else();

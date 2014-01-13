@@ -6,7 +6,7 @@
 namespace inter {
 class If : public Statement {
   public:
-    std::shared_ptr<If> create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement);
+    static std::shared_ptr<If> create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement);
     If(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement);
     ~If();
 
