@@ -15,6 +15,7 @@ class Logical : public Expression {
     std::shared_ptr<Expression> expr1() const;
     std::shared_ptr<Expression> expr2() const;
 
+    virtual void init();
     virtual std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left,
                                                  std::shared_ptr<symbols::Type> right);
     virtual std::shared_ptr<Expression> gen() override;
@@ -29,7 +30,9 @@ class Logical : public Expression {
 inline
 std::shared_ptr<Logical> Logical::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr1,
                                          std::shared_ptr<Expression> expr2) {
-    return std::make_shared<Logical>(token, expr1, expr2);
+    auto res = std::make_shared<Logical>(token, expr1, expr2);
+    res->init();
+    return res;
 }
 
 inline
@@ -38,6 +41,10 @@ Logical::Logical(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression
         : Expression(token, std::shared_ptr<symbols::Type>())
         , expr1_(expr1)
         , expr2_(expr2) {
+}
+
+inline
+void Logical::init() {
     auto type = check(expr1_->type(), expr2_->type());
     if (!type)
         error("type error");

@@ -46,7 +46,7 @@ void While::init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> st
 inline
 void While::gen(const std::uint32_t &b, const std::uint32_t &a) {
     after_ = a;
-    expr_->jumping(b, 0);
+    expr_->jumping(0, a);
     auto label = new_label();
     emit_label(label);
     stmt_->gen(label, b);

@@ -15,7 +15,9 @@ class Not : public Logical {
 
 inline
 std::shared_ptr<Not> Not::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr) {
-    return std::make_shared<Not>(token, expr);
+    auto res = std::make_shared<Not>(token, expr);
+    res->init();
+    return res;
 }
 
 inline

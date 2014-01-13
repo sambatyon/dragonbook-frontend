@@ -31,7 +31,7 @@
 #include <exception>
 
 namespace parser {
-Parser::Parser(std::shared_ptr<lexer::Lexer> lexer) : lexer_(lexer) {
+Parser::Parser(std::shared_ptr<lexer::Lexer> lexer) : lexer_(lexer), lookahead_(), top_(), used_(0) {
     move();
 }
 
@@ -51,6 +51,7 @@ void Parser::move() {
 void Parser::error(std::string what) {
     std::stringstream ss;
     ss << "Near line " << lexer_->current_line() << ": " << what;
+    std::cerr << ss.str() << '\n';
     throw std::runtime_error(ss.str().c_str());
 }
 
@@ -104,10 +105,13 @@ std::shared_ptr<symbols::Type> Parser::dimension(std::shared_ptr<symbols::Type> 
 }
 
 std::shared_ptr<inter::Statement> Parser::statements() {
-    if (lookahead_->tag() == '}')
+    if (lookahead_->tag() == '}') {
         return inter::Statement::kNullStatement;
-    else
-        return inter::StatementSequence::create(statement(), statements());
+    } else {
+        auto stmt1 = statement();
+        auto stmt2 = statements();
+        return inter::StatementSequence::create(stmt1, stmt2);
+    }
 }
 
 std::shared_ptr<inter::Statement> Parser::statement() {

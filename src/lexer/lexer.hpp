@@ -46,7 +46,9 @@ std::shared_ptr<Lexer> Lexer::create() {
 
 inline
 void Lexer::readch() {
-    peek_ = std::cin.get();
+    std::cin.get(peek_);
+    if (std::cin.eof())
+        peek_ = '\0';
 }
 
 inline

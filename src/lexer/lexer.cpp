@@ -8,9 +8,9 @@
 #include <memory>
 
 namespace lexer {
-std::uint32_t Lexer::current_line_ = 0;
+std::uint32_t Lexer::current_line_ = 1;
 
-Lexer::Lexer() : words_(), peek_('\0') {
+Lexer::Lexer() : words_(), peek_(' ') {
     reserve(std::make_shared<Word>("if", Token::kIf));
     reserve(std::make_shared<Word>("else", Token::kElse));
     reserve(std::make_shared<Word>("while", Token::kWhile));
@@ -38,7 +38,7 @@ bool Lexer::readch(char c) {
 }
 
 std::shared_ptr<Token> Lexer::scan() {
-    for (;; readch()) {
+    for (int i = 1; i > 0; this->readch()) {
         if (peek_ == ' ' || peek_ == '\t')
             continue;
         else if (peek_ == '\n')

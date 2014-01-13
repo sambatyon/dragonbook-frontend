@@ -63,7 +63,7 @@ Token::~Token() {
 inline
 std::string Token::to_string() const {
     std::stringstream ss;
-    ss << tag_;
+    ss << static_cast<char>(tag_);
     return ss.str();
 }
 } // namespace lexer

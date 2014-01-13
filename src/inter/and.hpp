@@ -16,7 +16,9 @@ class And : public Logical {
 inline
 std::shared_ptr<And> And::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> left,
                                  std::shared_ptr<Expression> right) {
-    return std::make_shared<And>(token, left, right);
+    auto res = std::make_shared<And>(token, left, right);
+    res->init();
+    return res;
 }
 
 inline

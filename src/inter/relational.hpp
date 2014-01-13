@@ -15,13 +15,15 @@ public:
     
     std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left,
                                          std::shared_ptr<symbols::Type> right) override;
-    void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+    void jumping(const std::uint32_t &to, const std::uint32_t &from) override; 
 };
 
 inline
 std::shared_ptr<Relational> Relational::create(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> left,
                                                std::shared_ptr<Expression> right) {
-    return std::make_shared<Relational>(token, left, right);
+    auto res = std::make_shared<Relational>(token, left, right);
+    res->init();
+    return res;
 }
 
 inline
