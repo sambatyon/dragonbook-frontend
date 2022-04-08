@@ -3,16 +3,14 @@ package com.dragon.lexer;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import com.dragon.symbols.Type;
+
 public class Lexer {
-  private int line;
-  private char peek;
-  private Hashtable<String, Word> words;
+  private int line = 1;
+  private char peek = ' ';
+  private Hashtable<String, Word> words = new Hashtable<String, Word>();
 
   public Lexer() {
-    line = 1;
-    peek = ' ';
-    words = new Hashtable<String, Word>();
-
     reserve(new Word("if", Tag.IF));
     reserve(new Word("else", Tag.ELSE));
     reserve(new Word("while", Tag.WHILE));
@@ -20,6 +18,10 @@ public class Lexer {
     reserve(new Word("break", Tag.BREAK));
     reserve(Word.True);
     reserve(Word.False);
+    reserve(Type.Int);
+    reserve(Type.Float);
+    reserve(Type.Char);
+    reserve(Type.Bool);
   }
 
   private void reserve(Word w) {
