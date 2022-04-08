@@ -281,7 +281,7 @@ std::shared_ptr<inter::Expression> Parser::factor() {
     switch (lookahead_->tag()) {
         case '(':
             move();
-            expr = bool();
+            expr = boolean();
             match(')');
             return expr;
         case lexer::Token::kInteger:
