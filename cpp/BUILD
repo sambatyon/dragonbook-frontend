@@ -1,7 +1,7 @@
 
 # TODO(arojas): Separate this in libraries and main.
 cc_binary(
-  name = "cpp-frontend",
+  name = "frontend",
   srcs = ["main.cpp"] + glob([
     "inter/*.cpp",
     "lexer/*.cpp",
