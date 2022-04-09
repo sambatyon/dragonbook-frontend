@@ -6,9 +6,7 @@ public class While extends Stmt {
   private Expr condition;
   private Stmt body;
 
-  public While() {
-    init(null, null);
-  }
+  public While() {}
 
   public While(Expr cond, Stmt bod) {
     init(cond, bod);

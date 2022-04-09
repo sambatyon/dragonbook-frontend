@@ -15,6 +15,6 @@ public class Temp extends Expr {
 
   @Override
   public String toString() {
-    return "t " + number;
+    return "t" + number;
   }
 }

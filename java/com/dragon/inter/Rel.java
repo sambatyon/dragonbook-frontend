@@ -25,7 +25,7 @@ public class Rel extends Logical {
     var a = left.reduce();
     var b = right.reduce();
 
-    var test = a.toString() + " " + op.toString() + " " + b.hashCode();
+    var test = a.toString() + " " + op.toString() + " " + b.toString();
     emitJumps(test, to, from);
   }
 }

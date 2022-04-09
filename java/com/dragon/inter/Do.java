@@ -6,9 +6,7 @@ public class Do extends Stmt {
   private Expr condition;
   private Stmt body;
 
-  public Do() {
-    init(null, null);
-  }
+  public Do() {}
 
   public Do(Stmt bod, Expr cond) {
     init(bod, cond);
