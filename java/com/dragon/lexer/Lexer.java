@@ -1,14 +1,14 @@
 package com.dragon.lexer;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import com.dragon.symbols.Type;
 
 public class Lexer {
   private int line = 1;
   private char peek = ' ';
-  private Hashtable<String, Word> words = new Hashtable<String, Word>();
+  private HashMap<String, Word> words = new HashMap<String, Word>();
 
   public Lexer() {
     reserve(new Word("if", Tag.IF));
@@ -28,12 +28,12 @@ public class Lexer {
     words.put(w.getLexeme(), w);
   }
 
-  private void readch() throws IOException {
+  private void readCh() throws IOException {
     peek = (char)System.in.read();
   }
 
-  private boolean readch(char c) throws IOException {
-    readch();
+  private boolean readCh(char c) throws IOException {
+    readCh();
     if (peek != c) {
       return false;
     }
@@ -42,7 +42,7 @@ public class Lexer {
   }
 
   public Token scan() throws IOException {
-    for (;; readch()) {
+    for (;; readCh()) {
       if (peek == ' ' || peek == '\t' || peek == '\r') {
         continue;
       } else if (peek == '\n') {
@@ -54,37 +54,37 @@ public class Lexer {
 
     switch (peek) {
       case '&': {
-        if (readch('&')) {
+        if (readCh('&')) {
           return Word.and;
         }
         return new Token('&');
       }
       case '|': {
-        if (readch('|')) {
+        if (readCh('|')) {
           return Word.or;
         }
         return new Token('|');
       }
       case '=': {
-        if (readch('=')) {
+        if (readCh('=')) {
           return Word.eq;
         }
         return new Token('=');
       }
       case '!': {
-        if (readch('=')) {
+        if (readCh('=')) {
           return Word.ne;
         }
         return new Token('!');
       }
       case '<': {
-        if (readch('=')) {
+        if (readCh('=')) {
           return Word.le;
         }
         return new Token('<');
       }
       case '>': {
-        if (readch('=')) {
+        if (readCh('=')) {
           return Word.ge;
         }
         return new Token('>');
@@ -95,7 +95,7 @@ public class Lexer {
       int v = 0;
       do {
         v = 10*v + Character.digit(peek, 10);
-        readch();
+        readCh();
       } while (Character.isDigit(peek));
 
       if (peek != '.') {
@@ -105,7 +105,7 @@ public class Lexer {
       float x = v;
       float d = 10;
       for (;;) {
-        readch();
+        readCh();
         if (!Character.isDigit(peek)) {
           break;
         }
@@ -116,23 +116,23 @@ public class Lexer {
     }
 
     if (Character.isLetter(peek)) {
-      StringBuffer b =  new StringBuffer();
+      var b =  new StringBuffer();
       do {
         b.append(peek);
-        readch();
+        readCh();
       } while (Character.isLetterOrDigit(peek));
 
-      String s = b.toString();
+      var s = b.toString();
       if (words.containsKey(s)) {
         return words.get(s);
       }
 
-      Word w = new Word(s, Tag.ID);
+      var w = new Word(s, Tag.ID);
       words.put(s, w);
       return w;
     }
 
-    Token tok = new Token(peek);
+    var tok = new Token(peek);
     peek = ' ';
     return tok;
   }

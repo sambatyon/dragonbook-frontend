@@ -1,16 +1,16 @@
 package com.dragon.symbols;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import com.dragon.inter.Id;
 import com.dragon.lexer.Token;
 
 public class Env {
-  private Hashtable<Token, Id> table;
+  private HashMap<Token, Id> table;
   protected Env prev;
 
   public Env(Env env) {
-    table = new Hashtable<Token, Id>();
+    table = new HashMap<Token, Id>();
     prev = env;
   }
 
@@ -19,7 +19,7 @@ public class Env {
   }
 
   public Id get(Token w) {
-    for (Env e = this; e != null; e = e.prev) {
+    for (var e = this; e != null; e = e.prev) {
       Id found = e.table.get(w);
       if (found != null) {
         return found;
