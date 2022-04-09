@@ -10,11 +10,11 @@ public class Do extends Stmt {
     init(null, null);
   }
 
-  public Do(Expr cond, Stmt bod) {
-    init(cond, bod);
+  public Do(Stmt bod, Expr cond) {
+    init(bod, cond);
   }
 
-  public void init(Expr cond, Stmt bod) {
+  public void init(Stmt bod, Expr cond) {
     condition = cond;
     body = bod;
     if (condition.getType() != Type.Bool) {
