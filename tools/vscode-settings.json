@@ -2,7 +2,7 @@
   "java.project.sourcePaths": [
     "java"
   ],
-  "go.goroot": "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/go_sdk",
+  "go.goroot": "${workspaceFolder}/bazel-dragonbook/external/go_sdk",
   "go.toolsEnvVars": {
     "GOPACKAGESDRIVER": "${workspaceFolder}/tools/gopackagesdriver.sh"
   },
@@ -15,7 +15,7 @@
       "-bazel-bin",
       "-bazel-out",
       "-bazel-testlogs",
-      "-bazel-mypkg",
+      "-bazel-dragonbook",
     ],
     "formatting.gofumpt": true,
     "formatting.local": "dragonbook",
@@ -31,8 +31,11 @@
       "vendor": false
     },
   },
+  "go.languageServerFlags": [
+   // "-rpc.trace"
+  ],
   "go.useLanguageServer": true,
   "go.buildOnSave": "off",
   "go.lintOnSave": "off",
-  "go.vetOnSave": "off"
+  "go.vetOnSave": "off",
 }
