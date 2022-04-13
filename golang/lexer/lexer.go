@@ -59,6 +59,11 @@ func (l *Lexer) readCh(c rune) (bool, error) {
 }
 
 func (l *Lexer) Scan() (Token, error) {
+	if l.peek != ' ' {
+		tok := &Tok{tag: Tag(l.peek)}
+		l.peek = ' '
+		return tok, nil
+	}
 	for {
 		err := l.read()
 		if err != nil {
@@ -137,7 +142,10 @@ func (l *Lexer) Scan() (Token, error) {
 		var v int64
 		for {
 			v = 10*v + int64(l.peek-'0')
-			if err = l.read(); err != nil && err != io.EOF {
+			if err = l.read(); err != nil {
+				if err == io.EOF {
+					break
+				}
 				return nil, err
 			}
 			if !unicode.IsDigit(l.peek) {
@@ -152,7 +160,10 @@ func (l *Lexer) Scan() (Token, error) {
 		x := float64(v)
 		var d float64 = 10.0
 		for {
-			if err = l.read(); err != nil && err != io.EOF {
+			if err = l.read(); err != nil {
+				if err == io.EOF {
+					break
+				}
 				return nil, err
 			}
 			if !unicode.IsDigit(l.peek) {
@@ -168,7 +179,10 @@ func (l *Lexer) Scan() (Token, error) {
 		var sb strings.Builder
 		for {
 			sb.WriteRune(l.peek)
-			if err = l.read(); err != nil && err != io.EOF {
+			if err = l.read(); err != nil {
+				if err == io.EOF {
+					break
+				}
 				return nil, err
 			}
 			if !unicode.IsLetter(l.peek) && !unicode.IsDigit(l.peek) {
@@ -181,6 +195,7 @@ func (l *Lexer) Scan() (Token, error) {
 		}
 
 		w := &Word{tag: ID, lexeme: s}
+		l.words[s] = w
 		return w, nil
 	}
 

@@ -38,4 +38,7 @@
   "go.buildOnSave": "off",
   "go.lintOnSave": "off",
   "go.vetOnSave": "off",
+  "files.associations": {
+    "memory": "cpp"
+  },
 }
