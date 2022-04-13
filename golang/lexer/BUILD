@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
   name = "lexer",
@@ -6,5 +6,11 @@ go_library(
     "lexer.go",
     "tokens.go",
   ],
-  importpath = "dragonbook",
+  importpath = "dragonbook.lexer",
+)
+
+go_test(
+  name = "lexer_test",
+  srcs = ["lexer_test.go"],
+  embed = [":lexer"],
 )

@@ -2,7 +2,7 @@ package lexer
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"strings"
 	"unicode"
 )
@@ -14,12 +14,12 @@ type Lexer struct {
 	reader *bufio.Reader
 }
 
-func NewLexer(f *os.File) *Lexer {
+func NewLexer(rd io.Reader) *Lexer {
 	ret := &Lexer{
 		Line:   1,
 		peek:   ' ',
 		words:  make(map[string]Token),
-		reader: bufio.NewReader(f),
+		reader: bufio.NewReader(rd),
 	}
 
 	ret.words["if"] = &Word{tag: IF, lexeme: "if"}
@@ -79,7 +79,7 @@ func (l *Lexer) Scan() (Token, error) {
 	switch l.peek {
 	case '&':
 		b, err = l.readCh('&')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -88,7 +88,7 @@ func (l *Lexer) Scan() (Token, error) {
 		return &Tok{tag: Tag('&')}, nil
 	case '|':
 		b, err = l.readCh('|')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -97,7 +97,7 @@ func (l *Lexer) Scan() (Token, error) {
 		return &Tok{tag: Tag('|')}, nil
 	case '=':
 		b, err = l.readCh('=')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -106,7 +106,7 @@ func (l *Lexer) Scan() (Token, error) {
 		return &Tok{tag: Tag('=')}, nil
 	case '!':
 		b, err = l.readCh('=')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -115,7 +115,7 @@ func (l *Lexer) Scan() (Token, error) {
 		return &Tok{tag: Tag('!')}, nil
 	case '<':
 		b, err = l.readCh('=')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -124,7 +124,7 @@ func (l *Lexer) Scan() (Token, error) {
 		return &Tok{tag: Tag('<')}, nil
 	case '>':
 		b, err = l.readCh('=')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 		if b {
@@ -137,7 +137,7 @@ func (l *Lexer) Scan() (Token, error) {
 		var v int64
 		for {
 			v = 10*v + int64(l.peek-'0')
-			if err = l.read(); err != nil {
+			if err = l.read(); err != nil && err != io.EOF {
 				return nil, err
 			}
 			if !unicode.IsDigit(l.peek) {
@@ -152,7 +152,7 @@ func (l *Lexer) Scan() (Token, error) {
 		x := float64(v)
 		var d float64 = 10.0
 		for {
-			if err = l.read(); err != nil {
+			if err = l.read(); err != nil && err != io.EOF {
 				return nil, err
 			}
 			if !unicode.IsDigit(l.peek) {
@@ -168,7 +168,7 @@ func (l *Lexer) Scan() (Token, error) {
 		var sb strings.Builder
 		for {
 			sb.WriteRune(l.peek)
-			if err = l.read(); err != nil {
+			if err = l.read(); err != nil && err != io.EOF {
 				return nil, err
 			}
 			if !unicode.IsLetter(l.peek) && !unicode.IsDigit(l.peek) {
