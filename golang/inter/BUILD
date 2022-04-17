@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+  name = "inter",
+  srcs = [
+    "inter.go",
+    "expression.go",
+    "statement.go",
+  ],
+  deps = [
+    "//golang/lexer:lexer",
+  ],
+  importpath = "dragonbook/inter",
+)
+
+go_test(
+  name = "inter_test",
+  srcs = ["expression_test.go"],
+  embed = [":inter"],
+)

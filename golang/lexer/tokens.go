@@ -1,6 +1,8 @@
 package lexer
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Tag int
 
@@ -34,6 +36,10 @@ type Token interface {
 
 type Tok struct {
 	tag Tag
+}
+
+func NewToken(tag Tag) *Tok {
+	return &Tok{tag: tag}
 }
 
 func (t *Tok) Tag() Tag {
@@ -71,6 +77,10 @@ func (i *Real) String() string {
 type Word struct {
 	tag    Tag
 	lexeme string
+}
+
+func NewWord(tag Tag, lexeme string) *Word {
+	return &Word{tag: tag, lexeme: lexeme}
 }
 
 func (w *Word) Tag() Tag {
@@ -141,44 +151,95 @@ func TempWord() *Word {
 	return tempWord
 }
 
-type Type struct {
-	tag    Tag
-	lexeme string
-	Width  int
+var accessWord = &Word{tag: INDEX, lexeme: "[]"}
+
+func AccessWord() *Word {
+	return accessWord
 }
 
-func (t *Type) Tag() Tag {
+type Type interface {
+	Token
+	Width() int
+	Numeric() bool
+}
+
+type SimpleType struct {
+	tag    Tag
+	lexeme string
+	width  int
+}
+
+func (t *SimpleType) Tag() Tag {
 	return t.tag
 }
 
-func (t *Type) String() string {
+func (t *SimpleType) String() string {
 	return t.lexeme
 }
 
-func (t *Type) Numeric() bool {
+func (t *SimpleType) Width() int {
+	return t.width
+}
+
+func (t *SimpleType) Numeric() bool {
 	return t == IntType() || t == FloatType() || t == CharType()
 }
 
-var intType = &Type{tag: BASIC, lexeme: "int", Width: 4}
+func MaxType(left Type, right Type) Type {
+	if !left.Numeric() || !right.Numeric() {
+		return nil
+	}
+	if left == FloatType() || right == FloatType() {
+		return FloatType()
+	}
+	if left == IntType() || right == IntType() {
+		return IntType()
+	}
 
-func IntType() *Type {
+	return CharType()
+}
+
+var intType = &SimpleType{tag: BASIC, lexeme: "int", width: 4}
+
+func IntType() *SimpleType {
 	return intType
 }
 
-var floatType = &Type{tag: BASIC, lexeme: "float", Width: 8}
+var floatType = &SimpleType{tag: BASIC, lexeme: "float", width: 8}
 
-func FloatType() *Type {
+func FloatType() *SimpleType {
 	return floatType
 }
 
-var charType = &Type{tag: BASIC, lexeme: "char", Width: 1}
+var charType = &SimpleType{tag: BASIC, lexeme: "char", width: 1}
 
-func CharType() *Type {
+func CharType() *SimpleType {
 	return charType
 }
 
-var boolType = &Type{tag: BASIC, lexeme: "bool", Width: 1}
+var boolType = &SimpleType{tag: BASIC, lexeme: "bool", width: 1}
 
-func BoolType() *Type {
+func BoolType() *SimpleType {
 	return boolType
+}
+
+type Array struct {
+	Of     *SimpleType
+	Length int
+}
+
+func (a *Array) Tag() Tag {
+	return INDEX
+}
+
+func (a *Array) String() string {
+	return fmt.Sprintf("[%d]%s", a.Length, a.Of.String())
+}
+
+func (a *Array) Width() int {
+	return a.Length
+}
+
+func (a *Array) Numeric() bool {
+	return false
 }
