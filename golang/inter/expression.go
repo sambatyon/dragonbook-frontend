@@ -16,7 +16,7 @@ type Expression interface {
 	Jumps(b *strings.Builder, to int, from int) error
 }
 
-func EmitJumps(bd *strings.Builder, test string, to int, from int) {
+func emitJumps(bd *strings.Builder, test string, to int, from int) {
 	if to != 0 && from != 0 {
 		Emit(bd, fmt.Sprintf("if %s goto L%d", test, to))
 		Emit(bd, fmt.Sprintf("goto L%d", from))
@@ -27,33 +27,63 @@ func EmitJumps(bd *strings.Builder, test string, to int, from int) {
 	}
 }
 
-type expr struct {
-	op  lexer.Token
+type Constant struct {
+	tok lexer.Token
 	typ lexer.Type
 }
 
-func (e *expr) Op() lexer.Token {
-	return e.op
+func NewIntConstant(v int64) *Constant {
+	return &Constant{&lexer.Integer{v}, lexer.IntType()}
 }
 
-func (e *expr) Type() lexer.Type {
-	return e.typ
+func NewFloatConstant(v float64) *Constant {
+	return &Constant{&lexer.Real{v}, lexer.FloatType()}
 }
 
-func (e *expr) Generate(*strings.Builder) (Expression, error) {
-	return e, nil
+var tr = &Constant{
+	lexer.TrueWord(),
+	lexer.BoolType(),
 }
 
-func (e *expr) Reduce(*strings.Builder) (Expression, error) {
-	return e, nil
+func TrueConstant() *Constant {
+	return tr
 }
 
-func (e *expr) String() string {
-	return e.op.String()
+var fl = &Constant{
+	lexer.FalseWord(),
+	lexer.BoolType(),
 }
 
-func (e *expr) Jumps(b *strings.Builder, to int, from int) error {
-	EmitJumps(b, e.String(), to, from)
+func FalseConstant() *Constant {
+	return fl
+}
+
+func (c *Constant) Op() lexer.Token {
+	return c.tok
+}
+
+func (c *Constant) Type() lexer.Type {
+	return c.typ
+}
+
+func (c *Constant) Generate(*strings.Builder) (Expression, error) {
+	return c, nil
+}
+
+func (c *Constant) Reduce(*strings.Builder) (Expression, error) {
+	return c, nil
+}
+
+func (c *Constant) String() string {
+	return c.tok.String()
+}
+
+func (c *Constant) Jumps(b *strings.Builder, to int, from int) error {
+	if c == TrueConstant() && to != 0 {
+		Emit(b, fmt.Sprintf("goto L%d", to))
+	} else if c == FalseConstant() && from != 0 {
+		Emit(b, fmt.Sprintf("goto L%d, from"))
+	}
 	return nil
 }
 
@@ -84,7 +114,7 @@ func (id *Identifier) String() string {
 }
 
 func (id *Identifier) Jumps(b *strings.Builder, to int, from int) error {
-	EmitJumps(b, id.String(), to, from)
+	emitJumps(b, id.String(), to, from)
 	return nil
 }
 
@@ -115,7 +145,7 @@ func (t *Temp) String() string {
 }
 
 func (t *Temp) Jumps(b *strings.Builder, to int, from int) error {
-	EmitJumps(b, t.String(), to, from)
+	emitJumps(b, t.String(), to, from)
 	return nil
 }
 
@@ -185,7 +215,7 @@ func (ao *ArithmeticOp) String() string {
 }
 
 func (ao *ArithmeticOp) Jumps(b *strings.Builder, to int, from int) error {
-	EmitJumps(b, ao.String(), to, from)
+	emitJumps(b, ao.String(), to, from)
 	return nil
 }
 
@@ -238,7 +268,7 @@ func (u *UnaryOp) String() string {
 }
 
 func (u *UnaryOp) Jumps(b *strings.Builder, to int, from int) error {
-	EmitJumps(b, u.String(), to, from)
+	emitJumps(b, u.String(), to, from)
 	return nil
 }
 
@@ -287,7 +317,7 @@ func (ao *AccessOp) Jumps(b *strings.Builder, to int, from int) error {
 	if err != nil {
 		return err
 	}
-	EmitJumps(b, ra.String(), to, from)
+	emitJumps(b, ra.String(), to, from)
 	return nil
 }
 

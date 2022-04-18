@@ -7,6 +7,10 @@ import (
 
 var labels int = 0
 
+func resetLabels() {
+	labels = 0
+}
+
 func NewLabel() int {
 	labels++
 	return labels
