@@ -11,6 +11,7 @@ go_library(
     "//golang/lexer:lexer",
   ],
   importpath = "dragonbook/inter",
+  visibility = ["//golang:__subpackages__"],
 )
 
 go_test(

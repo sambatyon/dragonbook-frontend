@@ -93,6 +93,10 @@ type Identifier struct {
 	Offset int
 }
 
+func NewIdentifier(id lexer.Token, typ lexer.Type, offset int) *Identifier {
+	return &Identifier{id, typ, offset}
+}
+
 func (id *Identifier) Op() lexer.Token {
 	return id.id
 }
@@ -150,6 +154,10 @@ func (t *Temp) Jumps(b *strings.Builder, to int, from int) error {
 }
 
 var tempNumber int = 0
+
+func ResetTempCount() {
+	tempNumber = 0
+}
 
 func NewTemp(typ lexer.Type) *Temp {
 	tempNumber++
@@ -325,6 +333,72 @@ func check(tleft lexer.Type, tright lexer.Type) lexer.Type {
 	if tleft == lexer.BoolType() && tright == lexer.BoolType() {
 		return lexer.BoolType()
 	}
+	return nil
+}
+
+type RelationOp struct {
+	op    lexer.Token
+	left  Expression
+	right Expression
+}
+
+func NewRelationOp(tok lexer.Token, left Expression, right Expression) (*RelationOp, error) {
+	if left.Type() != right.Type() {
+		return nil, errors.New("Type error")
+	}
+	_, lok := left.Type().(*lexer.Array)
+	_, rok := right.Type().(*lexer.Array)
+	if lok || rok {
+		return nil, errors.New("Type error")
+	}
+	return &RelationOp{
+		op:    tok,
+		left:  left,
+		right: right,
+	}, nil
+}
+
+func (r *RelationOp) Op() lexer.Token {
+	return r.op
+}
+
+func (r *RelationOp) Type() lexer.Type {
+	return lexer.BoolType()
+}
+
+func (r *RelationOp) Generate(b *strings.Builder) (Expression, error) {
+	f := NewLabel()
+	a := NewLabel()
+	tmp := NewTemp(r.Type())
+	if err := r.Jumps(b, 0, f); err != nil {
+		return nil, err
+	}
+	Emit(b, fmt.Sprintf("%s = true", tmp.String()))
+	Emit(b, fmt.Sprintf("goto L%d", a))
+	EmitLabel(b, f)
+	Emit(b, fmt.Sprintf("%s = false", tmp.String()))
+	EmitLabel(b, a)
+	return tmp, nil
+}
+
+func (r *RelationOp) Reduce(*strings.Builder) (Expression, error) {
+	return r, nil
+}
+
+func (r *RelationOp) String() string {
+	return fmt.Sprintf("%s %s %s", r.left.String(), r.op.String(), r.right.String())
+}
+
+func (r *RelationOp) Jumps(b *strings.Builder, to int, from int) error {
+	lr, err := r.left.Reduce(b)
+	if err != nil {
+		return err
+	}
+	rr, err := r.right.Reduce(b)
+	if err != nil {
+		return err
+	}
+	emitJumps(b, fmt.Sprintf("%s %s %s", lr.String(), r.op.String(), rr.String()), to, from)
 	return nil
 }
 

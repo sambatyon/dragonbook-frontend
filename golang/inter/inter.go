@@ -7,7 +7,7 @@ import (
 
 var labels int = 0
 
-func resetLabels() {
+func ResetLabels() {
 	labels = 0
 }
 

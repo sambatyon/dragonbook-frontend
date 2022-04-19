@@ -224,7 +224,7 @@ func BoolType() *SimpleType {
 }
 
 type Array struct {
-	Of     *SimpleType
+	Of     Type
 	Length int
 }
 
@@ -237,7 +237,7 @@ func (a *Array) String() string {
 }
 
 func (a *Array) Width() int {
-	return a.Length
+	return a.Of.Width() * a.Length
 }
 
 func (a *Array) Numeric() bool {

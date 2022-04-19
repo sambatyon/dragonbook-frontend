@@ -41,7 +41,8 @@ var exprTests = []struct {
 		},
 		"x + y",
 		"",
-		"\tt1 = x + y\n",
+		`	t1 = x + y
+`,
 	},
 	{
 		&UnaryOp{
@@ -51,7 +52,8 @@ var exprTests = []struct {
 		},
 		"- x",
 		"",
-		"\tt2 = - x\n",
+		`	t1 = - x
+`,
 	},
 	{
 		&AccessOp{
@@ -61,7 +63,8 @@ var exprTests = []struct {
 		},
 		"arr [x]",
 		"",
-		"\tt3 = arr [x]\n",
+		`	t1 = arr [x]
+`,
 	},
 	{
 		&NotLogicOp{
@@ -69,7 +72,11 @@ var exprTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.BoolType(), 4},
 		},
 		"! x",
-		"\tif x goto L1\n\tt4 = true\n\tgoto L2\nL1:\tt4 = false\nL2:",
+		`	if x goto L1
+	t1 = true
+	goto L2
+L1:	t1 = false
+L2:`,
 		"",
 	},
 	{
@@ -78,7 +85,12 @@ var exprTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "y"), lexer.BoolType(), 4},
 		},
 		"x || y",
-		"\tif x goto L5\n\tiffalse y goto L3\nL5:\tt5 = true\n\tgoto L4\nL3:\tt5 = false\nL4:",
+		`	if x goto L3
+	iffalse y goto L1
+L3:	t1 = true
+	goto L2
+L1:	t1 = false
+L2:`,
 		"",
 	},
 	{
@@ -87,13 +99,35 @@ var exprTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "y"), lexer.BoolType(), 4},
 		},
 		"x && y",
-		"\tiffalse x goto L6\n\tiffalse y goto L6\n\tt6 = true\n\tgoto L7\nL6:\tt6 = false\nL7:",
+		`	iffalse x goto L1
+	iffalse y goto L1
+	t1 = true
+	goto L2
+L1:	t1 = false
+L2:`,
+		"",
+	},
+	{
+		&RelationOp{
+			lexer.EqWord(),
+			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.BoolType(), 4},
+			&Identifier{lexer.NewWord(lexer.ID, "y"), lexer.BoolType(), 4},
+		},
+		"x == y",
+		`	iffalse x == y goto L1
+	t1 = true
+	goto L2
+L1:	t1 = false
+L2:`,
 		"",
 	},
 }
 
 func TestExpressions(t *testing.T) {
 	for _, test := range exprTests {
+		ResetLabels()
+		ResetTempCount()
+
 		if test.expr.String() != test.str {
 			t.Fatalf("Expected str: %s got: %s", test.str, test.expr.String())
 		}

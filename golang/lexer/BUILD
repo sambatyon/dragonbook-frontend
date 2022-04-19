@@ -7,7 +7,7 @@ go_library(
     "tokens.go",
   ],
   importpath = "dragonbook/lexer",
-  visibility = ["//golang:__subpackages__"]
+  visibility = ["//golang:__subpackages__"],
 )
 
 go_test(

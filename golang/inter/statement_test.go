@@ -89,7 +89,8 @@ var stmtTests = []struct {
 
 func TestStatements(t *testing.T) {
 	for _, test := range stmtTests {
-		resetLabels()
+		ResetLabels()
+		ResetTempCount()
 		begin := NewLabel()
 		after := NewLabel()
 		var b strings.Builder

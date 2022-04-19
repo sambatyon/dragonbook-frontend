@@ -63,6 +63,15 @@ type AssingArrayStmt struct {
 }
 
 func NewAssignArrayStmt(access *AccessOp, expr Expression) (*AssingArrayStmt, error) {
+	_, aok := access.Type().(*lexer.Array)
+	_, eok := expr.Type().(*lexer.Array)
+	if (aok || eok) || (access.Type() != expr.Type()) {
+		return nil, errors.New("Type error")
+	}
+	if (access.Type().Numeric() && !expr.Type().Numeric()) || (!access.Type().Numeric() && expr.Type().Numeric()) {
+		return nil, errors.New("Type error")
+	}
+
 	return &AssingArrayStmt{id: access.Array, index: access.Index, expr: expr}, nil
 }
 
@@ -86,6 +95,10 @@ func (aa *AssingArrayStmt) after() int {
 type StmtSeq struct {
 	head Statement
 	tail Statement
+}
+
+func NewStmtSeq(head Statement, tail Statement) *StmtSeq {
+	return &StmtSeq{head, tail}
 }
 
 func (s *StmtSeq) Generate(b *strings.Builder, begin int, after int) error {
@@ -173,9 +186,9 @@ func (e *ElseStmt) after() int {
 }
 
 type WhileStmt struct {
-	cond Expression
-	body Statement
-	aft  int
+	Cond Expression
+	Body Statement
+	Aft  int
 }
 
 func NewWhileStmt(cond Expression, body Statement) (*WhileStmt, error) {
@@ -186,13 +199,13 @@ func NewWhileStmt(cond Expression, body Statement) (*WhileStmt, error) {
 }
 
 func (w *WhileStmt) Generate(b *strings.Builder, begin int, after int) error {
-	w.aft = after
-	if err := w.cond.Jumps(b, 0, after); err != nil {
+	w.Aft = after
+	if err := w.Cond.Jumps(b, 0, after); err != nil {
 		return err
 	}
 	label := NewLabel()
 	EmitLabel(b, label)
-	if err := w.body.Generate(b, label, begin); err != nil {
+	if err := w.Body.Generate(b, label, begin); err != nil {
 		return err
 	}
 	Emit(b, fmt.Sprintf("goto L%d", begin))
@@ -200,13 +213,13 @@ func (w *WhileStmt) Generate(b *strings.Builder, begin int, after int) error {
 }
 
 func (w *WhileStmt) after() int {
-	return w.aft
+	return w.Aft
 }
 
 type DoStmt struct {
-	cond Expression
-	body Statement
-	aft  int
+	Cond Expression
+	Body Statement
+	Aft  int
 }
 
 func NewDoStmt(cond Expression, body Statement) (*DoStmt, error) {
@@ -217,20 +230,20 @@ func NewDoStmt(cond Expression, body Statement) (*DoStmt, error) {
 }
 
 func (d *DoStmt) Generate(b *strings.Builder, begin int, after int) error {
-	d.aft = after
+	d.Aft = after
 	label := NewLabel()
-	if err := d.body.Generate(b, begin, label); err != nil {
+	if err := d.Body.Generate(b, begin, label); err != nil {
 		return err
 	}
 	EmitLabel(b, label)
-	if err := d.cond.Jumps(b, begin, 0); err != nil {
+	if err := d.Cond.Jumps(b, begin, 0); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (d *DoStmt) after() int {
-	return d.aft
+	return d.Aft
 }
 
 type BreakStmt struct {
