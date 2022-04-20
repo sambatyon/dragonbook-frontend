@@ -6,6 +6,11 @@ import (
 	"testing"
 )
 
+func intConstant(val int64) *Constant {
+	cst, _ := NewIntConstant(&lexer.Integer{val})
+	return cst
+}
+
 var stmtTests = []struct {
 	stmt Statement
 	want string
@@ -13,15 +18,15 @@ var stmtTests = []struct {
 	{
 		&AssignStmt{
 			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-			NewIntConstant(42),
+			intConstant(42),
 		},
 		"\tx = 42\n",
 	},
 	{
 		&AssingArrayStmt{
 			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-			NewIntConstant(0),
-			NewIntConstant(42),
+			intConstant(0),
+			intConstant(42),
 		},
 		"\tx [ 0 ] = 42\n",
 	},
@@ -29,12 +34,12 @@ var stmtTests = []struct {
 		&StmtSeq{
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(42),
+				intConstant(42),
 			},
 			&AssingArrayStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(0),
-				NewIntConstant(42),
+				intConstant(0),
+				intConstant(42),
 			},
 		},
 		"\tx = 42\nL3:\tx [ 0 ] = 42\n",
@@ -44,7 +49,7 @@ var stmtTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "b"), lexer.BoolType(), 4},
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(0),
+				intConstant(0),
 			},
 		},
 		"\tiffalse b goto L2\nL3:\tx = 0\n",
@@ -54,11 +59,11 @@ var stmtTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "b"), lexer.BoolType(), 4},
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(0),
+				intConstant(0),
 			},
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(42),
+				intConstant(42),
 			},
 		},
 		"\tiffalse b goto L4\nL3:\tx = 0\nL4:\tx = 42\n",
@@ -68,7 +73,7 @@ var stmtTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "b"), lexer.BoolType(), 4},
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(0),
+				intConstant(0),
 			},
 			0,
 		},
@@ -79,7 +84,7 @@ var stmtTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "b"), lexer.BoolType(), 4},
 			&AssignStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
-				NewIntConstant(0),
+				intConstant(0),
 			},
 			0,
 		},

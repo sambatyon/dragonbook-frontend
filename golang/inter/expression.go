@@ -32,12 +32,20 @@ type Constant struct {
 	typ lexer.Type
 }
 
-func NewIntConstant(v int64) *Constant {
-	return &Constant{&lexer.Integer{v}, lexer.IntType()}
+func NewIntConstant(tok lexer.Token) (*Constant, error) {
+	_, ok := tok.(*lexer.Integer)
+	if !ok {
+		return nil, errors.New("Type error")
+	}
+	return &Constant{tok, lexer.IntType()}, nil
 }
 
-func NewFloatConstant(v float64) *Constant {
-	return &Constant{&lexer.Real{v}, lexer.FloatType()}
+func NewFloatConstant(tok lexer.Token) (*Constant, error) {
+	_, ok := tok.(*lexer.Real)
+	if !ok {
+		return nil, errors.New("Type error")
+	}
+	return &Constant{tok, lexer.FloatType()}, nil
 }
 
 var tr = &Constant{
@@ -284,6 +292,10 @@ type AccessOp struct {
 	Array *Identifier
 	Index Expression
 	typ   lexer.Type
+}
+
+func NewAccessOp(array *Identifier, index Expression, typ lexer.Type) (*AccessOp, error) {
+	return &AccessOp{array, index, typ}, nil
 }
 
 func (ao *AccessOp) Op() lexer.Token {
