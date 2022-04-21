@@ -1,12 +1,12 @@
 #include "cpp/parser/parser.hpp"
 
+#include "cpp/parser/environment.hpp"
+
+#include "cpp/lexer/array.hpp"
 #include "cpp/lexer/numeric.hpp"
 #include "cpp/lexer/lexer.hpp"
 #include "cpp/lexer/token.hpp"
-
-#include "cpp/symbols/environment.hpp"
-#include "cpp/symbols/array.hpp"
-#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include "cpp/inter/arithmetic-operator.hpp"
 #include "cpp/inter/statement-sequence.hpp"

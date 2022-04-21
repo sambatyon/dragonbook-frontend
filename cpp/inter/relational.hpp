@@ -2,7 +2,7 @@
 
 #include "cpp/inter/logical.hpp"
 
-#include "cpp/symbols/array.hpp"
+#include "cpp/lexer/array.hpp"
 
 namespace inter {
 class Relational : public Logical {

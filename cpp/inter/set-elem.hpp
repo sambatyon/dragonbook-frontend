@@ -4,7 +4,7 @@
 #include "cpp/inter/statement.hpp"
 #include "cpp/inter/identifier.hpp"
 
-#include "cpp/symbols/array.hpp"
+#include "cpp/lexer/array.hpp"
 
 namespace inter {
 class SetElem : public Statement {

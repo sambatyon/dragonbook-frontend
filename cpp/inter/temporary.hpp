@@ -2,7 +2,7 @@
 
 #include "cpp/inter/expression.hpp"
 
-#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include "cpp/lexer/word.hpp"
 

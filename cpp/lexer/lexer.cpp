@@ -1,8 +1,7 @@
 #include "cpp/lexer/lexer.hpp"
 
 #include "cpp/lexer/numeric.hpp"
-
-#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include <cctype>
 #include <memory>

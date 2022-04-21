@@ -1,4 +1,4 @@
-#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include "cpp/lexer/token.hpp"
 

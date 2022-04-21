@@ -3,7 +3,7 @@
 #include "cpp/inter/node.hpp"
 
 #include "cpp/lexer/token.hpp"
-#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include <cstdint>
 #include <memory>
