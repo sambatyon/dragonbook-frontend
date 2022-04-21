@@ -1,6 +1,6 @@
 #pragma once
 
-#include <inter/statement.hpp>
+#include "cpp/inter/statement.hpp"
 
 namespace inter {
 class Break : public Statement {

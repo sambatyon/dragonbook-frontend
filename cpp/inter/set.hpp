@@ -1,7 +1,7 @@
 #pragma once
 
-#include <inter/statement.hpp>
-#include <inter/identifier.hpp>
+#include "cpp/inter/statement.hpp"
+#include "cpp/inter/identifier.hpp"
 
 namespace inter {
 class Set : public Statement {

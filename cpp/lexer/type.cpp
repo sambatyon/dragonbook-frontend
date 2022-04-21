@@ -1,6 +1,6 @@
-#include <symbols/type.hpp>
+#include "cpp/lexer/type.hpp"
 
-#include <lexer/token.hpp>
+#include "cpp/lexer/token.hpp"
 
 namespace symbols {
 std::shared_ptr<Type> Type::integer = Type::create("int", Token::kBasic, 4);

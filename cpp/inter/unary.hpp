@@ -1,6 +1,6 @@
 #pragma once
 
-#include <inter/operator.hpp>
+#include "cpp/inter/operator.hpp"
 
 namespace inter {
 class UnaryOperator : public Operator {

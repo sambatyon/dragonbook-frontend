@@ -1,4 +1,4 @@
-#include <lexer/word.hpp>
+#include "cpp/lexer/word.hpp"
 
 namespace lexer {
 std::shared_ptr<Word> Word::and_word = Word::create("&&", Token::kAnd);

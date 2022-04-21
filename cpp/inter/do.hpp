@@ -1,7 +1,7 @@
 #pragma once
 
-#include <inter/statement.hpp>
-#include <inter/expression.hpp>
+#include "cpp/inter/statement.hpp"
+#include "cpp/inter/expression.hpp"
 
 namespace inter {
 class Do : public Statement {

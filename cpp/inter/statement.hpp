@@ -1,6 +1,6 @@
 #pragma once
 
-#include <inter/node.hpp>
+#include "cpp/inter/node.hpp"
 
 namespace inter {
 class Statement : public Node {

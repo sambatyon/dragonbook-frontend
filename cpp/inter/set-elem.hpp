@@ -1,10 +1,10 @@
 #pragma once
 
-#include <inter/access.hpp>
-#include <inter/statement.hpp>
-#include <inter/identifier.hpp>
+#include "cpp/inter/access.hpp"
+#include "cpp/inter/statement.hpp"
+#include "cpp/inter/identifier.hpp"
 
-#include <symbols/array.hpp>
+#include "cpp/lexer/array.hpp"
 
 namespace inter {
 class SetElem : public Statement {

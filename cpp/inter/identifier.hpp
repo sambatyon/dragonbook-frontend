@@ -1,9 +1,9 @@
 #pragma once
 
-#include <inter/expression.hpp>
+#include "cpp/inter/expression.hpp"
 
-#include <lexer/word.hpp>
-#include <symbols/type.hpp>
+#include "cpp/lexer/word.hpp"
+#include "cpp/lexer/type.hpp"
 
 #include <cstdint>
 #include <memory>

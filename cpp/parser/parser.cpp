@@ -1,32 +1,32 @@
-#include <parser/parser.hpp>
+#include "cpp/parser/parser.hpp"
 
-#include <lexer/numeric.hpp>
-#include <lexer/lexer.hpp>
-#include <lexer/token.hpp>
+#include "cpp/parser/environment.hpp"
 
-#include <symbols/environment.hpp>
-#include <symbols/array.hpp>
-#include <symbols/type.hpp>
+#include "cpp/lexer/array.hpp"
+#include "cpp/lexer/numeric.hpp"
+#include "cpp/lexer/lexer.hpp"
+#include "cpp/lexer/token.hpp"
+#include "cpp/lexer/type.hpp"
 
-#include <inter/arithmetic-operator.hpp>
-#include <inter/statement-sequence.hpp>
-#include <inter/identifier.hpp>
-#include <inter/expression.hpp>
-#include <inter/relational.hpp>
-#include <inter/statement.hpp>
-#include <inter/set-elem.hpp>
-#include <inter/constant.hpp>
-#include <inter/access.hpp>
-#include <inter/unary.hpp>
-#include <inter/while.hpp>
-#include <inter/break.hpp>
-#include <inter/else.hpp>
-#include <inter/and.hpp>
-#include <inter/not.hpp>
-#include <inter/set.hpp>
-#include <inter/if.hpp>
-#include <inter/do.hpp>
-#include <inter/or.hpp>
+#include "cpp/inter/arithmetic-operator.hpp"
+#include "cpp/inter/statement-sequence.hpp"
+#include "cpp/inter/identifier.hpp"
+#include "cpp/inter/expression.hpp"
+#include "cpp/inter/relational.hpp"
+#include "cpp/inter/statement.hpp"
+#include "cpp/inter/set-elem.hpp"
+#include "cpp/inter/constant.hpp"
+#include "cpp/inter/access.hpp"
+#include "cpp/inter/unary.hpp"
+#include "cpp/inter/while.hpp"
+#include "cpp/inter/break.hpp"
+#include "cpp/inter/else.hpp"
+#include "cpp/inter/and.hpp"
+#include "cpp/inter/not.hpp"
+#include "cpp/inter/set.hpp"
+#include "cpp/inter/if.hpp"
+#include "cpp/inter/do.hpp"
+#include "cpp/inter/or.hpp"
 
 #include <exception>
 

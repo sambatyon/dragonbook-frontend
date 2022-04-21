@@ -1,4 +1,4 @@
-#include <inter/relational.hpp>
+#include "cpp/inter/relational.hpp"
 
 namespace inter {
 std::shared_ptr<symbols::Type> Relational::check(std::shared_ptr<symbols::Type> left,

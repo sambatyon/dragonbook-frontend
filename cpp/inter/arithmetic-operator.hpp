@@ -1,9 +1,9 @@
 #pragma once
 
-#include <inter/operator.hpp>
-#include <inter/expression.hpp>
+#include "cpp/inter/operator.hpp"
+#include "cpp/inter/expression.hpp"
 
-#include <lexer/word.hpp>
+#include "cpp/lexer/word.hpp"
 
 #include <memory>
 

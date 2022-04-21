@@ -1,5 +1,5 @@
-#include <inter/logical.hpp>
-#include <inter/temporary.hpp>
+#include "cpp/inter/logical.hpp"
+#include "cpp/inter/temporary.hpp"
 
 namespace inter {
 std::shared_ptr<Expression> Logical::gen() {
