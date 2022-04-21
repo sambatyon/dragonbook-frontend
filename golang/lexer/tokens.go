@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"math"
 )
 
 type Tag int
@@ -27,6 +28,7 @@ const (
 	TEMP
 	TRUE
 	WHILE
+	EOF = math.MaxInt
 )
 
 type Token interface {
@@ -36,6 +38,12 @@ type Token interface {
 
 type Tok struct {
 	tag Tag
+}
+
+var eof Token = &Tok{EOF}
+
+func Eof() Token {
+	return eof
 }
 
 func NewToken(tag Tag) *Tok {

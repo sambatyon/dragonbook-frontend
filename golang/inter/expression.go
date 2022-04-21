@@ -329,7 +329,7 @@ func (ao *AccessOp) Reduce(b *strings.Builder) (Expression, error) {
 }
 
 func (ao *AccessOp) String() string {
-	return fmt.Sprintf("%s [%s]", ao.Array.String(), ao.Index.String())
+	return fmt.Sprintf("%s [ %s ]", ao.Array.String(), ao.Index.String())
 }
 
 func (ao *AccessOp) Jumps(b *strings.Builder, to int, from int) error {

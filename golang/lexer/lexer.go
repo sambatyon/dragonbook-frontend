@@ -40,6 +40,10 @@ func NewLexer(rd io.Reader) *Lexer {
 func (l *Lexer) read() error {
 	b, err := l.reader.ReadByte()
 	if err != nil {
+		if err == io.EOF {
+			l.peek = rune(0)
+			return nil
+		}
 		return err
 	}
 	l.peek = rune(b)
@@ -63,6 +67,9 @@ func (l *Lexer) Scan() (Token, error) {
 		tok := &Tok{tag: Tag(l.peek)}
 		l.peek = ' '
 		return tok, nil
+	}
+	if l.peek == rune(0) {
+		return Eof(), nil
 	}
 	for {
 		err := l.read()

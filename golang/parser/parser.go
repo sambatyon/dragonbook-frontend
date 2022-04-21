@@ -22,8 +22,8 @@ func (e *environment) put(key string, value *inter.Identifier) {
 }
 
 func (e *environment) get(key string) (*inter.Identifier, bool) {
-	for cur := e; cur != nil; cur = e.previous {
-		found, ok := e.table[key]
+	for cur := e; cur != nil; cur = cur.previous {
+		found, ok := cur.table[key]
 		if ok {
 			return found, true
 		}
@@ -63,7 +63,9 @@ func (p *Parser) match(t lexer.Tag) error {
 	if p.lookahead.Tag() != t {
 		return errors.New(fmt.Sprintf("Syntax error near line %d", p.lex.Line))
 	}
-	p.move()
+	if err := p.move(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -93,6 +95,9 @@ func (p *Parser) block() (inter.Statement, error) {
 	}
 	stmts, err := p.stmts()
 	if err != nil {
+		return nil, err
+	}
+	if err := p.match(lexer.Tag('}')); err != nil {
 		return nil, err
 	}
 	p.top = saved
@@ -207,8 +212,8 @@ func (p *Parser) stmt() (inter.Statement, error) {
 		return inter.NewElseStmt(expr, body, els)
 
 	case lexer.WHILE:
-		saved := p.encstmt
 		while := &inter.WhileStmt{nil, nil, 0}
+		saved := p.encstmt
 		p.encstmt = while
 		if err := p.match(lexer.WHILE); err != nil {
 			return nil, err
@@ -238,8 +243,8 @@ func (p *Parser) stmt() (inter.Statement, error) {
 		return while, nil
 
 	case lexer.DO:
-		saved := p.encstmt
 		do := &inter.DoStmt{nil, nil, 0}
+		saved := p.encstmt
 		p.encstmt = do
 		if err := p.match(lexer.DO); err != nil {
 			return nil, err
@@ -264,6 +269,7 @@ func (p *Parser) stmt() (inter.Statement, error) {
 			return nil, errors.New("Boolean Required in while loop")
 		}
 		do.Cond = expr
+
 		if err := p.match(lexer.Tag(')')); err != nil {
 			return nil, err
 		}
@@ -566,6 +572,9 @@ func (p *Parser) offset(id *inter.Identifier) (*inter.AccessOp, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := p.match(lexer.Tag(']')); err != nil {
+		return nil, err
+	}
 	arr, ok := typ.(*lexer.Array)
 	if !ok {
 		return nil, errors.New("Type error")
@@ -587,6 +596,9 @@ func (p *Parser) offset(id *inter.Identifier) (*inter.AccessOp, error) {
 		}
 		index, err = p.bool()
 		if err != nil {
+			return nil, err
+		}
+		if err := p.match(lexer.Tag(']')); err != nil {
 			return nil, err
 		}
 		arr, ok = typ.(*lexer.Array)
