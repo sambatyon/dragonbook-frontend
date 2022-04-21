@@ -1,4 +1,4 @@
-#include <lexer/token.hpp>
+#include "cpp/lexer/token.hpp"
 
 namespace lexer {
 const std::uint32_t Token::kAnd;

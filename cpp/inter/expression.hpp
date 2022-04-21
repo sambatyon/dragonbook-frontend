@@ -1,9 +1,9 @@
 #pragma once
 
-#include <inter/node.hpp>
+#include "cpp/inter/node.hpp"
 
-#include <lexer/token.hpp>
-#include <symbols/type.hpp>
+#include "cpp/lexer/token.hpp"
+#include "cpp/symbols/type.hpp"
 
 #include <cstdint>
 #include <memory>

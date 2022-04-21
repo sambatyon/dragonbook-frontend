@@ -13,7 +13,6 @@ cc_binary(
     "parser/*.hpp",
     "symbols/*.hpp",
   ]),
-  copts = ["-Icpp"], # TODO(arojas): Remove this legacy include directive.
 )
 
 # TODO(arojas): Add unit tests.

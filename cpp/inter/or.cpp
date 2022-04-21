@@ -1,6 +1,6 @@
-#include <inter/or.hpp>
+#include "cpp/inter/or.hpp"
 
-#include <inter/node.hpp>
+#include "cpp/inter/node.hpp"
 
 namespace inter {
 void Or::jumping(const std::uint32_t &to, const std::uint32_t &from) {

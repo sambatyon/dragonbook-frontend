@@ -1,7 +1,7 @@
 #pragma once
 
-#include <inter/expression.hpp>
-#include <lexer/numeric.hpp>
+#include "cpp/inter/expression.hpp"
+#include "cpp/lexer/numeric.hpp"
 
 namespace inter {
 class Constant : public Expression {

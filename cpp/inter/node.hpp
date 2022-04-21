@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lexer/lexer.hpp>
+#include "cpp/lexer/lexer.hpp"
 
 #include <exception>
 #include <stdexcept>

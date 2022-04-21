@@ -1,10 +1,10 @@
 #pragma once
 
-#include <inter/expression.hpp>
+#include "cpp/inter/expression.hpp"
 
-#include <symbols/type.hpp>
+#include "cpp/symbols/type.hpp"
 
-#include <lexer/word.hpp>
+#include "cpp/lexer/word.hpp"
 
 #include <cstdint>
 #include <sstream>

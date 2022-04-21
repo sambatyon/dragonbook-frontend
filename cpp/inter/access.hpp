@@ -1,11 +1,11 @@
 #pragma once
 
-#include <inter/operator.hpp>
-#include <inter/expression.hpp>
-#include <inter/identifier.hpp>
+#include "cpp/inter/operator.hpp"
+#include "cpp/inter/expression.hpp"
+#include "cpp/inter/identifier.hpp"
 
-#include <lexer/word.hpp>
-#include <lexer/token.hpp>
+#include "cpp/lexer/word.hpp"
+#include "cpp/lexer/token.hpp"
 
 namespace inter {
 class Access : public Operator {

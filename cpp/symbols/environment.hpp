@@ -1,7 +1,7 @@
 #pragma once
 
-#include <lexer/token.hpp>
-#include <inter/identifier.hpp>
+#include "cpp/lexer/token.hpp"
+#include "cpp/inter/identifier.hpp"
 
 #include <map>
 #include <memory>

@@ -1,6 +1,6 @@
-#include <inter/constant.hpp>
+#include "cpp/inter/constant.hpp"
 
-#include <lexer/word.hpp>
+#include "cpp/lexer/word.hpp"
 
 namespace inter {
 std::shared_ptr<Constant> Constant::kTrue = Constant::create(lexer::Token::create(lexer::Word::kTrue),

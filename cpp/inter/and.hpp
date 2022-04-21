@@ -1,6 +1,6 @@
 #pragma once
 
-#include <inter/logical.hpp>
+#include "cpp/inter/logical.hpp"
 
 namespace inter {
 class And : public Logical {

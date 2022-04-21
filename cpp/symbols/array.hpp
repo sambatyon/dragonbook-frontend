@@ -1,7 +1,7 @@
 #pragma once
 
-#include <symbols/type.hpp>
-#include <lexer/token.hpp>
+#include "cpp/symbols/type.hpp"
+#include "cpp/lexer/token.hpp"
 
 #include <memory>
 #include <cstddef>

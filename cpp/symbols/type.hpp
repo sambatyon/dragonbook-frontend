@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lexer/word.hpp>
+#include "cpp/lexer/word.hpp"
 
 #include <memory>
 #include <string>

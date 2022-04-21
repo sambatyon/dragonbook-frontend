@@ -1,4 +1,4 @@
-#include <inter/statement-sequence.hpp>
+#include "cpp/inter/statement-sequence.hpp"
 
 namespace inter {
 void StatementSequence::gen(const std::uint32_t &b, const std::uint32_t &a) {
