@@ -21,4 +21,4 @@ const std::uint32_t Token::kReal;
 const std::uint32_t Token::kTemp;
 const std::uint32_t Token::kTrue;
 const std::uint32_t Token::kWhile;
-} // namespace lexer
+}  // namespace lexer

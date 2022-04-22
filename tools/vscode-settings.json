@@ -115,4 +115,10 @@
     "iterator": "cpp",
     "utility": "cpp"
   },
+  "[go]": {
+    "editor.rulers": [100],
+  },
+  "[cpp]": {
+    "editor.rulers": [120],
+  }
 }
