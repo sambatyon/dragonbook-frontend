@@ -120,5 +120,6 @@
   },
   "[cpp]": {
     "editor.rulers": [120],
-  }
+  },
+  "task.allowAutomaticTasks": "on"
 }
