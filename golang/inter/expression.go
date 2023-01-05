@@ -90,7 +90,7 @@ func (c *Constant) Jumps(b *strings.Builder, to int, from int) error {
 	if c == TrueConstant() && to != 0 {
 		Emit(b, fmt.Sprintf("goto L%d", to))
 	} else if c == FalseConstant() && from != 0 {
-		Emit(b, fmt.Sprintf("goto L%d, from"))
+		Emit(b, fmt.Sprintf("goto L%d", from))
 	}
 	return nil
 }
