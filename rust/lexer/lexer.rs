@@ -44,40 +44,64 @@ impl<T: std::io::Read> Lexer<T> {
 
     match self.peek {
       b'&' => {
-        if self.read_ch(b'&')? {
-          return Ok(Token::And)
+        return match self.read_ch(b'&') {
+          Ok(true) => Ok(Token::And),
+          Ok(false) => Ok(Token::Tok(b'&')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'&')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'&'))
       },
       b'|' => {
-        if self.read_ch(b'|')? {
-          return Ok(Token::Or)
+        return match self.read_ch(b'|') {
+          Ok(true) => Ok(Token::Or),
+          Ok(false) => Ok(Token::Tok(b'|')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'|')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'|'))
       },
       b'=' => {
-        if self.read_ch(b'=')? {
-          return Ok(Token::Equality)
+        return match self.read_ch(b'=') {
+          Ok(true) => Ok(Token::Equality),
+          Ok(false) => Ok(Token::Tok(b'=')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'=')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'='))
       },
       b'!' => {
-        if self.read_ch(b'=')? {
-          return Ok(Token::Ne)
+        return match self.read_ch(b'=') {
+          Ok(true) => Ok(Token::Ne),
+          Ok(false) => Ok(Token::Tok(b'!')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'!')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'!'))
       },
       b'<' => {
-        if self.read_ch(b'=')? {
-          return Ok(Token::Ne)
+        return match self.read_ch(b'=') {
+          Ok(true) => Ok(Token::Le),
+          Ok(false) => Ok(Token::Tok(b'<')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'<')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'!'))
       },
       b'>' => {
-        if self.read_ch(b'=')? {
-          return Ok(Token::Ne)
+        return match self.read_ch(b'=') {
+          Ok(true) => Ok(Token::Ge),
+          Ok(false) => Ok(Token::Tok(b'>')),
+          Err(error) => match error.kind() {
+            ErrorKind::UnexpectedEof => Ok(Token::Tok(b'>')),
+            _ => Err(error)
+          }
         }
-        return Ok(Token::Tok(b'!'))
       },
       _ => (),
     }
@@ -174,17 +198,42 @@ impl<T: std::io::Read> Lexer<T> {
 mod test {
 use super::*;
 use stringreader::StringReader;
+use tokens::Tag;
 
 
 #[test]
 fn lexer_tests() {
-  let tests = [
-    ("{int i; int j}", 42i32)
+  let tests: Vec<(&str, Vec<Token>)> = vec![
+    ("&", vec![Token::Tok(b'&')]),
+    ("&&", vec![Token::And]),
+    ("|", vec![Token::Tok(b'|')]),
+    ("||", vec![Token::Or]),
+    ("=", vec![Token::Tok(b'=')]),
+    ("==", vec![Token::Equality]),
+    ("!", vec![Token::Tok(b'!')]),
+    ("!=", vec![Token::Ne]),
+    ("<", vec![Token::Tok(b'<')]),
+    ("<=", vec![Token::Le]),
+    (">", vec![Token::Tok(b'>')]),
+    (">=", vec![Token::Ge]),
+    ("1982", vec![Token::Integer(1982)]),
+    ("1982.2891", vec![Token::Real(1982.2891)]),
+    ("Iden7ifier23", vec![Token::Word("Iden7ifier23".to_string(), Tag::ID)]),
+    ("{
+        i;
+      }",
+    vec![
+      Token::Tok(b'{'),
+      Token::Word("i".to_string(), Tag::ID), Token::Tok(b';'),
+      Token::Tok(b'}')]),
   ];
 
   for tc in tests {
-    let lexer = Lexer::new(StringReader::new(tc.0));
-    println!("tc: {}", tc.0)
+    let mut lexer = Lexer::new(StringReader::new(tc.0));
+    for expected in tc.1 {
+      let tok = lexer.scan().unwrap();
+      assert_eq!(tok, expected);
+    }
   }
 }
 }

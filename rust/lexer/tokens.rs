@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy,Clone,Debug, Eq)]
 pub enum Tag {
   AND = 256,
   BASIC,
@@ -21,6 +21,12 @@ pub enum Tag {
   TRUE,
   WHILE,
   EOF = std::u32::MAX as isize
+}
+
+impl PartialEq for Tag {
+  fn eq(&self, other: &Self) -> bool {
+    (*self as u32) == (*other as u32)
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -110,3 +116,33 @@ impl Token {
     s.to_string()
   }
 }
+
+impl PartialEq for Token {
+  fn eq(&self, other: &Self) -> bool {
+    match self {
+      Token::Word(s, tg) => match other {
+        Token::Word(os, otg) => s == os && tg == otg,
+        _ => false
+      },
+      Token::Integer(v) => match other {
+        Token::Integer(ov) => v == ov,
+        _ => false
+      },
+      Token::Real(_) => match other {
+        Token::Real(_) => self.to_string() == other.to_string(),
+        _ => false
+      },
+      Token::SimpleType(lex, w) => match other {
+        Token::SimpleType(olex, ow) => lex == olex && w == ow,
+        _ => false
+      },
+      Token::Array(ty, len) => match other {
+        Token::Array(oty, olen) => ty.as_ref() == oty.as_ref() && len == olen,
+        _ => false
+      },
+      _ => self.tag() == other.tag()
+    }
+  }
+}
+
+impl Eq for Token {}
