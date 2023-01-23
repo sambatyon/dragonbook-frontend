@@ -24,17 +24,17 @@ impl<T: std::io::Read> Lexer<T> {
       reader: BufReader::new(source),
     };
     // TODO(sambatyon): Check wether String can be replaced with &str
-    lex.words.insert("if".to_string(), Token::Word("if".to_string(), Tag::IF));
-    lex.words.insert("else".to_string(), Token::Word("else".to_string(), Tag::ELSE));
-    lex.words.insert("while".to_string(), Token::Word("while".to_string(), Tag::WHILE));
-    lex.words.insert("do".to_string(), Token::Word("do".to_string(), Tag::DO));
-    lex.words.insert("break".to_string(), Token::Word("break".to_string(), Tag::BREAK));
-    lex.words.insert("true".to_string(), Token::Word("true".to_string(), Tag::TRUE));
-    lex.words.insert("false".to_string(), Token::Word("false".to_string(), Tag::FALSE));
-    lex.words.insert("int".to_string(), Token::SimpleType("int".to_string(), 4u8));
-    lex.words.insert("float".to_string(), Token::SimpleType("float".to_string(), 8u8));
-    lex.words.insert("char".to_string(), Token::SimpleType("char".to_string(), 1u8));
-    lex.words.insert("bool".to_string(), Token::SimpleType("bool".to_string(), 1u8));
+    lex.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
+    lex.words.insert(String::from("else"), Token::Word(String::from("else"), Tag::ELSE));
+    lex.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
+    lex.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
+    lex.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
+    lex.words.insert(String::from("true"), Token::Word(String::from("true"), Tag::TRUE));
+    lex.words.insert(String::from("false"), Token::Word(String::from("false"), Tag::FALSE));
+    lex.words.insert(String::from("int"), Token::SimpleType(String::from("int"), 4u8));
+    lex.words.insert(String::from("float"), Token::SimpleType(String::from("float"), 8u8));
+    lex.words.insert(String::from("char"), Token::SimpleType(String::from("char"), 1u8));
+    lex.words.insert(String::from("bool"), Token::SimpleType(String::from("bool"), 1u8));
     lex
   }
 

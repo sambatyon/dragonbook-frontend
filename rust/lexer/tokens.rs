@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Copy,Clone,Debug, Eq)]
 pub enum Tag {
   AND = 256,
@@ -83,37 +85,25 @@ impl Token {
       Token::Eof => Tag::EOF as u32
     }
   }
+}
 
-  pub fn to_string(&self) -> String {
-    let binding: String;
-    let s = match self {
-      Token::Tok(tg) => {
-        binding = (*tg as char).to_string();
-        binding.as_str()
-      }
-      Token::Word(lexeme, _) => lexeme.as_str(),
-      Token::And => "&&",
-      Token::Or => "||",
-      Token::Equality => "==",
-      Token::Ne => "!=",
-      Token::Le => "<=",
-      Token::Ge => ">=",
-      Token::Integer(i) => {
-        binding = i.to_string();
-        binding.as_str()
-      },
-      Token::Real(r) => {
-        binding = r.to_string();
-        binding.as_str()
-      }
-      Token::SimpleType(lexeme, _) => lexeme,
-      Token::Array(typ, length) => {
-        binding = format!("[{}]{}", length, typ.to_string());
-        binding.as_str()
-      }
-      Token::Eof => "\0"
-    };
-    s.to_string()
+impl fmt::Display for Token {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Token::Tok(tg) => write!(f, "{}", tg),
+      Token::Word(lex, _) => write!(f, "{}", lex),
+      Token::And => write!(f, "&&"),
+      Token::Or => write!(f, "||"),
+      Token::Equality => write!(f, "=="),
+      Token::Ne => write!(f, "!="),
+      Token::Le => write!(f, "<="),
+      Token::Ge => write!(f, ">="),
+      Token::Integer(i) => write!(f, "{}", i),
+      Token::Real(r) => write!(f, "{}", r.to_string()),
+      Token::SimpleType(lex, _) => write!(f, "{}", lex),
+      Token::Array(typ, len) => write!(f, "[{}]{}", len, *typ),
+      Token::Eof => write!(f, "\0")
+    }
   }
 }
 

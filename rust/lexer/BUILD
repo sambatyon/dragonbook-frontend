@@ -6,6 +6,7 @@ rust_library(
     "lexer.rs",
     "tokens.rs",
   ],
+  visibility = ["//rust:__subpackages__"],
 )
 
 rust_test(
