@@ -61,9 +61,9 @@ var exprTests = []struct {
 			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
 			lexer.FloatType(),
 		},
-		"arr [x]",
+		"arr [ x ]",
 		"",
-		`	t1 = arr [x]
+		`	t1 = arr [ x ]
 `,
 	},
 	{

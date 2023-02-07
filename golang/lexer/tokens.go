@@ -40,6 +40,8 @@ type Tok struct {
 	tag Tag
 }
 
+var _ Token = (*Tok)(nil)
+
 var eof Token = &Tok{EOF}
 
 func Eof() Token {
@@ -62,6 +64,8 @@ type Integer struct {
 	Value int64
 }
 
+var _ Token = (*Integer)(nil)
+
 func (i *Integer) Tag() Tag {
 	return INTEGER
 }
@@ -73,6 +77,8 @@ func (i *Integer) String() string {
 type Real struct {
 	Value float64
 }
+
+var _ Token = (*Real)(nil)
 
 func (r *Real) Tag() Tag {
 	return REAL
@@ -86,6 +92,8 @@ type Word struct {
 	tag    Tag
 	lexeme string
 }
+
+var _ Token = (*Word)(nil)
 
 func NewWord(tag Tag, lexeme string) *Word {
 	return &Word{tag: tag, lexeme: lexeme}
@@ -177,6 +185,11 @@ type SimpleType struct {
 	width  int
 }
 
+var (
+	_ Token = (*SimpleType)(nil)
+	_ Type  = (*SimpleType)(nil)
+)
+
 func (t *SimpleType) Tag() Tag {
 	return t.tag
 }
@@ -235,6 +248,11 @@ type Array struct {
 	Of     Type
 	Length int
 }
+
+var (
+	_ Token = (*Array)(nil)
+	_ Type  = (*Array)(nil)
+)
 
 func (a *Array) Tag() Tag {
 	return INDEX

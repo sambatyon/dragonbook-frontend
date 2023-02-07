@@ -17,12 +17,13 @@ type Expression interface {
 }
 
 func emitJumps(bd *strings.Builder, test string, to int, from int) {
-	if to != 0 && from != 0 {
+	switch {
+	case to != 0 && from != 0:
 		Emit(bd, fmt.Sprintf("if %s goto L%d", test, to))
 		Emit(bd, fmt.Sprintf("goto L%d", from))
-	} else if to != 0 {
+	case to != 0:
 		Emit(bd, fmt.Sprintf("if %s goto L%d", test, to))
-	} else if from != 0 {
+	case from != 0:
 		Emit(bd, fmt.Sprintf("iffalse %s goto L%d", test, from))
 	}
 }
