@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Copy,Clone,Debug, Eq)]
+#[derive(Copy,Clone,Debug,Eq)]
 pub enum Tag {
   AND = 256,
   BASIC,
@@ -44,7 +44,7 @@ pub enum Token {
   Integer(i64),
   Real(f64),
   SimpleType(String, u8),
-  Array(Box<Token>, i32),
+  Array(Box<Token>, u32),
   Eof
 }
 
@@ -58,14 +58,38 @@ impl Token {
       "break" => Tag::BREAK,
       "true" => Tag::TRUE,
       "false" => Tag::FALSE,
-      "int" => return Token::SimpleType(ident, 4),
-      "float" => return Token::SimpleType(ident, 8),
-      "char" => return Token::SimpleType(ident, 1),
-      "bool" => return Token::SimpleType(ident, 1),
+      "int" => return Self::integer(),
+      "float" => return Self::float(),
+      "char" => return Self::ch(),
+      "bool" => return Self::boolean(),
       _ => Tag::ID
     };
 
     Token::Word(ident, tg)
+  }
+
+  pub fn integer() -> Token {
+    Token::SimpleType(String::from("int"), 4u8)
+  }
+
+  pub fn float() -> Token {
+    Token::SimpleType(String::from("float"), 8u8)
+  }
+
+  pub fn ch() -> Token {
+    Token::SimpleType(String::from("char"), 1u8)
+  }
+
+  pub fn boolean() -> Token {
+    Token::SimpleType(String::from("bool"), 1u8)
+  }
+
+  pub fn tru() -> Token {
+    Token::Word(String::from("true"), Tag::TRUE)
+  }
+
+  pub fn fals() -> Token {
+    Token::Word(String::from("false"), Tag::FALSE)
   }
 
   pub fn tag(&self) -> u32 {
@@ -136,3 +160,4 @@ impl PartialEq for Token {
 }
 
 impl Eq for Token {}
+

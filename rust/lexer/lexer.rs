@@ -29,12 +29,12 @@ impl<T: std::io::Read> Lexer<T> {
     lex.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
     lex.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
     lex.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
-    lex.words.insert(String::from("true"), Token::Word(String::from("true"), Tag::TRUE));
-    lex.words.insert(String::from("false"), Token::Word(String::from("false"), Tag::FALSE));
-    lex.words.insert(String::from("int"), Token::SimpleType(String::from("int"), 4u8));
-    lex.words.insert(String::from("float"), Token::SimpleType(String::from("float"), 8u8));
-    lex.words.insert(String::from("char"), Token::SimpleType(String::from("char"), 1u8));
-    lex.words.insert(String::from("bool"), Token::SimpleType(String::from("bool"), 1u8));
+    lex.words.insert(String::from("true"), Token::tru());
+    lex.words.insert(String::from("false"), Token::fals());
+    lex.words.insert(String::from("int"), Token::integer());
+    lex.words.insert(String::from("float"), Token::float());
+    lex.words.insert(String::from("char"), Token::ch());
+    lex.words.insert(String::from("bool"), Token::boolean());
     lex
   }
 
