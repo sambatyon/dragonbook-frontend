@@ -50,7 +50,7 @@ pub enum Token {
 
 impl Token {
   pub fn from_string(ident: String) -> Token {
-    let tg = match ident.as_str() {
+    let tag = match ident.as_str() {
       "if" => Tag::IF,
       "else" => Tag::ELSE,
       "while" => Tag::WHILE,
@@ -65,7 +65,7 @@ impl Token {
       _ => Tag::ID
     };
 
-    Token::Word(ident, tg)
+    Token::Word(ident, tag)
   }
 
   pub fn integer() -> Token {
@@ -134,24 +134,24 @@ impl fmt::Display for Token {
 impl PartialEq for Token {
   fn eq(&self, other: &Self) -> bool {
     match self {
-      Token::Word(s, tg) => match other {
-        Token::Word(os, otg) => s == os && tg == otg,
+      Token::Word(text, tag) => match other {
+        Token::Word(otext, otag) => text == otext && tag == otag,
         _ => false
       },
-      Token::Integer(v) => match other {
-        Token::Integer(ov) => v == ov,
+      Token::Integer(value) => match other {
+        Token::Integer(ovalue) => value == ovalue,
         _ => false
       },
       Token::Real(_) => match other {
         Token::Real(_) => self.to_string() == other.to_string(),
         _ => false
       },
-      Token::SimpleType(lex, w) => match other {
-        Token::SimpleType(olex, ow) => lex == olex && w == ow,
+      Token::SimpleType(text, width) => match other {
+        Token::SimpleType(otext, owidth) => text == otext && width == owidth,
         _ => false
       },
-      Token::Array(ty, len) => match other {
-        Token::Array(oty, olen) => ty.as_ref() == oty.as_ref() && len == olen,
+      Token::Array(typ, len) => match other {
+        Token::Array(oty, olen) => typ.as_ref() == oty.as_ref() && len == olen,
         _ => false
       },
       _ => self.tag() == other.tag()

@@ -1,7 +1,8 @@
 use lexer::tokens::{Tag, Token};
 use std::fmt;
 
-pub mod expr;
+pub mod expression;
+pub mod statement;
 
 #[derive(Copy,Clone,Debug)]
 pub struct LabelManager {
@@ -9,11 +10,11 @@ pub struct LabelManager {
 }
 
 impl LabelManager {
-  fn new() -> LabelManager {
+  pub fn new() -> LabelManager {
     LabelManager{labels: 0}
   }
 
-  fn reset(&mut self) {
+  pub fn reset(&mut self) {
     self.labels = 0;
   }
 }

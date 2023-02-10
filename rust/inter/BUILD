@@ -4,7 +4,8 @@ rust_library(
   name = "inter",
   srcs = [
     "inter.rs",
-    "expr.rs"
+    "expression.rs",
+    "statement.rs",
   ],
   deps = [
     "//rust/lexer",

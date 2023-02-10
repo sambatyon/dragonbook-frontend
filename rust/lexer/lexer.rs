@@ -9,7 +9,7 @@ use tokens::Token;
 use tokens::Tag;
 
 pub struct Lexer<T: std::io::Read> {
-  line: u32,
+  pub line: u32,
   peek: u8,
   words: HashMap<String, Token>,
   reader: BufReader<T>,
@@ -17,25 +17,25 @@ pub struct Lexer<T: std::io::Read> {
 
 impl<T: std::io::Read> Lexer<T> {
   pub fn new(source: T) -> Lexer<T> {
-    let mut lex = Lexer {
+    let mut lexer = Lexer {
       line: 1,
       peek: b' ',
       words: HashMap::new(),
       reader: BufReader::new(source),
     };
     // TODO(sambatyon): Check wether String can be replaced with &str
-    lex.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
-    lex.words.insert(String::from("else"), Token::Word(String::from("else"), Tag::ELSE));
-    lex.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
-    lex.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
-    lex.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
-    lex.words.insert(String::from("true"), Token::tru());
-    lex.words.insert(String::from("false"), Token::fals());
-    lex.words.insert(String::from("int"), Token::integer());
-    lex.words.insert(String::from("float"), Token::float());
-    lex.words.insert(String::from("char"), Token::ch());
-    lex.words.insert(String::from("bool"), Token::boolean());
-    lex
+    lexer.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
+    lexer.words.insert(String::from("else"), Token::Word(String::from("else"), Tag::ELSE));
+    lexer.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
+    lexer.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
+    lexer.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
+    lexer.words.insert(String::from("true"), Token::tru());
+    lexer.words.insert(String::from("false"), Token::fals());
+    lexer.words.insert(String::from("int"), Token::integer());
+    lexer.words.insert(String::from("float"), Token::float());
+    lexer.words.insert(String::from("char"), Token::ch());
+    lexer.words.insert(String::from("bool"), Token::boolean());
+    lexer
   }
 
   pub fn scan(&mut self) -> Result<Token> {
