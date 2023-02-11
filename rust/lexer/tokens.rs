@@ -84,12 +84,16 @@ impl Token {
     Token::SimpleType(String::from("bool"), 1u8)
   }
 
-  pub fn tru() -> Token {
+  pub fn true_token() -> Token {
     Token::Word(String::from("true"), Tag::TRUE)
   }
 
-  pub fn fals() -> Token {
+  pub fn false_token() -> Token {
     Token::Word(String::from("false"), Tag::FALSE)
+  }
+
+  pub fn temp_word() -> Token {
+    Token::Word(String::from("t"), Tag::TEMP)
   }
 
   pub fn tag(&self) -> u32 {

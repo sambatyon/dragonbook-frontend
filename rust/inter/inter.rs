@@ -105,6 +105,21 @@ impl Type {
       Type::Array{of, length} => false,
     }
   }
+
+  fn max_type(left: &Type, right: &Type) -> Option<Type> {
+    if !left.is_numeric() || !right.is_numeric() {
+      return None
+    }
+    let lf = Type::float();
+    if left == lf || right == lf {
+      return Some(lf)
+    }
+    let i = Type::integer();
+    if left == i || right == i {
+      return Some(i)
+    }
+    Some(Type::ch())
+  }
 }
 
 impl fmt::Display for Type {
@@ -128,6 +143,12 @@ impl PartialEq for Type {
         _ => false
       }
     }
+  }
+}
+
+impl PartialEq<Type> for &Type {
+  fn eq(&self, other: &Type) -> bool {
+    *self == other
   }
 }
 
