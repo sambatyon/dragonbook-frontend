@@ -1,7 +1,8 @@
 use lexer::tokens::{Tag, Token};
 use std::fmt;
 
-pub mod expr;
+pub mod expression;
+pub mod statement;
 
 #[derive(Copy,Clone,Debug)]
 pub struct LabelManager {
@@ -9,11 +10,11 @@ pub struct LabelManager {
 }
 
 impl LabelManager {
-  fn new() -> LabelManager {
+  pub fn new() -> LabelManager {
     LabelManager{labels: 0}
   }
 
-  fn reset(&mut self) {
+  pub fn reset(&mut self) {
     self.labels = 0;
   }
 }
@@ -104,6 +105,21 @@ impl Type {
       Type::Array{of, length} => false,
     }
   }
+
+  fn max_type(left: &Type, right: &Type) -> Option<Type> {
+    if !left.is_numeric() || !right.is_numeric() {
+      return None
+    }
+    let lf = Type::float();
+    if left == lf || right == lf {
+      return Some(lf)
+    }
+    let i = Type::integer();
+    if left == i || right == i {
+      return Some(i)
+    }
+    Some(Type::ch())
+  }
 }
 
 impl fmt::Display for Type {
@@ -127,6 +143,12 @@ impl PartialEq for Type {
         _ => false
       }
     }
+  }
+}
+
+impl PartialEq<Type> for &Type {
+  fn eq(&self, other: &Type) -> bool {
+    *self == other
   }
 }
 

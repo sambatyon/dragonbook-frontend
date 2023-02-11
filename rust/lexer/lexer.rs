@@ -9,7 +9,7 @@ use tokens::Token;
 use tokens::Tag;
 
 pub struct Lexer<T: std::io::Read> {
-  line: u32,
+  pub line: u32,
   peek: u8,
   words: HashMap<String, Token>,
   reader: BufReader<T>,
@@ -17,25 +17,25 @@ pub struct Lexer<T: std::io::Read> {
 
 impl<T: std::io::Read> Lexer<T> {
   pub fn new(source: T) -> Lexer<T> {
-    let mut lex = Lexer {
+    let mut lexer = Lexer {
       line: 1,
       peek: b' ',
       words: HashMap::new(),
       reader: BufReader::new(source),
     };
     // TODO(sambatyon): Check wether String can be replaced with &str
-    lex.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
-    lex.words.insert(String::from("else"), Token::Word(String::from("else"), Tag::ELSE));
-    lex.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
-    lex.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
-    lex.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
-    lex.words.insert(String::from("true"), Token::tru());
-    lex.words.insert(String::from("false"), Token::fals());
-    lex.words.insert(String::from("int"), Token::integer());
-    lex.words.insert(String::from("float"), Token::float());
-    lex.words.insert(String::from("char"), Token::ch());
-    lex.words.insert(String::from("bool"), Token::boolean());
-    lex
+    lexer.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
+    lexer.words.insert(String::from("else"), Token::Word(String::from("else"), Tag::ELSE));
+    lexer.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
+    lexer.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
+    lexer.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
+    lexer.words.insert(String::from("true"), Token::true_token());
+    lexer.words.insert(String::from("false"), Token::false_token());
+    lexer.words.insert(String::from("int"), Token::integer());
+    lexer.words.insert(String::from("float"), Token::float());
+    lexer.words.insert(String::from("char"), Token::ch());
+    lexer.words.insert(String::from("bool"), Token::boolean());
+    lexer
   }
 
   pub fn scan(&mut self) -> Result<Token> {
@@ -245,23 +245,23 @@ fn float(f: f64) -> Token {
 }
 
 fn while_kwd() -> Token {
-  Token::Word("while".to_string(), Tag::WHILE)
+  Token::Word(String::from("while"), Tag::WHILE)
 }
 
 fn do_kwd() -> Token {
-  Token::Word("do".to_string(), Tag::DO)
+  Token::Word(String::from("do"), Tag::DO)
 }
 
 fn if_kwd() -> Token {
-  Token::Word("if".to_string(), Tag::IF)
+  Token::Word(String::from("if"), Tag::IF)
 }
 
 fn break_kwd() -> Token {
-  Token::Word("break".to_string(), Tag::BREAK)
+  Token::Word(String::from("break"), Tag::BREAK)
 }
 
 fn true_kwd() -> Token {
-  Token::Word("true".to_string(), Tag::TRUE)
+  Token::Word(String::from("true"), Tag::TRUE)
 }
 
 #[test]
