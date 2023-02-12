@@ -33,6 +33,8 @@ type Constant struct {
 	typ lexer.Type
 }
 
+var _ Expression = (*Constant)(nil)
+
 func NewIntConstant(tok lexer.Token) (*Constant, error) {
 	_, ok := tok.(*lexer.Integer)
 	if !ok {
@@ -179,6 +181,8 @@ type ArithmeticOp struct {
 	left  Expression
 	right Expression
 }
+
+var _ Expression = (*ArithmeticOp)(nil)
 
 func NewArithmeticOperator(tok lexer.Token, left Expression, right Expression) (*ArithmeticOp, error) {
 	typ := lexer.MaxType(left.Type(), right.Type())

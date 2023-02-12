@@ -22,6 +22,8 @@ class Temporary : public Expression {
 
   std::string to_string() const override;
 
+  static void reset_temp_count();
+
  private:
   static std::atomic_uint32_t count_;
   std::uint32_t number_;
@@ -46,5 +48,9 @@ inline std::string Temporary::to_string() const {
   std::stringstream ss;
   ss << "t" << number_;
   return ss.str();
+}
+
+inline void Temporary::reset_temp_count() {
+  count_ = 0;
 }
 }  // namespace inter
