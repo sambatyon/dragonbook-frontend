@@ -49,6 +49,6 @@ inline std::shared_ptr<Expression> UnaryOperator::gen(std::stringstream &ss) {
 }
 
 inline std::string UnaryOperator::to_string() const {
-  return oper()->to_string();
+  return oper()->to_string() + " " + expression()->to_string();
 }
 }  // namespace inter

@@ -53,10 +53,10 @@ inline void Node::reset_labels() {
 }
 
 inline void Node::emit_label(std::stringstream &ss, std::uint32_t i) {
-  std::cout << "L" << i << ":";
+  ss << "L" << i << ":";
 }
 
 inline void Node::emit(std::stringstream &ss, const std::string &message) {
-  std::cout << '\t' << message << '\n';
+  ss << '\t' << message << '\n';
 }
 }  // namespace inter
