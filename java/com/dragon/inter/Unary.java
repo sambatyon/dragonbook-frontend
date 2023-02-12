@@ -16,8 +16,8 @@ public class Unary extends Op {
   }
 
   @Override
-  public Expr gen() {
-    return new Unary(op, expr.reduce());
+  public Expr gen(StringBuilder b) {
+    return new Unary(op, expr.reduce(b));
   }
 
   @Override

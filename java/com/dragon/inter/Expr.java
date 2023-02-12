@@ -20,26 +20,26 @@ public class Expr extends Node {
     return type;
   }
 
-  public Expr gen() {
+  public Expr gen(StringBuilder b) {
     return this;
   }
 
-  public Expr reduce() {
+  public Expr reduce(StringBuilder b) {
     return this;
   }
 
-  public void jumping(int to, int from) {
-    emitJumps(toString(), to, from);
+  public void jumping(StringBuilder b, int to, int from) {
+    emitJumps(b, toString(), to, from);
   }
 
-  public void emitJumps(String test, int to, int from) {
+  public void emitJumps(StringBuilder b, String test, int to, int from) {
     if (to != 0 && from != 0) {
-      emit("if" + test + " goto L" + to);
-      emit("goto L" + from);
+      emit(b, "if" + test + " goto L" + to);
+      emit(b, "goto L" + from);
     } else if (to != 0) {
-      emit("if " + test + " goto L" + to);
+      emit(b, "if " + test + " goto L" + to);
     } else if (from != 0) {
-      emit("iffalse " + test + " goto L" + from);
+      emit(b, "iffalse " + test + " goto L" + from);
     }
   }
 

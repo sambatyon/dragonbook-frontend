@@ -11,7 +11,7 @@ public class Break extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
-    emit("goto L" + stmt.after);
+  public void gen(StringBuilder b, int begin, int after) {
+    emit(b, "goto L" + stmt.afterStmt);
   }
 }

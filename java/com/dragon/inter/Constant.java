@@ -18,11 +18,11 @@ public class Constant extends Expr {
   }
 
   @Override
-  public void jumping(int t, int f) {
+  public void jumping(StringBuilder b, int t, int f) {
     if (this == True && t != 0) {
-      emit("goto L" + t);
+      emit(b, "goto L" + t);
     } else if (this == False && f != 0) {
-      emit("goto L" + f);
+      emit(b, "goto L" + f);
     }
   }
 }

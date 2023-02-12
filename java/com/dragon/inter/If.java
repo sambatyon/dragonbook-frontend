@@ -15,10 +15,10 @@ public class If extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
+  public void gen(StringBuilder b, int begin, int after) {
     var label = newLabel();
-    condition.jumping(0, a);
-    emitLabel(label);
-    stmt.gen(label, a);
+    condition.jumping(b, 0, after);
+    emitLabel(b, label);
+    stmt.gen(b, label, after);
   }
 }

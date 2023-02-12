@@ -8,12 +8,12 @@ public class And extends Logical {
   }
 
   @Override
-  public void jumping(int to, int from) {
+  public void jumping(StringBuilder b, int to, int from) {
     var label = from != 0 ? from : newLabel();
-    left.jumping(0, label);
-    right.jumping(to, from);
+    left.jumping(b, 0, label);
+    right.jumping(b, to, from);
     if (from == 0) {
-      emitLabel(label);
+      emitLabel(b, label);
     }
   }
 

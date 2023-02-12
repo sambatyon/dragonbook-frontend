@@ -21,11 +21,11 @@ public class Rel extends Logical {
   }
 
   @Override
-  public void jumping(int to, int from) {
-    var a = left.reduce();
-    var b = right.reduce();
+  public void jumping(StringBuilder b, int to, int from) {
+    var lr = left.reduce(b);
+    var rr = right.reduce(b);
 
-    var test = a.toString() + " " + op.toString() + " " + b.toString();
-    emitJumps(test, to, from);
+    var test = lr.toString() + " " + op.toString() + " " + rr.toString();
+    emitJumps(b, test, to, from);
   }
 }

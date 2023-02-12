@@ -8,8 +8,8 @@ public class Not extends Logical {
   }
 
   @Override
-  public void jumping(int to, int from) {
-    left.jumping(from, to);
+  public void jumping(StringBuilder b, int to, int from) {
+    left.jumping(b, from, to);
   }
 
   @Override
