@@ -15,6 +15,9 @@ public class Node {
   public static int newLabel() {
     return ++labels;
   }
+  public static void resetLabel() {
+    labels = 0;
+  }
 
   public static void emitLabel(int i) {
     System.out.print("L" + i + ":");
