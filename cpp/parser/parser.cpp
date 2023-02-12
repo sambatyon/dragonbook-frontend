@@ -53,7 +53,6 @@ void Parser::move() {
 void Parser::error(std::string what) {
   std::stringstream ss;
   ss << "Near line " << lexer_->current_line() << ": " << what;
-  std::cerr << ss.str() << '\n';
   throw std::runtime_error(ss.str().c_str());
 }
 
@@ -91,10 +90,11 @@ void Parser::decls() {
 std::shared_ptr<symbols::Type> Parser::type() {
   auto typ = std::dynamic_pointer_cast<symbols::Type>(lookahead_);  // Expect look.tag == Token::kBasic
   match(lexer::Token::kBasic);
-  if (lookahead_->tag() != '[')
+  if (lookahead_->tag() != '[') {
     return typ;
-  else
+  } else {
     return dimension(typ);
+  }
 }
 
 std::shared_ptr<symbols::Type> Parser::dimension(std::shared_ptr<symbols::Type> typ) {
@@ -102,8 +102,9 @@ std::shared_ptr<symbols::Type> Parser::dimension(std::shared_ptr<symbols::Type> 
   auto token = lookahead_;
   match(lexer::Token::kInteger);
   match(']');
-  if (lookahead_->tag() == '[')
+  if (lookahead_->tag() == '[') {
     typ = dimension(typ);
+  }
   return symbols::Array::create(std::dynamic_pointer_cast<lexer::Number>(token)->value(), typ);
 }
 
