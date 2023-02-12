@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -22,7 +23,7 @@ class Temporary : public Expression {
   std::string to_string() const override;
 
  private:
-  static std::uint32_t count_;
+  static std::atomic_uint32_t count_;
   std::uint32_t number_;
 };
 

@@ -1,5 +1,5 @@
 #include "cpp/inter/temporary.hpp"
 
 namespace inter {
-std::uint32_t Temporary::count_ = 0u;
+std::atomic_uint32_t Temporary::count_{};
 }  // namespace inter
