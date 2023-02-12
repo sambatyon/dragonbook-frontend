@@ -58,13 +58,15 @@ public class Parser {
     }
   }
 
-  public void program() throws IOException {
+  public String program() throws IOException {
+    var buf = new StringBuilder();
     Stmt s = block();
     int begin = Node.newLabel();
     int after = Node.newLabel();
-    Node.emitLabel(begin);
-    s.gen(begin, after);
-    Node.emitLabel(after);
+    Node.emitLabel(buf, begin);
+    s.gen(buf, begin, after);
+    Node.emitLabel(buf, after);
+    return buf.toString();
   }
 
   private Stmt block() throws IOException {

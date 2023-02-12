@@ -27,7 +27,7 @@ public class Set extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
-    emit(id.toString() + " = " + expr.gen().toString());
+  public void gen(StringBuilder b, int begin, int after) {
+    emit(b, id.toString() + " = " + expr.gen(b).toString());
   }
 }

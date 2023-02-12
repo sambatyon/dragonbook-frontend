@@ -9,10 +9,10 @@ public class Op extends Expr {
   }
 
   @Override
-  public Expr reduce() {
-    var x = gen();
+  public Expr reduce(StringBuilder b) {
+    var x = gen(b);
     var tmp = new Temp(getType());
-    emit(tmp.toString() + " = " + x.toString());
+    emit(b, tmp.toString() + " = " + x.toString());
     return tmp;
   }
 }

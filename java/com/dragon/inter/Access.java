@@ -23,13 +23,13 @@ public class Access extends Op {
   }
 
   @Override
-  public Expr gen() {
-    return new Access(array, index.reduce(), type);
+  public Expr gen(StringBuilder b) {
+    return new Access(array, index.reduce(b), type);
   }
 
   @Override
-  public void jumping(int to, int from) {
-    emitJumps(reduce().toString(), to, from);
+  public void jumping(StringBuilder b, int to, int from) {
+    emitJumps(b, reduce(b).toString(), to, from);
   }
 
   @Override

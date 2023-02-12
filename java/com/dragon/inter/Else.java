@@ -17,14 +17,14 @@ public class Else extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
+  public void gen(StringBuilder b, int begin, int after) {
     var label1 = newLabel();
     var label2 = newLabel();
-    condition.jumping(0, label2);
-    emitLabel(label1);
-    trueStmt.gen(label1, a);
-    emit("goto L" + a);
-    emitLabel(label2);
-    falseStmt.gen(label2, a);
+    condition.jumping(b, 0, label2);
+    emitLabel(b, label1);
+    trueStmt.gen(b, label1, after);
+    emit(b, "goto L" + after);
+    emitLabel(b, label2);
+    falseStmt.gen(b, label2, after);
   }
 }

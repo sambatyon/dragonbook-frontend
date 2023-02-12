@@ -21,12 +21,12 @@ public class While extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
-    after = a;
-    condition.jumping(0, a);
+  public void gen(StringBuilder b, int begin, int after) {
+    afterStmt = after;
+    condition.jumping(b, 0, after);
     int label = newLabel();
-    emitLabel(label);
-    body.gen(label, b);
-    emit("goto L" + b);
+    emitLabel(b, label);
+    body.gen(b, label, begin);
+    emit(b, "goto L" + begin);
   }
 }

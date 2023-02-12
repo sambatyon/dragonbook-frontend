@@ -19,11 +19,11 @@ public class Node {
     labels = 0;
   }
 
-  public static void emitLabel(int i) {
-    System.out.print("L" + i + ":");
+  public static void emitLabel(StringBuilder b, int i) {
+    b.append("L" + i + ":");
   }
 
-  public static void emit(String s) {
-    System.out.println("\t" + s);
+  public static void emit(StringBuilder b, String s) {
+    b.append("\t" + s);
   }
 }

@@ -21,12 +21,12 @@ public class Do extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
-    after = a;
+  public void gen(StringBuilder b, int begin, int after) {
+    afterStmt = after;
     int label = newLabel();
-    body.gen(b, label);
-    emitLabel(label);
-    condition.jumping(b, 0);
+    body.gen(b, begin, label);
+    emitLabel(b, label);
+    condition.jumping(b, begin, 0);
   }
 
 }

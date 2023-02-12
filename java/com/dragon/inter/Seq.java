@@ -10,16 +10,16 @@ public class Seq extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
+  public void gen(StringBuilder b, int begin, int after) {
     if (head == Stmt.Null) {
-      tail.gen(b, a);
+      tail.gen(b, begin, after);
     } else if (tail == Stmt.Null) {
-      head.gen(b, a);
+      head.gen(b, begin, after);
     } else {
       int label = newLabel();
-      head.gen(b, label);
-      emitLabel(label);
-      tail.gen(label, a);
+      head.gen(b, begin, label);
+      emitLabel(b, label);
+      tail.gen(b, label, after);
     }
   }
 }

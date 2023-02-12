@@ -32,9 +32,9 @@ public class SetElem extends Stmt {
   }
 
   @Override
-  public void gen(int b, int a) {
-    var idx = index.reduce().toString();
-    var ex = expr.reduce().toString();
-    emit(array.toString() + " [ " + idx + " ] = " + ex);
+  public void gen(StringBuilder b, int begin, int after) {
+    var idx = index.reduce(b).toString();
+    var ex = expr.reduce(b).toString();
+    emit(b, array.toString() + " [ " + idx + " ] = " + ex);
   }
 }

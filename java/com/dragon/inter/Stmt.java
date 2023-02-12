@@ -4,9 +4,9 @@ public class Stmt extends Node {
   public static Stmt Null = new Stmt();
   public static Stmt enclosing = Stmt.Null;
 
-  protected int after = 0;
+  protected int afterStmt = 0;
 
   public Stmt() {}
 
-  public void gen(int b, int a) {}
+  public void gen(StringBuilder b, int begin, int after) {}
 }

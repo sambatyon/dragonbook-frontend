@@ -18,8 +18,8 @@ public class Arith extends Op {
   }
 
   @Override
-  public Expr gen() {
-    return new Arith(op, left.reduce(), right.reduce());
+  public Expr gen(StringBuilder b) {
+    return new Arith(op, left.reduce(b), right.reduce(b));
   }
 
   @Override

@@ -25,16 +25,16 @@ public class Logical extends Expr {
   }
 
   @Override
-  public Expr gen() {
+  public Expr gen(StringBuilder b) {
     var f = newLabel();
     var a = newLabel();
     var tmp = new Temp(type);
-    jumping(0, f);
-    emit(tmp.toString() + " = true");
-    emit("goto L" + a);
-    emitLabel(f);
-    emit(tmp.toString() + " = false");
-    emitLabel(a);
+    jumping(b, 0, f);
+    emit(b, tmp.toString() + " = true");
+    emit(b, "goto L" + a);
+    emitLabel(b, f);
+    emit(b, tmp.toString() + " = false");
+    emitLabel(b, a);
     return tmp;
   }
 
