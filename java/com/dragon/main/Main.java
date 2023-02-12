@@ -7,7 +7,7 @@ import com.dragon.parser.Parser;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    var l = new Lexer();
+    var l = new Lexer(System.in);
     var parser = new Parser(l);
     parser.program();
     System.out.println();
