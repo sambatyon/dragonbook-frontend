@@ -139,7 +139,7 @@ struct Temp {
   num: i32,
 }
 
-static temp_counter: AtomicI32 = AtomicI32::new(0);
+static temp_counter: AtomicI32 = AtomicI32::new(1);
 
 impl Temp {
   fn new(typ: Type) -> Temp {
@@ -147,7 +147,7 @@ impl Temp {
   }
 
   fn reset_counter() {
-    temp_counter.store(0, Ordering::Relaxed)
+    temp_counter.store(1, Ordering::Relaxed)
   }
 }
 
@@ -231,4 +231,172 @@ impl fmt::Display for ArithmeticOp {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "{} {} {}", self.left, self.op, self.right)
   }
+}
+
+struct UnaryOp {
+  op: Token,
+  typ: Type,
+  rest: Box<dyn Expression>,
+}
+
+impl UnaryOp {
+  pub fn new(op: Token, rest: Box<dyn Expression>) -> Result<UnaryOp, String> {
+    let typ = match Type::max_type(&Type::integer(), &rest.typ()) {
+      Some(typ) => typ,
+      _ => return Err(String::from("Type Error"))
+    };
+    Ok(UnaryOp { op: op, typ: typ, rest: rest })
+  }
+}
+
+impl Expression for UnaryOp {
+  fn op(&self) -> Token {
+    self.op.clone()
+  }
+
+  fn typ(&self) -> Type {
+    self.typ.clone()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let rest = self.rest.reduce(b)?;
+    let unary = UnaryOp::new(self.op.clone(), rest)?;
+    Ok(Box::new(unary))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let x = self.generate(b)?;
+    let tmp = Temp::new(self.typ.clone());
+    emit(b, format!("{} = {}", tmp, x).as_str());
+    Ok(Box::new(tmp))
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    emit_jumps(b, format!("{}", self).as_str(), to, from);
+    Ok(())
+  }
+}
+
+impl fmt::Display for UnaryOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} {}", self.op, self.rest)
+  }
+}
+
+struct AccessOp {
+  array: Box<Identifier>,
+  index: Box<dyn Expression>,
+  typ: Type,
+}
+
+impl AccessOp {
+  fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: Type) -> AccessOp {
+    AccessOp { array: array, index: index, typ: typ }
+  }
+}
+
+impl Expression for AccessOp {
+  fn op(&self) -> Token {
+    lexer::tokens::Token::access_word().clone()
+  }
+
+  fn typ(&self) -> Type {
+    self.typ.clone()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let idx = self.index.generate(b)?;
+    Ok(Box::new(AccessOp::new(self.array.clone(), idx, self.typ.clone())))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let x = self.generate(b)?;
+    let tmp = Temp::new(self.typ());
+    emit(b, format!("{} = {}", tmp, x).as_str());
+    Ok(Box::new(tmp))
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    let ra = self.reduce(b)?;
+    emit_jumps(b, format!("{}", ra).as_str(), to, from);
+    Ok(())
+  }
+
+}
+
+impl fmt::Display for AccessOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} [ {} ]", self.array, self.index)
+  }
+}
+
+#[cfg(test)]
+mod test {
+use crate::reset_labels;
+
+use super::*;
+
+use lexer::tokens::Token;
+use lexer::tokens::Tag;
+
+#[test]
+fn expression_tests() {
+  let tests: Vec<(Box<dyn Expression>, &str, &str, &str)> = vec![
+    (
+      Box::new(Identifier::new(Token::Word(String::from("example"), Tag::ID), Type::integer(), 4)),
+      "example",
+      "",
+      ""
+    ),
+    (
+      Box::new(Temp::new(Type::integer())),
+      "t1",
+      "",
+      ""
+    ),
+    (
+      Box::new(ArithmeticOp::new(
+        Token::Tok('+' as u8),
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::integer(), 4)),
+      ).unwrap()),
+      "x + y",
+      "",
+      "\tt1 = x + y\n"
+    ),
+    (
+      Box::new(UnaryOp::new(
+        Token::Tok('-' as u8),
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4))
+      ).unwrap()),
+      "- x",
+      "",
+      "\tt1 = - x\n"
+    ),
+    (
+      Box::new(AccessOp::new(
+        Box::new(Identifier::new(Token::Word(String::from("arr"), Tag::ID), Type::float(), 4)),
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+        Type::float()
+      )),
+      "arr [ x ]",
+      "",
+      "\tt1 = arr [ x ]\n"
+    )
+  ];
+
+  for tc in tests {
+    Temp::reset_counter();
+    reset_labels();
+
+    assert_eq!(format!("{}", tc.0), tc.1);
+    let mut b = String::new();
+    tc.0.generate(&mut b);
+    assert_eq!(b, tc.2);
+
+    let mut b = String::new();
+    tc.0.reduce(&mut b);
+    assert_eq!(b, tc.3);
+  }
+}
 }

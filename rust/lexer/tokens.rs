@@ -96,6 +96,10 @@ impl Token {
     Token::Word(String::from("t"), Tag::TEMP)
   }
 
+  pub fn access_word() -> Token {
+    Token::Word(String::from("[]"), Tag::INDEX)
+  }
+
   pub fn tag(&self) -> u32 {
     match self {
       Token::Tok(tg) => *tg as u32,
@@ -118,7 +122,7 @@ impl Token {
 impl fmt::Display for Token {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Token::Tok(tg) => write!(f, "{}", tg),
+      Token::Tok(tg) => write!(f, "{}", *tg as char),
       Token::Word(lex, _) => write!(f, "{}", lex),
       Token::And => write!(f, "&&"),
       Token::Or => write!(f, "||"),
