@@ -18,7 +18,7 @@ class Relational : public Logical {
 
   std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left, std::shared_ptr<symbols::Type> right)
       override;
-  void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+  void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) override;
 };
 
 inline std::shared_ptr<Relational> Relational::create(

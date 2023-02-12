@@ -22,7 +22,7 @@ class Arithmetic : public Operator {
   std::shared_ptr<Expression> expr1() const;
   std::shared_ptr<Expression> expr2() const;
 
-  virtual std::shared_ptr<Expression> gen() override;
+  virtual std::shared_ptr<Expression> gen(std::stringstream &ss) override;
 
   virtual std::string to_string() const override;
 
@@ -46,10 +46,11 @@ inline Arithmetic::Arithmetic(
 )
     : Operator(token, std::shared_ptr<symbols::Type>()), expr1_(expr1), expr2_(expr2) {
   auto type = symbols::Type::max(expr1->type().get(), expr2->type().get());
-  if (type == nullptr)
+  if (type == nullptr) {
     error("Arithmentic expression has no valid types");
-  else
+  } else {
     type_ = type->getptr();
+  }
 }
 
 inline Arithmetic::~Arithmetic() {
@@ -63,8 +64,8 @@ inline std::shared_ptr<Expression> Arithmetic::expr2() const {
   return expr2_;
 }
 
-inline std::shared_ptr<Expression> Arithmetic::gen() {
-  return Arithmetic::create(oper_, expr1_->reduce(), expr2_->reduce());
+inline std::shared_ptr<Expression> Arithmetic::gen(std::stringstream &ss) {
+  return Arithmetic::create(oper_, expr1_->reduce(ss), expr2_->reduce(ss));
 }
 
 inline std::string Arithmetic::to_string() const {

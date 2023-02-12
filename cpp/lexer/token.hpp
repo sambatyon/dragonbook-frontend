@@ -30,8 +30,8 @@ class Token {
   static const std::uint32_t kTrue = 274;
   static const std::uint32_t kWhile = 275;
 
-  static std::shared_ptr<Token> create(const std::uint32_t &tag);
-  explicit Token(const std::uint32_t &tag);
+  static std::shared_ptr<Token> create(std::uint32_t tag);
+  explicit Token(std::uint32_t tag);
   virtual ~Token();
 
   std::uint32_t tag() const;
@@ -41,11 +41,11 @@ class Token {
   std::uint32_t tag_;
 };
 
-inline std::shared_ptr<Token> Token::create(const std::uint32_t &tag) {
+inline std::shared_ptr<Token> Token::create(std::uint32_t tag) {
   return std::make_shared<Token>(tag);
 }
 
-inline Token::Token(const std::uint32_t &tag) : tag_(tag) {
+inline Token::Token(std::uint32_t tag) : tag_(tag) {
 }
 
 inline std::uint32_t Token::tag() const {

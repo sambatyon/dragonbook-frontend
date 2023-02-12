@@ -10,7 +10,7 @@ class Operator : public Expression {
   Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<symbols::Type> type);
   virtual ~Operator();
 
-  virtual std::shared_ptr<Expression> reduce() override;
+  virtual std::shared_ptr<Expression> reduce(std::stringstream &ss) override;
 };
 
 inline std::shared_ptr<Operator> Operator::create(
@@ -27,10 +27,10 @@ inline Operator::Operator(std::shared_ptr<lexer::Token> token, std::shared_ptr<s
 inline Operator::~Operator() {
 }
 
-inline std::shared_ptr<Expression> Operator::reduce() {
-  std::shared_ptr<Expression> expr = gen();
+inline std::shared_ptr<Expression> Operator::reduce(std::stringstream &ss) {
+  std::shared_ptr<Expression> expr = gen(ss);
   std::shared_ptr<Temporary> temp = Temporary::create(type());
-  emit(temp->to_string() + " = " + expr->to_string());
+  emit(ss, temp->to_string() + " = " + expr->to_string());
   return temp;
 }
 }  // namespace inter

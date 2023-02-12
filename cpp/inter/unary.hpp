@@ -13,7 +13,7 @@ class UnaryOperator : public Operator {
   ~UnaryOperator();
 
   std::shared_ptr<Expression> expression() const;
-  std::shared_ptr<Expression> gen() override;
+  std::shared_ptr<Expression> gen(std::stringstream &ss) override;
 
   std::string to_string() const override;
 
@@ -44,8 +44,8 @@ inline std::shared_ptr<Expression> UnaryOperator::expression() const {
   return expression_;
 }
 
-inline std::shared_ptr<Expression> UnaryOperator::gen() {
-  return UnaryOperator::create(oper(), expression_->reduce());
+inline std::shared_ptr<Expression> UnaryOperator::gen(std::stringstream &ss) {
+  return UnaryOperator::create(oper(), expression_->reduce(ss));
 }
 
 inline std::string UnaryOperator::to_string() const {

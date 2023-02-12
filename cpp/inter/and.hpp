@@ -14,7 +14,7 @@ class And : public Logical {
   And(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> left, std::shared_ptr<Expression> right);
   ~And();
 
-  void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+  void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) override;
 };
 
 inline std::shared_ptr<And> And::create(

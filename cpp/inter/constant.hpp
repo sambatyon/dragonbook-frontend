@@ -17,7 +17,7 @@ class Constant : public Expression {
   explicit Constant(std::int64_t value);
   ~Constant();
 
-  void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+  void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) override;
 };
 
 inline std::shared_ptr<Constant> Constant::create(
@@ -42,14 +42,14 @@ inline Constant::Constant(std::int64_t value)
 inline Constant::~Constant() {
 }
 
-inline void Constant::jumping(const std::uint32_t &to, const std::uint32_t &from) {
-  std::stringstream ss;
+inline void Constant::jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) {
+  std::stringstream lbl;
   if (this == kTrue.get() && to != 0) {
-    ss << to;
-    emit("goto L" + ss.str());
+    lbl << to;
+    emit(ss, "goto L" + lbl.str());
   } else if (this == kFalse.get() && from != 0) {
-    ss << from;
-    emit("goto L" + ss.str());
+    lbl << from;
+    emit(ss, "goto L" + lbl.str());
   }
 }
 }  // namespace inter

@@ -15,7 +15,7 @@ class Set : public Statement {
   std::shared_ptr<Expression> expr() const;
 
   std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left, std::shared_ptr<symbols::Type> right);
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
  private:
   std::shared_ptr<Identifier> id_;
@@ -35,8 +35,8 @@ inline Set::Set(std::shared_ptr<Identifier> id, std::shared_ptr<Expression> expr
 inline Set::~Set() {
 }
 
-inline void Set::gen(const std::uint32_t &b, const std::uint32_t &a) {
-  emit(id_->to_string() + " = " + expr_->gen()->to_string());
+inline void Set::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
+  emit(ss, id_->to_string() + " = " + expr_->gen(ss)->to_string());
 }
 
 inline std::shared_ptr<symbols::Type> Set::check(

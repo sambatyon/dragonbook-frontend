@@ -6,6 +6,6 @@
 int main(int argc, char **argv) {
     auto lexer = lexer::Lexer::create();
     parser::Parser pars(lexer);
-    pars.program();
-    std::cout << '\n';
+    auto program = pars.program();
+    std::cout << program << '\n';
 }

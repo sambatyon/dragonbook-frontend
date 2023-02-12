@@ -14,7 +14,7 @@ class Statement : public Node {
 
   std::uint32_t after() const;
 
-  virtual void gen(const std::uint32_t &b, const std::uint32_t &a);
+  virtual void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a);
 
  protected:
   std::uint32_t after_;
@@ -30,7 +30,7 @@ inline Statement::Statement() : after_(0) {
 inline Statement::~Statement() {
 }
 
-inline void Statement::gen(const std::uint32_t &b, const std::uint32_t &a) {
+inline void Statement::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
 }
 
 inline std::uint32_t Statement::after() const {

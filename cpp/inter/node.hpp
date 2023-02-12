@@ -18,8 +18,8 @@ class Node {
   static std::uint32_t new_label();
   static void reset_labels();
 
-  void emit_label(const std::uint32_t &i);
-  void emit(const std::string &label);
+  void emit_label(std::stringstream &ss, std::uint32_t i);
+  void emit(std::stringstream &ss, const std::string &label);
 
  protected:
   Node();
@@ -52,11 +52,11 @@ inline void Node::reset_labels() {
   labels_ = 0;
 }
 
-inline void Node::emit_label(const std::uint32_t &i) {
+inline void Node::emit_label(std::stringstream &ss, std::uint32_t i) {
   std::cout << "L" << i << ":";
 }
 
-inline void Node::emit(const std::string &message) {
+inline void Node::emit(std::stringstream &ss, const std::string &message) {
   std::cout << '\t' << message << '\n';
 }
 }  // namespace inter

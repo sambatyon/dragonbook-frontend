@@ -9,7 +9,7 @@ class Not : public Logical {
   Not(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression> expr);
   ~Not();
 
-  void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+  void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) override;
   std::string to_string() const override;
 };
 
@@ -25,8 +25,8 @@ inline Not::Not(std::shared_ptr<lexer::Token> token, std::shared_ptr<Expression>
 inline Not::~Not() {
 }
 
-inline void Not::jumping(const std::uint32_t &to, const std::uint32_t &from) {
-  expr1()->jumping(from, to);
+inline void Not::jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) {
+  expr1()->jumping(ss, from, to);
 }
 
 inline std::string Not::to_string() const {

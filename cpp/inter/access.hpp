@@ -22,9 +22,9 @@ class Access : public Operator {
   std::shared_ptr<Identifier> array() const;
   std::shared_ptr<Expression> index() const;
 
-  std::shared_ptr<Expression> gen() override;
+  std::shared_ptr<Expression> gen(std::stringstream &ss) override;
 
-  void jumping(const std::uint32_t &to, const std::uint32_t &from) override;
+  void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) override;
 
   std::string to_string() const override;
 
@@ -60,12 +60,12 @@ inline std::shared_ptr<Expression> Access::index() const {
   return index_;
 }
 
-inline std::shared_ptr<Expression> Access::gen() {
-  return Access::create(array_, index_->reduce(), type_);
+inline std::shared_ptr<Expression> Access::gen(std::stringstream &ss) {
+  return Access::create(array_, index_->reduce(ss), type_);
 }
 
-inline void Access::jumping(const std::uint32_t &to, const std::uint32_t &from) {
-  emit_jumps(reduce()->to_string(), to, from);
+inline void Access::jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) {
+  emit_jumps(ss, reduce(ss)->to_string(), to, from);
 }
 
 inline std::string Access::to_string() const {

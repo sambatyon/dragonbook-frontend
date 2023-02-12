@@ -20,7 +20,7 @@ class Else : public Statement {
   );
   ~Else();
 
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
   std::shared_ptr<Expression> expr() const;
   std::shared_ptr<Statement> statement_if() const;
@@ -53,17 +53,17 @@ inline Else::Else(
 inline Else::~Else() {
 }
 
-inline void Else::gen(const std::uint32_t &b, const std::uint32_t &a) {
+inline void Else::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
   auto label_statement_if = new_label();
   auto label_statement_else = new_label();
-  expr_->jumping(0, label_statement_else);
-  emit_label(label_statement_if);
-  statement_if_->gen(label_statement_if, a);
-  std::stringstream ss;
-  ss << a;
-  emit("goto L" + ss.str());
-  emit_label(label_statement_else);
-  statement_else_->gen(label_statement_else, a);
+  expr_->jumping(ss, 0, label_statement_else);
+  emit_label(ss, label_statement_if);
+  statement_if_->gen(ss, label_statement_if, a);
+  std::stringstream lbl;
+  lbl << a;
+  emit(ss, "goto L" + lbl.str());
+  emit_label(ss, label_statement_else);
+  statement_else_->gen(ss, label_statement_else, a);
 }
 
 inline std::shared_ptr<Expression> Else::expr() const {

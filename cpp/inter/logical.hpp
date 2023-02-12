@@ -24,7 +24,7 @@ class Logical : public Expression {
       std::shared_ptr<symbols::Type> left,
       std::shared_ptr<symbols::Type> right
   );
-  virtual std::shared_ptr<Expression> gen() override;
+  virtual std::shared_ptr<Expression> gen(std::stringstream &ss) override;
 
   virtual std::string to_string() const override;
 

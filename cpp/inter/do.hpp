@@ -14,7 +14,7 @@ class Do : public Statement {
 
   void init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr);
 
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
   std::shared_ptr<Expression> expr() const;
   std::shared_ptr<Statement> stmt() const;
@@ -41,12 +41,12 @@ inline void Do::init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression
     expr->error("Boolean required in do");
 }
 
-inline void Do::gen(const std::uint32_t &b, const std::uint32_t &a) {
+inline void Do::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
   after_ = a;
   auto label = new_label();
-  stmt_->gen(b, label);
-  emit_label(label);
-  expr_->jumping(b, 0);
+  stmt_->gen(ss, b, label);
+  emit_label(ss, label);
+  expr_->jumping(ss, b, 0);
 }
 
 inline std::shared_ptr<Expression> Do::expr() const {
