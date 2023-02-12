@@ -104,6 +104,8 @@ type Identifier struct {
 	Offset int
 }
 
+var _ Expression = (*Identifier)(nil)
+
 func NewIdentifier(id lexer.Token, typ lexer.Type, offset int) *Identifier {
 	return &Identifier{id, typ, offset}
 }
@@ -246,6 +248,8 @@ type UnaryOp struct {
 	rest Expression
 }
 
+var _ Expression = (*UnaryOp)(nil)
+
 func NewUnaryOp(tok lexer.Token, rest Expression) (*UnaryOp, error) {
 	typ := lexer.MaxType(lexer.IntType(), rest.Type())
 	if typ == nil {
@@ -298,6 +302,8 @@ type AccessOp struct {
 	Index Expression
 	typ   lexer.Type
 }
+
+var _ Expression = (*AccessOp)(nil)
 
 func NewAccessOp(array *Identifier, index Expression, typ lexer.Type) (*AccessOp, error) {
 	return &AccessOp{array, index, typ}, nil

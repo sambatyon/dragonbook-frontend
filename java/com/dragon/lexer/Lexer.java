@@ -1,6 +1,7 @@
 package com.dragon.lexer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import com.dragon.symbols.Type;
@@ -9,8 +10,10 @@ public class Lexer {
   private int line = 1;
   private char peek = ' ';
   private HashMap<String, Word> words = new HashMap<String, Word>();
+  private InputStream source;
 
-  public Lexer() {
+  public Lexer(InputStream source) {
+    this.source = source;
     reserve(new Word("if", Tag.IF));
     reserve(new Word("else", Tag.ELSE));
     reserve(new Word("while", Tag.WHILE));
@@ -29,7 +32,7 @@ public class Lexer {
   }
 
   private void readCh() throws IOException {
-    peek = (char)System.in.read();
+    peek = (char)source.read();
   }
 
   private boolean readCh(char c) throws IOException {
