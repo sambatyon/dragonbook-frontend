@@ -18,3 +18,16 @@ cc_library(
   "//cpp:__subpackages__",
   ],
 )
+
+cc_test(
+  name = "lexer_tests",
+  srcs = [
+    "lexer_test.cpp",
+  ],
+  deps = [
+    ":lexer",
+    "@com_google_googletest//:gtest_main"
+  ],
+  data = [],
+  size = "small",
+)

@@ -1,6 +1,7 @@
 #include "cpp/parser/parser.hpp"
 
 #include <exception>
+#include <sstream>
 
 #include "cpp/inter/access.hpp"
 #include "cpp/inter/and.hpp"
@@ -34,13 +35,15 @@ Parser::Parser(std::shared_ptr<lexer::Lexer> lexer) : lexer_(lexer), lookahead_(
   move();
 }
 
-void Parser::program() {
+std::string Parser::program() {
   auto stmts = block();
   auto begin = stmts->new_label();
   auto after = stmts->new_label();
-  stmts->emit_label(begin);
-  stmts->gen(begin, after);
-  stmts->emit_label(after);
+  std::stringstream program;
+  stmts->emit_label(program, begin);
+  stmts->gen(program, begin, after);
+  stmts->emit_label(program, after);
+  return program.str();
 }
 
 void Parser::move() {
@@ -50,15 +53,15 @@ void Parser::move() {
 void Parser::error(std::string what) {
   std::stringstream ss;
   ss << "Near line " << lexer_->current_line() << ": " << what;
-  std::cerr << ss.str() << '\n';
   throw std::runtime_error(ss.str().c_str());
 }
 
-void Parser::match(const std::uint32_t &tag) {
-  if (lookahead_->tag() == tag)
+void Parser::match(std::uint32_t tag) {
+  if (lookahead_->tag() == tag) {
     move();
-  else
+  } else {
     error("Syntax error");
+  }
 }
 
 std::shared_ptr<inter::Statement> Parser::block() {
@@ -87,10 +90,11 @@ void Parser::decls() {
 std::shared_ptr<symbols::Type> Parser::type() {
   auto typ = std::dynamic_pointer_cast<symbols::Type>(lookahead_);  // Expect look.tag == Token::kBasic
   match(lexer::Token::kBasic);
-  if (lookahead_->tag() != '[')
+  if (lookahead_->tag() != '[') {
     return typ;
-  else
+  } else {
     return dimension(typ);
+  }
 }
 
 std::shared_ptr<symbols::Type> Parser::dimension(std::shared_ptr<symbols::Type> typ) {
@@ -98,8 +102,9 @@ std::shared_ptr<symbols::Type> Parser::dimension(std::shared_ptr<symbols::Type> 
   auto token = lookahead_;
   match(lexer::Token::kInteger);
   match(']');
-  if (lookahead_->tag() == '[')
+  if (lookahead_->tag() == '[') {
     typ = dimension(typ);
+  }
   return symbols::Array::create(std::dynamic_pointer_cast<lexer::Number>(token)->value(), typ);
 }
 

@@ -12,7 +12,7 @@ class If : public Statement {
   If(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> statement);
   ~If();
 
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
   std::shared_ptr<Expression> expr() const;
   std::shared_ptr<Statement> statement() const;
@@ -35,11 +35,11 @@ inline If::If(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> state
 inline If::~If() {
 }
 
-inline void If::gen(const std::uint32_t &b, const std::uint32_t &a) {
+inline void If::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
   auto label = new_label();
-  expr_->jumping(0, a);
-  emit_label(label);
-  statement_->gen(label, a);
+  expr_->jumping(ss, 0, a);
+  emit_label(ss, label);
+  statement_->gen(ss, label, a);
 }
 
 inline std::shared_ptr<Expression> If::expr() const {

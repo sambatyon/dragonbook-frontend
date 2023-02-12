@@ -17,11 +17,11 @@ class Expression : public Node, public std::enable_shared_from_this<Expression> 
   virtual ~Expression();
 
   virtual std::shared_ptr<Expression> get_ptr();
-  virtual std::shared_ptr<Expression> gen();
-  virtual std::shared_ptr<Expression> reduce();
+  virtual std::shared_ptr<Expression> gen(std::stringstream &ss);
+  virtual std::shared_ptr<Expression> reduce(std::stringstream &ss);
 
-  virtual void jumping(const std::uint32_t &to, const std::uint32_t &from);
-  void emit_jumps(const std::string &test, const std::uint32_t &to, const std::uint32_t &from);
+  virtual void jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from);
+  void emit_jumps(std::stringstream &ss, const std::string &test, std::uint32_t to, std::uint32_t from);
 
   virtual std::string to_string() const;
 
@@ -51,16 +51,16 @@ inline std::shared_ptr<Expression> Expression::get_ptr() {
   return shared_from_this();
 }
 
-inline std::shared_ptr<Expression> Expression::gen() {
+inline std::shared_ptr<Expression> Expression::gen(std::stringstream &ss) {
   return get_ptr();
 }
 
-inline std::shared_ptr<Expression> Expression::reduce() {
+inline std::shared_ptr<Expression> Expression::reduce(std::stringstream &ss) {
   return get_ptr();
 }
 
-inline void Expression::jumping(const std::uint32_t &to, const std::uint32_t &from) {
-  emit_jumps(oper_->to_string(), to, from);
+inline void Expression::jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) {
+  emit_jumps(ss, oper_->to_string(), to, from);
 }
 
 inline std::string Expression::to_string() const {

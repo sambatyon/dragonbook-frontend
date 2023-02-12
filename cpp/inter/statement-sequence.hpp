@@ -13,7 +13,7 @@ class StatementSequence : public Statement {
   std::shared_ptr<Statement> first() const;
   std::shared_ptr<Statement> second() const;
 
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
  private:
   std::shared_ptr<Statement> first_;

@@ -16,9 +16,9 @@ std::shared_ptr<symbols::Type> Relational::check(
   }
 }
 
-void Relational::jumping(const std::uint32_t &to, const std::uint32_t &from) {
-  auto a = expr1()->reduce();
-  auto b = expr2()->reduce();
-  emit_jumps(a->to_string() + " " + oper()->to_string() + " " + b->to_string(), to, from);
+void Relational::jumping(std::stringstream &ss, std::uint32_t to, std::uint32_t from) {
+  auto a = expr1()->reduce(ss);
+  auto b = expr2()->reduce(ss);
+  emit_jumps(ss, a->to_string() + " " + oper()->to_string() + " " + b->to_string(), to, from);
 }
 }  // namespace inter

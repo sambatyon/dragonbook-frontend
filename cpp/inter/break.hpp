@@ -10,7 +10,7 @@ class Break : public Statement {
   Break();
   virtual ~Break();
 
-  virtual void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  virtual void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
   std::shared_ptr<Statement> statement() const;
 
@@ -30,9 +30,9 @@ inline Break::Break() : statement_(Statement::enclosing_statement) {
 inline Break::~Break() {
 }
 
-inline void Break::gen(const std::uint32_t &b, const std::uint32_t &a) {
-  std::stringstream ss;
-  ss << statement_->after();
-  emit("goto L" + ss.str());
+inline void Break::gen(std::stringstream &ss,std::uint32_t b, std::uint32_t a) {
+  std::stringstream after;
+  after << statement_->after();
+  emit(ss, "goto L" + after.str());
 }
 }  // namespace inter

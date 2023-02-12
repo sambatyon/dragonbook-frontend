@@ -26,13 +26,13 @@ namespace parser {
 class Parser {
  public:
   explicit Parser(std::shared_ptr<lexer::Lexer> lexer);
-  void program();
+  std::string program();
 
  protected:
   void move();
   void error(std::string what);
 
-  void match(const std::uint32_t &tag);
+  void match(std::uint32_t tag);
   std::shared_ptr<inter::Statement> block();
   void decls();
 

@@ -20,8 +20,8 @@ class Word : public Token {
   static std::shared_ptr<Word> false_word;
   static std::shared_ptr<Word> temp;
 
-  static std::shared_ptr<Word> create(const std::string &lexeme, const std::uint32_t &tag);
-  Word(const std::string &lexeme, const std::uint32_t &tag);
+  static std::shared_ptr<Word> create(const std::string &lexeme, std::uint32_t tag);
+  Word(const std::string &lexeme, std::uint32_t tag);
   virtual ~Word();
 
   std::string lexeme() const;
@@ -31,11 +31,11 @@ class Word : public Token {
   std::string lexeme_;
 };
 
-inline std::shared_ptr<Word> Word::create(const std::string &lexeme, const std::uint32_t &tag) {
+inline std::shared_ptr<Word> Word::create(const std::string &lexeme, std::uint32_t tag) {
   return std::make_shared<Word>(lexeme, tag);
 }
 
-inline Word::Word(const std::string &lexeme, const std::uint32_t &tag) : Token(tag), lexeme_(lexeme) {
+inline Word::Word(const std::string &lexeme, std::uint32_t tag) : Token(tag), lexeme_(lexeme) {
 }
 
 inline Word::~Word() {

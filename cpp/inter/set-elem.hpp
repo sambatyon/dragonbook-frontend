@@ -19,7 +19,7 @@ class SetElem : public Statement {
   std::shared_ptr<Expression> expr() const;
 
   std::shared_ptr<symbols::Type> check(std::shared_ptr<symbols::Type> left, std::shared_ptr<symbols::Type> right);
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
  private:
   std::shared_ptr<Identifier> array_;
@@ -40,10 +40,10 @@ inline SetElem::SetElem(std::shared_ptr<Access> access, std::shared_ptr<Expressi
 inline SetElem::~SetElem() {
 }
 
-inline void SetElem::gen(const std::uint32_t &b, const std::uint32_t &a) {
-  auto index = index_->reduce()->to_string();
-  auto expression = expr_->reduce()->to_string();
-  emit(array_->to_string() + "[ " + index + " ] = " + expression);
+inline void SetElem::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
+  auto index = index_->reduce(ss)->to_string();
+  auto expression = expr_->reduce(ss)->to_string();
+  emit(ss, array_->to_string() + "[ " + index + " ] = " + expression);
 }
 
 inline std::shared_ptr<symbols::Type> SetElem::check(

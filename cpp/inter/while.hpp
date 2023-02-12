@@ -14,7 +14,7 @@ class While : public Statement {
 
   void init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt);
 
-  void gen(const std::uint32_t &b, const std::uint32_t &a) override;
+  void gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) override;
 
   std::shared_ptr<Expression> expr() const;
   std::shared_ptr<Statement> stmt() const;
@@ -41,15 +41,15 @@ inline void While::init(std::shared_ptr<Expression> expr, std::shared_ptr<Statem
     expr->error("Boolean required in do");
 }
 
-inline void While::gen(const std::uint32_t &b, const std::uint32_t &a) {
+inline void While::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
   after_ = a;
-  expr_->jumping(0, a);
+  expr_->jumping(ss, 0, a);
   auto label = new_label();
-  emit_label(label);
-  stmt_->gen(label, b);
-  std::stringstream ss;
-  ss << b;
-  emit("goto L" + ss.str());
+  emit_label(ss, label);
+  stmt_->gen(ss, label, b);
+  std::stringstream lbl;
+  lbl << b;
+  emit(ss, "goto L" + ss.str());
 }
 
 inline std::shared_ptr<Expression> While::expr() const {
