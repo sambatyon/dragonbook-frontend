@@ -2,6 +2,15 @@ workspace(name="dragonbook")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# C++ CONFIG
+http_archive(
+  name = "com_google_googletest",
+  urls = ["https://github.com/google/googletest/archive/b796f7d44681514f58a683a3a71ff17c94edb0c1.zip"],
+  strip_prefix = "googletest-b796f7d44681514f58a683a3a71ff17c94edb0c1",
+)
+
+# GO CONFIG
+
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "f2dcd210c7095febe54b804bb1cd3a58fe8435a909db2ec04e31542631cf715c",
@@ -15,6 +24,8 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 go_register_toolchains(version = "1.18.1")
+
+# Rust CONFIG
 
 http_archive(
     name = "rules_rust",

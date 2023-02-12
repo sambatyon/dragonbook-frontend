@@ -15,9 +15,9 @@ class Lexer {
  public:
   static std::uint32_t current_line();  // Eventually, current_line should stop being static
                                         // in order to make the scaner reentrant
-  static std::shared_ptr<Lexer> create();
+  static std::shared_ptr<Lexer> create(std::istream &source);
 
-  Lexer();
+  Lexer(std::istream &source);
   ~Lexer();
 
   std::shared_ptr<Token> scan();
@@ -29,6 +29,7 @@ class Lexer {
   void reserve(std::shared_ptr<Word> word);
 
  private:
+  std::istream &source_;
   std::unordered_map<std::string, std::shared_ptr<Word>> words_;
   char peek_;
   static std::uint32_t current_line_;
@@ -38,13 +39,13 @@ inline std::uint32_t Lexer::current_line() {
   return current_line_;
 }
 
-inline std::shared_ptr<Lexer> Lexer::create() {
-  return std::make_shared<Lexer>();
+inline std::shared_ptr<Lexer> Lexer::create(std::istream &source) {
+  return std::make_shared<Lexer>(source);
 }
 
 inline void Lexer::readch() {
-  std::cin.get(peek_);
-  if (std::cin.eof())
+  source_.get(peek_);
+  if (source_.eof())
     peek_ = '\0';
 }
 

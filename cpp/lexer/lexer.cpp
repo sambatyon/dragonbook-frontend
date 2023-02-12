@@ -9,7 +9,7 @@
 namespace lexer {
 std::uint32_t Lexer::current_line_ = 1;
 
-Lexer::Lexer() : words_(), peek_(' ') {
+Lexer::Lexer(std::istream &source) : source_(source), words_(), peek_(' ') {
   reserve(std::make_shared<Word>("if", Token::kIf));
   reserve(std::make_shared<Word>("else", Token::kElse));
   reserve(std::make_shared<Word>("while", Token::kWhile));
@@ -30,27 +30,30 @@ Lexer::~Lexer() {
 
 bool Lexer::readch(char c) {
   readch();
-  if (peek_ != c)
+  if (peek_ != c) {
     return false;
+  }
   peek_ = ' ';
   return true;
 }
 
 std::shared_ptr<Token> Lexer::scan() {
   for (int i = 1; i > 0; this->readch()) {
-    if (peek_ == ' ' || peek_ == '\t')
+    if (peek_ == ' ' || peek_ == '\t') {
       continue;
-    else if (peek_ == '\n')
+    } else if (peek_ == '\n') {
       ++current_line_;
-    else
+    } else {
       break;
+    }
   }
   switch (peek_) {
     case '&':
-      if (readch('&'))
+      if (readch('&')) {
         return Word::and_word;
-      else
+      } else {
         return Token::create(static_cast<std::uint32_t>('&'));  // consider pooling this
+      }
       break;
     case '|':
       if (readch('|'))
@@ -89,8 +92,9 @@ std::shared_ptr<Token> Lexer::scan() {
       value = 10ull * value + static_cast<std::int64_t>(peek_ - '0');
       readch();
     } while (std::isdigit(peek_));
-    if (peek_ != '.')
+    if (peek_ != '.'){
       return std::make_shared<Number>(value);
+    }
     auto dvalue = static_cast<double>(value);
     auto power = 10.0;
     for (;;) {
