@@ -1,5 +1,7 @@
 package com.dragon.inter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Node {
   Node() {}
 
@@ -11,12 +13,12 @@ public class Node {
     throw new Error(s);
   }
 
-  protected static int labels = 0;
+  private static final AtomicInteger labels = new AtomicInteger(0);
   public static int newLabel() {
-    return ++labels;
+    return labels.addAndGet(1);
   }
   public static void resetLabel() {
-    labels = 0;
+    labels.getAndSet(0);
   }
 
   public static void emitLabel(StringBuilder b, int i) {
