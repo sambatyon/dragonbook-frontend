@@ -1,33 +1,18 @@
 use lexer::tokens::{Tag, Token};
 use std::fmt;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicI64, Ordering};
 
 pub mod expression;
 pub mod statement;
 
-static temp_counter: AtomicU64 = AtomicU64::new(0);
+static temp_counter: AtomicI64 = AtomicI64::new(1);
 
-fn new_label() -> u64 {
+fn new_label() -> i64 {
   temp_counter.fetch_add(1, Ordering::Relaxed)
 }
 
 fn reset_labels() {
-  temp_counter.store(0, Ordering::Relaxed);
-}
-
-#[derive(Copy,Clone,Debug)]
-pub struct LabelManager {
-  labels: u64,
-}
-
-impl LabelManager {
-  pub fn new() -> LabelManager {
-    LabelManager{labels: 0}
-  }
-
-  pub fn reset(&mut self) {
-    self.labels = 0;
-  }
+  temp_counter.store(1, Ordering::Relaxed);
 }
 
 fn emit_label(s: &mut String, i: i64) {

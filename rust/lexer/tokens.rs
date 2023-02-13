@@ -100,6 +100,10 @@ impl Token {
     Token::Word(String::from("[]"), Tag::INDEX)
   }
 
+  pub fn eq_word() -> Token {
+    Token::Word(String::from("=="), Tag::EQ)
+  }
+
   pub fn tag(&self) -> u32 {
     match self {
       Token::Tok(tg) => *tg as u32,
