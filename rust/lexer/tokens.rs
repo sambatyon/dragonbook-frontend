@@ -104,6 +104,14 @@ impl Token {
     Token::Word(String::from("=="), Tag::EQ)
   }
 
+  pub fn or_word() -> Token {
+    Token::Word(String::from("||"), Tag::OR)
+  }
+
+  pub fn and_word() -> Token {
+    Token::Word(String::from("&&"), Tag::AND)
+  }
+
   pub fn tag(&self) -> u32 {
     match self {
       Token::Tok(tg) => *tg as u32,

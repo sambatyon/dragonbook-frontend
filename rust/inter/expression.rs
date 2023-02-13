@@ -466,6 +466,218 @@ impl fmt::Display for RelationOp {
   }
 }
 
+struct NotLogicOp {
+  op: Token,
+  expr: Box<dyn Expression>,
+}
+
+impl NotLogicOp {
+  fn new(op: Token, expr: Box<dyn Expression>) -> Result<NotLogicOp, String> {
+    if expr.typ() != Type::boolean() {
+      return Err(String::from("Type error"));
+    }
+    if op.tag() != Token::Tok('!' as u8).tag() {
+      return Err(String::from("Lexer error"));
+    }
+    Ok(NotLogicOp { op: op, expr: expr })
+  }
+}
+
+impl Expression for NotLogicOp {
+  fn op(&self) -> Token {
+    self.op.clone()
+  }
+
+  fn typ(&self) -> Type {
+    Type::boolean()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let from = new_label();
+    let a = new_label();
+    let tmp = Temp::new(self.typ());
+    self.jumps(b, 0, from)?;
+    emit(b, format!("{} = true", tmp).as_str());
+    emit(b, format!("goto L{}", a).as_str());
+    emit_label(b, from);
+    emit(b, format!("{} = false", tmp).as_str());
+    emit_label(b, a);
+    Ok(Box::new(tmp))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    self.expr.jumps(b, from, to)
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
+
+}
+
+impl Clone for NotLogicOp {
+  fn clone(&self) -> Self {
+    NotLogicOp { op: self.op.clone(), expr: self.expr.box_clone() }
+  }
+}
+
+impl fmt::Display for NotLogicOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} {}", self.op, self.expr)
+  }
+}
+
+fn check(tleft: &Type, tright: &Type) -> bool {
+  let bt = Type::boolean();
+  tleft == bt && tright == bt
+}
+
+struct OrLogicOp {
+  left: Box<dyn Expression>,
+  right: Box<dyn Expression>,
+}
+
+impl OrLogicOp {
+  fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<OrLogicOp, String> {
+    if !check(&left.typ(), &right.typ()) {
+      return Err(String::from("Type Error"))
+    }
+    Ok(OrLogicOp { left: left, right: right })
+  }
+}
+
+impl Expression for OrLogicOp {
+  fn op(&self) -> Token {
+    Token::or_word()
+  }
+
+  fn typ(&self) -> Type {
+    Type::boolean()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let from = new_label();
+    let a = new_label();
+    let tmp = Temp::new(self.typ());
+    self.jumps(b, 0, from)?;
+    emit(b, format!("{} = true", tmp).as_str());
+    emit(b, format!("goto L{}", a).as_str());
+    emit_label(b, from);
+    emit(b, format!("{} = false", tmp).as_str());
+    emit_label(b, a);
+    Ok(Box::new(tmp))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    let mut label = to;
+    if to == 0 {
+      label = new_label();
+    }
+    self.left.jumps(b, label, 0)?;
+    self.right.jumps(b, to, from)?;
+    if to == 0 {
+      emit_label(b, label);
+    }
+    Ok(())
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
+
+}
+
+impl fmt::Display for OrLogicOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} || {}", self.left, self.right)
+  }
+}
+
+impl Clone for OrLogicOp {
+  fn clone(&self) -> Self {
+    OrLogicOp { left: self.left.box_clone(), right: self.right.box_clone() }
+  }
+}
+
+struct AndLogicOp {
+  left: Box<dyn Expression>,
+  right: Box<dyn Expression>,
+}
+
+impl AndLogicOp {
+  fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<AndLogicOp, String> {
+    if !check(&left.typ(), &right.typ()) {
+      return Err(String::from("Type Error"))
+    }
+    Ok(AndLogicOp { left: left, right: right })
+  }
+}
+
+impl Expression for AndLogicOp {
+  fn op(&self) -> Token {
+    Token::and_word()
+  }
+
+  fn typ(&self) -> Type {
+    Type::boolean()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let from = new_label();
+    let a = new_label();
+    let tmp = Temp::new(self.typ());
+    self.jumps(b, 0, from)?;
+    emit(b, format!("{} = true", tmp).as_str());
+    emit(b, format!("goto L{}", a).as_str());
+    emit_label(b, from);
+    emit(b, format!("{} = false", tmp).as_str());
+    emit_label(b, a);
+    Ok(Box::new(tmp))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    let mut label = from;
+    if from == 0 {
+      label = new_label();
+    }
+    self.left.jumps(b, 0, label)?;
+    self.right.jumps(b, to, from)?;
+    if from == 0 {
+      emit_label(b, label);
+    }
+    Ok(())
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
+
+}
+
+impl fmt::Display for AndLogicOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} && {}", self.left, self.right)
+  }
+}
+
+impl Clone for AndLogicOp {
+  fn clone(&self) -> Self {
+    AndLogicOp { left: self.left.box_clone(), right: self.right.box_clone() }
+  }
+}
+
 #[cfg(test)]
 mod test {
 use crate::reset_labels;
@@ -518,6 +730,33 @@ fn expression_tests() {
       "arr [ x ]",
       "",
       "\tt1 = arr [ x ]\n"
+    ),
+    (
+      Box::new(NotLogicOp::new(
+        Token::Tok('!' as u8),
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
+      ).unwrap()),
+      "! x",
+      "\tif x goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
+      "",
+    ),
+    (
+      Box::new(OrLogicOp::new(
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+      ).unwrap()),
+      "x || y",
+      "\tif x goto L3\n\tiffalse y goto L1\nL3:\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
+      "",
+    ),
+    (
+      Box::new(AndLogicOp::new(
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+      ).unwrap()),
+      "x && y",
+      "\tiffalse x goto L1\n\tiffalse y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
+      "",
     ),
     (
       Box::new(RelationOp::new(
