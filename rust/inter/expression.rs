@@ -75,15 +75,17 @@ impl PartialEq<Constant> for &Constant {
 }
 
 impl Constant {
-  pub fn integer(tok: Token) -> Result<Constant, String> {
-    match tok {
-      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer()}),
-      t => Err(format!("Invalid parameter: {}", t))
-    }
+  pub fn integer(value: i64) -> Constant {
+    Constant::new(Token::Integer(value)).unwrap()
   }
 
-  pub fn float(tok: Token) -> Result<Constant, String> {
+  pub fn float(value: f64) -> Constant {
+    Constant::new(Token::Real(value)).unwrap()
+  }
+
+  pub fn new(tok: Token) -> Result<Constant, String> {
     match tok {
+      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer()}),
       Token::Real(_) => Ok(Constant{token: tok, typ: Type::float()}),
       t => Err(format!("Invalid parameter: {}", t))
     }
@@ -145,7 +147,7 @@ impl fmt::Display for Identifier {
 }
 
 #[derive(Clone)]
-struct Temp {
+pub struct Temp {
   op: Token,
   typ: Type,
   num: i32,
@@ -154,11 +156,11 @@ struct Temp {
 static temp_counter: AtomicI32 = AtomicI32::new(1);
 
 impl Temp {
-  fn new(typ: Type) -> Temp {
+  pub fn new(typ: Type) -> Temp {
     Temp{op: Token::temp_word(), typ: typ, num: temp_counter.fetch_add(1, Ordering::Relaxed)}
   }
 
-  fn reset_counter() {
+  pub fn reset_counter() {
     temp_counter.store(1, Ordering::Relaxed)
   }
 }
@@ -196,7 +198,7 @@ impl fmt::Display for Temp {
   }
 }
 
-struct ArithmeticOp {
+pub struct ArithmeticOp {
   op: Token,
   typ: Type,
   left: Box<dyn Expression>,
@@ -264,7 +266,7 @@ impl Clone for ArithmeticOp {
   }
 }
 
-struct UnaryOp {
+pub struct UnaryOp {
   op: Token,
   typ: Type,
   rest: Box<dyn Expression>,
@@ -328,7 +330,7 @@ impl Clone for UnaryOp {
   }
 }
 
-struct AccessOp {
+pub struct AccessOp {
   array: Box<Identifier>,
   index: Box<dyn Expression>,
   typ: Type,
@@ -388,7 +390,7 @@ impl fmt::Display for AccessOp {
   }
 }
 
-struct RelationOp {
+pub struct RelationOp {
   op: Token,
   left: Box<dyn Expression>,
   right: Box<dyn Expression>,
@@ -466,7 +468,7 @@ impl fmt::Display for RelationOp {
   }
 }
 
-struct NotLogicOp {
+pub struct NotLogicOp {
   op: Token,
   expr: Box<dyn Expression>,
 }
@@ -536,7 +538,7 @@ fn check(tleft: &Type, tright: &Type) -> bool {
   tleft == bt && tright == bt
 }
 
-struct OrLogicOp {
+pub struct OrLogicOp {
   left: Box<dyn Expression>,
   right: Box<dyn Expression>,
 }
@@ -607,7 +609,7 @@ impl Clone for OrLogicOp {
   }
 }
 
-struct AndLogicOp {
+pub struct AndLogicOp {
   left: Box<dyn Expression>,
   right: Box<dyn Expression>,
 }
@@ -681,7 +683,6 @@ impl Clone for AndLogicOp {
 #[cfg(test)]
 mod test {
 use crate::reset_labels;
-
 use super::*;
 
 use lexer::tokens::Token;
