@@ -26,6 +26,6 @@ public class Node {
   }
 
   public static void emit(StringBuilder b, String s) {
-    b.append("\t" + s);
+    b.append("\t" + s + "\n");
   }
 }

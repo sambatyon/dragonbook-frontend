@@ -1,5 +1,5 @@
 build --java_language_version=18
 run --java_language_version=18 --java_runtime_version=remotejdk_18
-test --java_language_version=18 --java_runtime_version=remotejdk_18 --jvmopt=-Djava.security.manager=allow
+test --java_language_version=18 --java_runtime_version=remotejdk_18
 
 build --cxxopt='-std=c++20'

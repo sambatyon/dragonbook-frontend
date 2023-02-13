@@ -34,6 +34,6 @@ public class Access extends Op {
 
   @Override
   public String toString() {
-    return array.toString() + " [ " + index.toString() + " ]";
+    return array.toString() + "[ " + index.toString() + " ]";
   }
 }
