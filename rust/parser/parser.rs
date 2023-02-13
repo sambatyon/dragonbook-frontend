@@ -32,7 +32,6 @@ struct Parser<T: std::io::Read> {
   lexer: lexer::Lexer<T>,
   lookahead: toks::Token,
   top: Box<Environment>,
-  label_mngr: inter::LabelManager,
   used: i64,
   encstmt: Box<dyn stmt::Statement>,
 }
@@ -43,7 +42,6 @@ impl<T: std::io::Read> Parser<T> {
       lexer: lexer,
       lookahead: toks::Token::Eof,
       top: Environment::new(),
-      label_mngr: inter::LabelManager::new(),
       used: 0,
       encstmt: Box::new(stmt::NullStmt::new())
     }

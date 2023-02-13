@@ -4,8 +4,10 @@ use lexer::tokens::Token;
 use lexer;
 
 use super::Type;
-use super::emit_jumps;
 use super::emit;
+use super::emit_jumps;
+use super::emit_label;
+use super::new_label;
 
 pub trait Expression: fmt::Display {
   fn op(&self) -> Token;
@@ -13,6 +15,8 @@ pub trait Expression: fmt::Display {
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String>;
   fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String>;
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String>;
+
+  fn box_clone(&self) -> Box<dyn Expression>;
 }
 
 #[derive(Clone,Eq)]
@@ -45,6 +49,10 @@ impl Expression for Constant {
       emit(b, format!("goto L{}", from).as_str())
     }
     Ok(())
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
   }
 }
 
@@ -124,6 +132,10 @@ impl Expression for Identifier {
     emit_jumps(b, format!("{}", self).as_str(), to, from);
     Ok(())
   }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
 }
 
 impl fmt::Display for Identifier {
@@ -171,6 +183,10 @@ impl Expression for Temp {
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
     emit_jumps(b, format!("{}", self).as_str(), to, from);
     Ok(())
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
   }
 }
 
@@ -225,11 +241,26 @@ impl Expression for ArithmeticOp {
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
     Ok(emit_jumps(b, format!("{}", self).as_str(), to, from))
   }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
 }
 
 impl fmt::Display for ArithmeticOp {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "{} {} {}", self.left, self.op, self.right)
+  }
+}
+
+impl Clone for ArithmeticOp {
+  fn clone(&self) -> Self {
+    ArithmeticOp {
+      op: self.op.clone(),
+      typ: self.typ.clone(),
+      left: self.left.box_clone(),
+      right: self.right.box_clone(),
+    }
   }
 }
 
@@ -275,11 +306,25 @@ impl Expression for UnaryOp {
     emit_jumps(b, format!("{}", self).as_str(), to, from);
     Ok(())
   }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
 }
 
 impl fmt::Display for UnaryOp {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "{} {}", self.op, self.rest)
+  }
+}
+
+impl Clone for UnaryOp {
+  fn clone(&self) -> Self {
+    UnaryOp {
+      op: self.op.clone(),
+      typ: self.typ.clone(),
+      rest: self.rest.box_clone(),
+    }
   }
 }
 
@@ -322,11 +367,102 @@ impl Expression for AccessOp {
     Ok(())
   }
 
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for AccessOp {
+  fn clone(&self) -> Self {
+    AccessOp {
+      array: Box::new(*self.array.clone()),
+      index: self.index.box_clone(),
+      typ: self.typ.clone(),
+    }
+  }
 }
 
 impl fmt::Display for AccessOp {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "{} [ {} ]", self.array, self.index)
+  }
+}
+
+struct RelationOp {
+  op: Token,
+  left: Box<dyn Expression>,
+  right: Box<dyn Expression>,
+}
+
+impl RelationOp {
+  fn new(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<RelationOp, String> {
+    if left.typ() != right.typ() {
+      return Err(String::from("Type error"));
+    }
+    match left.typ() {
+      Type::Array { of: _, length: _ } => return Err(String::from("Type error")),
+      _ => ()
+    }
+    match right.typ() {
+      Type::Array { of: _, length: _ } => return Err(String::from("Type error")),
+      _ => ()
+    }
+
+    Ok(RelationOp { op: op, left: left, right: right })
+  }
+}
+
+impl Expression for RelationOp {
+  fn op(&self) -> Token {
+    self.op.clone()
+  }
+
+  fn typ(&self) -> Type {
+    Type::boolean()
+  }
+
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    let f = new_label();
+    let a = new_label();
+    let tmp = Temp::new(self.typ());
+    self.jumps(b, 0, f)?;
+    emit(b, format!("{} = true", tmp).as_str());
+    emit(b, format!("goto L{}", a).as_str());
+    emit_label(b, f);
+    emit(b, format!("{} = false", tmp).as_str());
+    emit_label(b, a);
+    Ok(Box::new(tmp))
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    let lr = self.left.reduce(b)?;
+    let rr = self.right.reduce(b)?;
+    emit_jumps(b, format!("{} {} {}", lr, self.op, rr).as_str(), to, from);
+    Ok(())
+  }
+
+  fn box_clone(&self) -> Box<dyn Expression> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for RelationOp {
+  fn clone(&self) -> Self {
+    RelationOp {
+      op: self.op.clone(),
+      left: self.left.box_clone(),
+      right: self.right.box_clone(),
+    }
+  }
+}
+
+impl fmt::Display for RelationOp {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} {} {}", self.left, self.op, self.right)
   }
 }
 
@@ -382,6 +518,16 @@ fn expression_tests() {
       "arr [ x ]",
       "",
       "\tt1 = arr [ x ]\n"
+    ),
+    (
+      Box::new(RelationOp::new(
+        Token::eq_word(),
+        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+      ).unwrap()),
+      "x == y",
+      "\tiffalse x == y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
+      "",
     )
   ];
 
