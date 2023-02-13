@@ -38,3 +38,17 @@ java_binary(
   ],
   main_class = "com.dragon.main.Main"
 )
+
+java_test(
+  name = "frontend_tests",
+  srcs = [
+    "com/dragon/main/FrontEndTests.java",
+    "com/dragon/lexer/LexerTests.java",
+  ],
+  test_class = "com.dragon.main.FrontEndTests",
+  deps = [
+    ":frontend",
+    "@maven//:junit_junit",
+  ],
+  size = "small",
+)
