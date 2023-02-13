@@ -25,6 +25,32 @@ pub struct Constant {
   typ: Type
 }
 
+impl Constant {
+  pub fn integer(value: i64) -> Constant {
+    Constant::new(Token::Integer(value)).unwrap()
+  }
+
+  pub fn float(value: f64) -> Constant {
+    Constant::new(Token::Real(value)).unwrap()
+  }
+
+  pub fn new(tok: Token) -> Result<Constant, String> {
+    match tok {
+      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer()}),
+      Token::Real(_) => Ok(Constant{token: tok, typ: Type::float()}),
+      t => Err(format!("Invalid parameter: {}", t))
+    }
+  }
+
+  pub fn true_constant() -> Constant {
+    Constant{token: Token::true_token(), typ: Type::boolean()}
+  }
+
+  pub fn false_constant() -> Constant {
+    Constant{token: Token::false_token(), typ: Type::boolean()}
+  }
+}
+
 impl Expression for Constant {
   fn op(&self) -> Token {
     self.token.clone()
@@ -71,32 +97,6 @@ impl PartialEq<Constant> for Constant {
 impl PartialEq<Constant> for &Constant {
   fn eq(&self, other: &Constant) -> bool {
     (*self).token == other.token && (*self).typ == other.typ
-  }
-}
-
-impl Constant {
-  pub fn integer(value: i64) -> Constant {
-    Constant::new(Token::Integer(value)).unwrap()
-  }
-
-  pub fn float(value: f64) -> Constant {
-    Constant::new(Token::Real(value)).unwrap()
-  }
-
-  pub fn new(tok: Token) -> Result<Constant, String> {
-    match tok {
-      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer()}),
-      Token::Real(_) => Ok(Constant{token: tok, typ: Type::float()}),
-      t => Err(format!("Invalid parameter: {}", t))
-    }
-  }
-
-  pub fn true_constant() -> Constant {
-    Constant{token: Token::true_token(), typ: Type::boolean()}
-  }
-
-  pub fn false_constant() -> Constant {
-    Constant{token: Token::false_token(), typ: Type::boolean()}
   }
 }
 
@@ -331,13 +331,13 @@ impl Clone for UnaryOp {
 }
 
 pub struct AccessOp {
-  array: Box<Identifier>,
-  index: Box<dyn Expression>,
+  pub array: Box<Identifier>,
+  pub index: Box<dyn Expression>,
   typ: Type,
 }
 
 impl AccessOp {
-  fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: Type) -> AccessOp {
+  pub fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: Type) -> AccessOp {
     AccessOp { array: array, index: index, typ: typ }
   }
 }
@@ -533,7 +533,7 @@ impl fmt::Display for NotLogicOp {
   }
 }
 
-fn check(tleft: &Type, tright: &Type) -> bool {
+fn check_booleans(tleft: &Type, tright: &Type) -> bool {
   let bt = Type::boolean();
   tleft == bt && tright == bt
 }
@@ -545,7 +545,7 @@ pub struct OrLogicOp {
 
 impl OrLogicOp {
   fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<OrLogicOp, String> {
-    if !check(&left.typ(), &right.typ()) {
+    if !check_booleans(&left.typ(), &right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(OrLogicOp { left: left, right: right })
@@ -616,7 +616,7 @@ pub struct AndLogicOp {
 
 impl AndLogicOp {
   fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<AndLogicOp, String> {
-    if !check(&left.typ(), &right.typ()) {
+    if !check_booleans(&left.typ(), &right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(AndLogicOp { left: left, right: right })
