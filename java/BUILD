@@ -44,6 +44,7 @@ java_test(
   srcs = [
     "com/dragon/main/FrontEndTests.java",
     "com/dragon/lexer/LexerTests.java",
+    "com/dragon/inter/ExprTests.java",
   ],
   test_class = "com.dragon.main.FrontEndTests",
   deps = [
@@ -51,4 +52,5 @@ java_test(
     "@maven//:junit_junit",
   ],
   size = "small",
+  jvm_flags = ["-Djava.security.manager=allow"],
 )
