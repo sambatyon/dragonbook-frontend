@@ -6,7 +6,7 @@ use super::Type;
 use super::emit;
 use super::expression::{Identifier, Expression};
 
-pub trait Statement: fmt::Display {
+pub trait Statement {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
   fn after(&self) -> i64 {
     0
@@ -24,12 +24,6 @@ impl NullStmt {
 impl Statement for NullStmt {
   fn generate(&self, b: &mut String, being: i64, after: i64) -> Result<(), String> {
       Ok(())
-  }
-}
-
-impl fmt::Display for NullStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "")
   }
 }
 
@@ -56,14 +50,8 @@ impl AssignStmt {
 impl Statement for AssignStmt {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let expr = self.expr.generate(b)?;
-    emit(b, format!("{}", self).as_str());
+    emit(b, format!("{} = {}", self.id, self.expr).as_str());
     Ok(())
-  }
-}
-
-impl fmt::Display for AssignStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{} = {}", self.id, self.expr)
   }
 }
 
@@ -105,14 +93,8 @@ impl Statement for AssingArrayStmt {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let idx = self.index.reduce(b)?;
     let expr = self.expr.reduce(b)?;
-    emit(b, format!("{}", self).as_str());
+    emit(b, format!("{} [ {} ] = {}", self.id, self.index, self.expr).as_str());
     Ok(())
-  }
-}
-
-impl fmt::Display for AssingArrayStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{} [ {} ] = {}", self.id, self.index, self.expr)
   }
 }
 
