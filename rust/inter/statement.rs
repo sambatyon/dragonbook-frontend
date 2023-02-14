@@ -1,15 +1,20 @@
 use std::fmt;
 
+use crate::emit_label;
 use crate::expression::AccessOp;
+use crate::new_label;
 
 use super::Type;
 use super::emit;
 use super::expression::{Identifier, Expression};
 
-pub trait Statement: fmt::Display {
+pub trait Statement {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
   fn after(&self) -> i64 {
     0
+  }
+  fn is_null(&self) -> bool {
+    false
   }
 }
 
@@ -25,11 +30,8 @@ impl Statement for NullStmt {
   fn generate(&self, b: &mut String, being: i64, after: i64) -> Result<(), String> {
       Ok(())
   }
-}
-
-impl fmt::Display for NullStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "")
+  fn is_null(&self) -> bool {
+      true
   }
 }
 
@@ -56,14 +58,8 @@ impl AssignStmt {
 impl Statement for AssignStmt {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let expr = self.expr.generate(b)?;
-    emit(b, format!("{}", self).as_str());
+    emit(b, format!("{} = {}", self.id, self.expr).as_str());
     Ok(())
-  }
-}
-
-impl fmt::Display for AssignStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{} = {}", self.id, self.expr)
   }
 }
 
@@ -105,17 +101,36 @@ impl Statement for AssingArrayStmt {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let idx = self.index.reduce(b)?;
     let expr = self.expr.reduce(b)?;
-    emit(b, format!("{}", self).as_str());
+    emit(b, format!("{} [ {} ] = {}", self.id, self.index, self.expr).as_str());
     Ok(())
   }
 }
 
-impl fmt::Display for AssingArrayStmt {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{} [ {} ] = {}", self.id, self.index, self.expr)
+pub struct StmtSeq {
+  head: Box<dyn Statement>,
+  tail: Box<dyn Statement>,
+}
+
+impl StmtSeq {
+  fn new(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> StmtSeq {
+    StmtSeq { head: head, tail: tail }
   }
 }
 
+impl Statement for StmtSeq {
+  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    if self.head.is_null() {
+      return self.tail.generate(b, begin, after);
+    }
+    if self.tail.is_null() {
+      return self.head.generate(b, begin, after);
+    }
+    let label = new_label();
+    self.head.generate(b, begin, label)?;
+    emit_label(b, label);
+    self.tail.generate(b, label, after)
+  }
+}
 
 #[cfg(test)]
 mod test {
@@ -147,6 +162,23 @@ fn statement_tests() {
         Box::new(Constant::float(42.0)),
       ).unwrap()),
       "\tarr [ x ] = 42\n",
+    ),
+    (
+      Box::new(StmtSeq::new(
+        Box::new(AssignStmt::new(
+          Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+          Box::new(Constant::integer(42)),
+        ).unwrap()),
+        Box::new(AssingArrayStmt::new(
+          Box::new(AccessOp::new(
+            Box::new(Identifier::new(Token::Word(String::from("arr"), Tag::ID), Type::float(), 4)),
+            Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+            Type::float()
+          )),
+          Box::new(Constant::float(42.0)),
+        ).unwrap())
+      )),
+      "\tx = 42\nL3:\tarr [ x ] = 42\n"
     ),
   ];
 
