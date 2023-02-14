@@ -8,7 +8,9 @@ use super::expression::{Identifier, Expression};
 
 pub trait Statement: fmt::Display {
   fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
-  fn after(&self) -> i64;
+  fn after(&self) -> i64 {
+    0
+  }
 }
 
 pub struct NullStmt {}
@@ -22,10 +24,6 @@ impl NullStmt {
 impl Statement for NullStmt {
   fn generate(&self, b: &mut String, being: i64, after: i64) -> Result<(), String> {
       Ok(())
-  }
-
-  fn after(&self) -> i64 {
-      0
   }
 }
 
@@ -60,10 +58,6 @@ impl Statement for AssignStmt {
     let expr = self.expr.generate(b)?;
     emit(b, format!("{}", self).as_str());
     Ok(())
-  }
-
-  fn after(&self) -> i64 {
-    0
   }
 }
 
@@ -113,10 +107,6 @@ impl Statement for AssingArrayStmt {
     let expr = self.expr.reduce(b)?;
     emit(b, format!("{}", self).as_str());
     Ok(())
-  }
-
-  fn after(&self) -> i64 {
-    0
   }
 }
 

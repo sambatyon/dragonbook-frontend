@@ -12,9 +12,18 @@ use super::new_label;
 pub trait Expression: fmt::Display {
   fn op(&self) -> Token;
   fn typ(&self) -> Type;
-  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String>;
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String>;
-  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String>;
+  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
+    Ok(self.box_clone())
+  }
+
+  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
+    emit_jumps(b, format!("{}", &self).as_str(), to, from);
+    Ok(())
+  }
 
   fn box_clone(&self) -> Box<dyn Expression>;
 }
@@ -58,14 +67,6 @@ impl Expression for Constant {
 
   fn typ(&self) -> Type {
     self.typ.clone()
-  }
-
-  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
-  }
-
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
   }
 
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
@@ -122,19 +123,6 @@ impl Expression for Identifier {
     self.typ.clone()
   }
 
-  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
-  }
-
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
-  }
-
-  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
-    emit_jumps(b, format!("{}", self).as_str(), to, from);
-    Ok(())
-  }
-
   fn box_clone(&self) -> Box<dyn Expression> {
     Box::new(self.clone())
   }
@@ -172,19 +160,6 @@ impl Expression for Temp {
 
   fn typ(&self) -> Type {
     self.typ.clone()
-  }
-
-  fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
-  }
-
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(Box::new(self.clone()))
-  }
-
-  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
-    emit_jumps(b, format!("{}", self).as_str(), to, from);
-    Ok(())
   }
 
   fn box_clone(&self) -> Box<dyn Expression> {
@@ -238,10 +213,6 @@ impl Expression for ArithmeticOp {
     let tmp = Temp::new(self.typ());
     emit(b, format!("{} = {}", tmp, x).as_str());
     Ok(Box::new(tmp))
-  }
-
-  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
-    Ok(emit_jumps(b, format!("{}", self).as_str(), to, from))
   }
 
   fn box_clone(&self) -> Box<dyn Expression> {
@@ -302,11 +273,6 @@ impl Expression for UnaryOp {
     let tmp = Temp::new(self.typ.clone());
     emit(b, format!("{} = {}", tmp, x).as_str());
     Ok(Box::new(tmp))
-  }
-
-  fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
-    emit_jumps(b, format!("{}", self).as_str(), to, from);
-    Ok(())
   }
 
   fn box_clone(&self) -> Box<dyn Expression> {
@@ -436,10 +402,6 @@ impl Expression for RelationOp {
     Ok(Box::new(tmp))
   }
 
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(self.box_clone())
-  }
-
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
     let lr = self.left.reduce(b)?;
     let rr = self.right.reduce(b)?;
@@ -507,10 +469,6 @@ impl Expression for NotLogicOp {
     Ok(Box::new(tmp))
   }
 
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(self.box_clone())
-  }
-
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
     self.expr.jumps(b, from, to)
   }
@@ -572,10 +530,6 @@ impl Expression for OrLogicOp {
     emit(b, format!("{} = false", tmp).as_str());
     emit_label(b, a);
     Ok(Box::new(tmp))
-  }
-
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(self.box_clone())
   }
 
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
@@ -643,10 +597,6 @@ impl Expression for AndLogicOp {
     emit(b, format!("{} = false", tmp).as_str());
     emit_label(b, a);
     Ok(Box::new(tmp))
-  }
-
-  fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    Ok(self.box_clone())
   }
 
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
