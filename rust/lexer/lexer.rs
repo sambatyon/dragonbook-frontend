@@ -184,7 +184,7 @@ impl<T: std::io::Read> Lexer<T> {
             format!("{} not in keywords", ident)))?;
         return Ok(w.clone());
       }
-      return Ok(Token::from_string(ident))
+      return Ok(Token::from_str(ident.as_str()))
     }
 
     let tok = Token::Tok(self.peek);

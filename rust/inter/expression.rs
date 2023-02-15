@@ -647,7 +647,7 @@ use lexer::tokens::Tag;
 fn expression_tests() {
   let tests: Vec<(Box<dyn Expression>, &str, &str, &str)> = vec![
     (
-      Box::new(Identifier::new(Token::Word(String::from("example"), Tag::ID), Type::integer(), 4)),
+      Box::new(Identifier::new(Token::from_str("example"), Type::integer(), 4)),
       "example",
       "",
       ""
@@ -661,8 +661,8 @@ fn expression_tests() {
     (
       Box::new(ArithmeticOp::new(
         Token::Tok('+' as u8),
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
-        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::integer(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+        Box::new(Identifier::new(Token::from_str("y"), Type::integer(), 4)),
       ).unwrap()),
       "x + y",
       "",
@@ -671,7 +671,7 @@ fn expression_tests() {
     (
       Box::new(UnaryOp::new(
         Token::Tok('-' as u8),
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4))
+        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4))
       ).unwrap()),
       "- x",
       "",
@@ -679,8 +679,8 @@ fn expression_tests() {
     ),
     (
       Box::new(AccessOp::new(
-        Box::new(Identifier::new(Token::Word(String::from("arr"), Tag::ID), Type::float(), 4)),
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+        Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
         Type::float()
       )),
       "arr [ x ]",
@@ -690,7 +690,7 @@ fn expression_tests() {
     (
       Box::new(NotLogicOp::new(
         Token::Tok('!' as u8),
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
       ).unwrap()),
       "! x",
       "\tif x goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
@@ -698,8 +698,8 @@ fn expression_tests() {
     ),
     (
       Box::new(OrLogicOp::new(
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
       ).unwrap()),
       "x || y",
       "\tif x goto L3\n\tiffalse y goto L1\nL3:\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
@@ -707,8 +707,8 @@ fn expression_tests() {
     ),
     (
       Box::new(AndLogicOp::new(
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
       ).unwrap()),
       "x && y",
       "\tiffalse x goto L1\n\tiffalse y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
@@ -717,8 +717,8 @@ fn expression_tests() {
     (
       Box::new(RelationOp::new(
         Token::eq_word().clone(),
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
       ).unwrap()),
       "x == y",
       "\tiffalse x == y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
