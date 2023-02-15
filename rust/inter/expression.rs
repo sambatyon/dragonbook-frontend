@@ -13,6 +13,7 @@ pub trait Expression: fmt::Display {
   fn op(&self) -> &Token;
   fn typ(&self) -> &Type;
 
+  // TODO(sambatyon): This should take a label generator
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
     Ok(self.box_clone())
   }
