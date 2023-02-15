@@ -8,6 +8,7 @@ namespace inter {
 class While : public Statement {
  public:
   static std::shared_ptr<While> create();
+  static std::shared_ptr<While> create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt);
 
   While();
   ~While();
@@ -28,6 +29,12 @@ inline std::shared_ptr<While> While::create() {
   return std::make_shared<While>();
 }
 
+inline std::shared_ptr<While> While::create(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt) {
+  auto res = std::make_shared<While>();
+  res->init(expr, stmt);
+  return res;
+}
+
 inline While::While() : expr_(), stmt_() {
 }
 
@@ -37,8 +44,9 @@ inline While::~While() {
 inline void While::init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt) {
   stmt_ = stmt;
   expr_ = expr;
-  if (expr->type() != symbols::Type::boolean)
+  if (expr->type() != symbols::Type::boolean) {
     expr->error("Boolean required in do");
+  }
 }
 
 inline void While::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
@@ -49,7 +57,7 @@ inline void While::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) 
   stmt_->gen(ss, label, b);
   std::stringstream lbl;
   lbl << b;
-  emit(ss, "goto L" + ss.str());
+  emit(ss, "goto L" + lbl.str());
 }
 
 inline std::shared_ptr<Expression> While::expr() const {

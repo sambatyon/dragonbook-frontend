@@ -8,6 +8,7 @@ namespace inter {
 class Do : public Statement {
  public:
   static std::shared_ptr<Do> create();
+  static std::shared_ptr<Do> create(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr);
 
   Do();
   ~Do();
@@ -28,6 +29,12 @@ inline std::shared_ptr<Do> Do::create() {
   return std::make_shared<Do>();
 }
 
+inline std::shared_ptr<Do> Do::create(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr) {
+  auto res = std::make_shared<Do>();
+  res->init(stmt, expr);
+  return res;
+}
+
 inline Do::Do() : expr_(), stmt_() {
 }
 
@@ -37,8 +44,9 @@ inline Do::~Do() {
 inline void Do::init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr) {
   stmt_ = stmt;
   expr_ = expr;
-  if (expr->type() != symbols::Type::boolean)
+  if (expr->type() != symbols::Type::boolean) {
     expr->error("Boolean required in do");
+  }
 }
 
 inline void Do::gen(std::stringstream &ss, std::uint32_t b, std::uint32_t a) {
