@@ -132,6 +132,29 @@ impl Statement for StmtSeq {
   }
 }
 
+struct IfStmt {
+  cond: Box<dyn Expression>,
+  body: Box<dyn Statement>,
+}
+
+impl IfStmt {
+  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<IfStmt, String> {
+    if cond.typ() != Type::boolean() {
+      return Err(String::from("If condition should be of bool type"))
+    }
+    Ok(IfStmt {cond: cond, body: body})
+  }
+}
+
+impl Statement for IfStmt {
+  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    let label = new_label();
+    self.cond.jumps(b, 0, after)?;
+    emit_label(b, label);
+    self.body.generate(b, label, after)
+  }
+}
+
 #[cfg(test)]
 mod test {
 use crate::{reset_labels, new_label};
@@ -179,6 +202,16 @@ fn statement_tests() {
         ).unwrap())
       )),
       "\tx = 42\nL3:\tarr [ x ] = 42\n"
+    ),
+    (
+      Box::new(IfStmt::new(
+        Box::new(Identifier::new(Token::Word(String::from("b"), Tag::ID), Type::boolean(), 4)),
+        Box::new(AssignStmt::new(
+          Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+          Box::new(Constant::integer(0)),
+        ).unwrap())
+      ).unwrap()),
+      "\tiffalse b goto L2\nL3:\tx = 0\n"
     ),
   ];
 
