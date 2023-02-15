@@ -29,12 +29,12 @@ impl<T: std::io::Read> Lexer<T> {
     lexer.words.insert(String::from("while"), Token::Word(String::from("while"), Tag::WHILE));
     lexer.words.insert(String::from("do"), Token::Word(String::from("do"), Tag::DO));
     lexer.words.insert(String::from("break"), Token::Word(String::from("break"), Tag::BREAK));
-    lexer.words.insert(String::from("true"), Token::true_token());
-    lexer.words.insert(String::from("false"), Token::false_token());
-    lexer.words.insert(String::from("int"), Token::integer());
-    lexer.words.insert(String::from("float"), Token::float());
-    lexer.words.insert(String::from("char"), Token::ch());
-    lexer.words.insert(String::from("bool"), Token::boolean());
+    lexer.words.insert(String::from("true"), Token::true_token().clone());
+    lexer.words.insert(String::from("false"), Token::false_token().clone());
+    lexer.words.insert(String::from("int"), Token::integer().clone());
+    lexer.words.insert(String::from("float"), Token::float().clone());
+    lexer.words.insert(String::from("char"), Token::ch().clone());
+    lexer.words.insert(String::from("bool"), Token::boolean().clone());
     lexer
   }
 

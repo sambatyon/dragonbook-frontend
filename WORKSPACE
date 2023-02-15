@@ -57,6 +57,9 @@ crates_repository(
         "stringreader": crate.spec(
             version = "0.1.1",
         ),
+        "once_cell": crate.spec(
+            version = "1.17.1",
+        )
         # "memmap2": crate.spec(
         #     version = "0.5.8",
         # ),

@@ -2,6 +2,8 @@ use lexer::tokens::{Tag, Token};
 use std::fmt;
 use std::sync::atomic::{AtomicI64, Ordering};
 
+use once_cell::sync::Lazy;
+
 pub mod expression;
 pub mod statement;
 
@@ -41,32 +43,36 @@ pub enum Type {
 }
 
 impl Type {
-  fn new(tok: Token) -> Result<Type, String> {
+  fn new(tok: &Token) -> Result<Type, String> {
     match tok {
       Token::SimpleType(lex, w) =>
-        Ok(Type::Simple { lexeme: lex.clone(), width: w }),
+        Ok(Type::Simple { lexeme: lex.clone(), width: *w }),
       Token::Array(of, len) => {
-        let o = Type::new(*of)?;
-        Ok(Type::Array { of: Box::new(o), length: len })
+        let o = Type::new(&*of)?;
+        Ok(Type::Array { of: Box::new(o), length: *len })
       },
       _ => Err(format!("Invalid parameters: {}", tok))
     }
   }
 
-  fn integer() -> Type {
-    Self::new(Token::integer()).unwrap()
+  fn integer() -> &'static Type {
+    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::integer()).unwrap());
+    &*t
   }
 
-  fn float() -> Type {
-    Self::new(Token::float()).unwrap()
+  fn float() -> &'static Type {
+    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::float()).unwrap());
+    &*t
   }
 
-  fn ch() -> Type {
-    Self::new(Token::ch()).unwrap()
+  fn ch() -> &'static Type {
+    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::ch()).unwrap());
+    &*t
   }
 
-  fn boolean() -> Type {
-    Self::new(Token::boolean()).unwrap()
+  fn boolean() -> &'static Type {
+    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::boolean()).unwrap());
+    &*t
   }
 
   fn token(&self) -> Token {
@@ -106,15 +112,14 @@ impl Type {
     if !left.is_numeric() || !right.is_numeric() {
       return None
     }
-    let lf = Type::float();
-    if left == lf || right == lf {
-      return Some(lf)
+    if left == Type::float() || right == Type::float() {
+      return Some(Type::float().clone())
     }
     let i = Type::integer();
-    if left == i || right == i {
-      return Some(i)
+    if left == Type::integer() || right == Type::integer() {
+      return Some(Type::integer().clone())
     }
-    Some(Type::ch())
+    Some(Type::ch().clone())
   }
 }
 

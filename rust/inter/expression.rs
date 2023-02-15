@@ -10,8 +10,9 @@ use super::emit_label;
 use super::new_label;
 
 pub trait Expression: fmt::Display {
-  fn op(&self) -> Token;
-  fn typ(&self) -> Type;
+  fn op(&self) -> &Token;
+  fn typ(&self) -> &Type;
+
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
     Ok(self.box_clone())
   }
@@ -45,28 +46,28 @@ impl Constant {
 
   pub fn new(tok: Token) -> Result<Constant, String> {
     match tok {
-      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer()}),
-      Token::Real(_) => Ok(Constant{token: tok, typ: Type::float()}),
+      Token::Integer(_) => Ok(Constant{token: tok, typ: Type::integer().clone()}),
+      Token::Real(_) => Ok(Constant{token: tok, typ: Type::float().clone()}),
       t => Err(format!("Invalid parameter: {}", t))
     }
   }
 
   pub fn true_constant() -> Constant {
-    Constant{token: Token::true_token(), typ: Type::boolean()}
+    Constant{token: Token::true_token().clone(), typ: Type::boolean().clone()}
   }
 
   pub fn false_constant() -> Constant {
-    Constant{token: Token::false_token(), typ: Type::boolean()}
+    Constant{token: Token::false_token().clone(), typ: Type::boolean().clone()}
   }
 }
 
 impl Expression for Constant {
-  fn op(&self) -> Token {
-    self.token.clone()
+  fn op(&self) -> &Token {
+    &self.token
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn jumps(&self, b: &mut String, to: i64, from: i64) -> Result<(), String> {
@@ -109,18 +110,18 @@ pub struct Identifier {
 }
 
 impl Identifier {
-  pub fn new(id: Token, typ: Type, offset: i32) -> Identifier {
-    Identifier { id: id, typ: typ, offset: offset }
+  pub fn new(id: Token, typ: &Type, offset: i32) -> Identifier {
+    Identifier { id: id, typ: typ.clone(), offset: offset }
   }
 }
 
 impl Expression for Identifier {
-  fn op(&self) -> Token {
-    self.id.clone()
+  fn op(&self) -> &Token {
+    &self.id
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn box_clone(&self) -> Box<dyn Expression> {
@@ -144,8 +145,12 @@ pub struct Temp {
 static temp_counter: AtomicI32 = AtomicI32::new(1);
 
 impl Temp {
-  pub fn new(typ: Type) -> Temp {
-    Temp{op: Token::temp_word(), typ: typ, num: temp_counter.fetch_add(1, Ordering::Relaxed)}
+  pub fn new(typ: &Type) -> Temp {
+    Temp{
+      op: Token::temp_word().clone(),
+      typ: typ.clone(),
+      num: temp_counter.fetch_add(1, Ordering::Relaxed)
+    }
   }
 
   pub fn reset_counter() {
@@ -154,12 +159,12 @@ impl Temp {
 }
 
 impl Expression for Temp {
-  fn op(&self) -> Token {
-    self.op.clone()
+  fn op(&self) -> &Token {
+    &self.op
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn box_clone(&self) -> Box<dyn Expression> {
@@ -182,7 +187,7 @@ pub struct ArithmeticOp {
 
 impl ArithmeticOp {
   pub fn new(tok: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<ArithmeticOp, String> {
-    let typ = match Type::max_type(&left.typ(), &right.typ()) {
+    let typ = match Type::max_type(left.typ(), right.typ()) {
       Some(t) => t,
       None => return Err(String::from("Type error"))
     };
@@ -191,12 +196,12 @@ impl ArithmeticOp {
 }
 
 impl Expression for ArithmeticOp {
-  fn op(&self) -> Token {
-    self.op.clone()
+  fn op(&self) -> &Token {
+    &self.op
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
@@ -245,7 +250,7 @@ pub struct UnaryOp {
 
 impl UnaryOp {
   pub fn new(op: Token, rest: Box<dyn Expression>) -> Result<UnaryOp, String> {
-    let typ = match Type::max_type(&Type::integer(), &rest.typ()) {
+    let typ = match Type::max_type(Type::integer(), rest.typ()) {
       Some(typ) => typ,
       _ => return Err(String::from("Type Error"))
     };
@@ -254,12 +259,12 @@ impl UnaryOp {
 }
 
 impl Expression for UnaryOp {
-  fn op(&self) -> Token {
-    self.op.clone()
+  fn op(&self) -> &Token {
+    &self.op
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
@@ -270,7 +275,7 @@ impl Expression for UnaryOp {
 
   fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
     let x = self.generate(b)?;
-    let tmp = Temp::new(self.typ.clone());
+    let tmp = Temp::new(self.typ());
     emit(b, format!("{} = {}", tmp, x).as_str());
     Ok(Box::new(tmp))
   }
@@ -303,23 +308,23 @@ pub struct AccessOp {
 }
 
 impl AccessOp {
-  pub fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: Type) -> AccessOp {
-    AccessOp { array: array, index: index, typ: typ }
+  pub fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: &Type) -> AccessOp {
+    AccessOp { array: array, index: index, typ: typ.clone() }
   }
 }
 
 impl Expression for AccessOp {
-  fn op(&self) -> Token {
-    lexer::tokens::Token::access_word().clone()
+  fn op(&self) -> &Token {
+    lexer::tokens::Token::access_word()
   }
 
-  fn typ(&self) -> Type {
-    self.typ.clone()
+  fn typ(&self) -> &Type {
+    &self.typ
   }
 
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
     let idx = self.index.generate(b)?;
-    Ok(Box::new(AccessOp::new(self.array.clone(), idx, self.typ.clone())))
+    Ok(Box::new(AccessOp::new(self.array.clone(), idx, &self.typ)))
   }
 
   fn reduce(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
@@ -381,11 +386,11 @@ impl RelationOp {
 }
 
 impl Expression for RelationOp {
-  fn op(&self) -> Token {
-    self.op.clone()
+  fn op(&self) -> &Token {
+    &self.op
   }
 
-  fn typ(&self) -> Type {
+  fn typ(&self) -> &Type {
     Type::boolean()
   }
 
@@ -448,11 +453,11 @@ impl NotLogicOp {
 }
 
 impl Expression for NotLogicOp {
-  fn op(&self) -> Token {
-    self.op.clone()
+  fn op(&self) -> &Token {
+    &self.op
   }
 
-  fn typ(&self) -> Type {
+  fn typ(&self) -> &Type {
     Type::boolean()
   }
 
@@ -503,7 +508,7 @@ pub struct OrLogicOp {
 
 impl OrLogicOp {
   fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<OrLogicOp, String> {
-    if !check_booleans(&left.typ(), &right.typ()) {
+    if !check_booleans(left.typ(), right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(OrLogicOp { left: left, right: right })
@@ -511,11 +516,11 @@ impl OrLogicOp {
 }
 
 impl Expression for OrLogicOp {
-  fn op(&self) -> Token {
+  fn op(&self) -> &Token {
     Token::or_word()
   }
 
-  fn typ(&self) -> Type {
+  fn typ(&self) -> &Type {
     Type::boolean()
   }
 
@@ -570,7 +575,7 @@ pub struct AndLogicOp {
 
 impl AndLogicOp {
   fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<AndLogicOp, String> {
-    if !check_booleans(&left.typ(), &right.typ()) {
+    if !check_booleans(left.typ(), right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(AndLogicOp { left: left, right: right })
@@ -578,11 +583,11 @@ impl AndLogicOp {
 }
 
 impl Expression for AndLogicOp {
-  fn op(&self) -> Token {
+  fn op(&self) -> &Token {
     Token::and_word()
   }
 
-  fn typ(&self) -> Type {
+  fn typ(&self) -> &Type {
     Type::boolean()
   }
 
@@ -711,7 +716,7 @@ fn expression_tests() {
     ),
     (
       Box::new(RelationOp::new(
-        Token::eq_word(),
+        Token::eq_word().clone(),
         Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::boolean(), 4)),
         Box::new(Identifier::new(Token::Word(String::from("y"), Tag::ID), Type::boolean(), 4)),
       ).unwrap()),

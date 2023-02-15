@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::emit_label;
 use crate::expression::AccessOp;
 use crate::new_label;

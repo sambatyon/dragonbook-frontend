@@ -6,6 +6,9 @@ rust_library(
     "lexer.rs",
     "tokens.rs",
   ],
+  deps = [
+    "@crate_index//:once_cell",
+  ],
   visibility = ["//rust:__subpackages__"],
 )
 
