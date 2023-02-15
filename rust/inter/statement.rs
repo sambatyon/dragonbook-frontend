@@ -22,6 +22,10 @@ impl NullStmt {
   pub fn new() -> NullStmt {
     NullStmt { }
   }
+
+  pub fn new_box() -> Box<NullStmt> {
+    Box::new(NullStmt::new())
+  }
 }
 
 impl Statement for NullStmt {
@@ -50,6 +54,11 @@ impl AssignStmt {
       return Err(String::from("Type Error"));
     }
     Ok(AssignStmt { id: id, expr: expr })
+  }
+
+  pub fn new_box(id: Box<Identifier>, expr: Box<dyn Expression>) -> Result<Box<AssignStmt>, String> {
+    let ass = AssignStmt::new(id, expr)?;
+    Ok(Box::new(ass))
   }
 }
 
@@ -93,6 +102,11 @@ impl AssingArrayStmt {
       expr: expr.box_clone()
     })
   }
+
+  pub fn new_box(access: Box<AccessOp>, expr: Box<dyn Expression>) -> Result<Box<AssingArrayStmt>, String> {
+    let aas = AssingArrayStmt::new(access, expr)?;
+    Ok(Box::new(aas))
+  }
 }
 
 impl Statement for AssingArrayStmt {
@@ -112,6 +126,10 @@ pub struct StmtSeq {
 impl StmtSeq {
   fn new(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> StmtSeq {
     StmtSeq { head: head, tail: tail }
+  }
+
+  fn new_box(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> Box<StmtSeq> {
+    Box::new(StmtSeq::new(head, tail))
   }
 }
 
@@ -142,6 +160,11 @@ impl IfStmt {
     }
     Ok(IfStmt {cond: cond, body: body})
   }
+
+  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<IfStmt>, String> {
+    let is = IfStmt::new(cond, body)?;
+    Ok(Box::new(is))
+  }
 }
 
 impl Statement for IfStmt {
@@ -167,48 +190,48 @@ use super::*;
 fn statement_tests() {
   let tests: Vec<(Box<dyn Statement>, &str)> = vec![
     (
-      Box::new(AssignStmt::new(
-        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+      AssignStmt::new_box(
+        Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
         Box::new(Constant::integer(42)),
-      ).unwrap()),
+      ).unwrap(),
       "\tx = 42\n",
     ),
     (
-      Box::new(AssingArrayStmt::new(
-        Box::new(AccessOp::new(
-          Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
-          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+      AssingArrayStmt::new_box(
+        AccessOp::new_box(
+          Identifier::new_box(Token::from_str("arr"), Type::float(), 4),
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
           Type::float()
-        )),
+        ),
         Box::new(Constant::float(42.0)),
-      ).unwrap()),
+      ).unwrap(),
       "\tarr [ x ] = 42\n",
     ),
     (
-      Box::new(StmtSeq::new(
-        Box::new(AssignStmt::new(
-          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+      StmtSeq::new_box(
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
           Box::new(Constant::integer(42)),
-        ).unwrap()),
-        Box::new(AssingArrayStmt::new(
-          Box::new(AccessOp::new(
-            Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
-            Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+        ).unwrap(),
+        AssingArrayStmt::new_box(
+          AccessOp::new_box(
+            Identifier::new_box(Token::from_str("arr"), Type::float(), 4),
+            Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
             Type::float()
-          )),
+          ),
           Box::new(Constant::float(42.0)),
-        ).unwrap())
-      )),
+        ).unwrap()
+      ),
       "\tx = 42\nL3:\tarr [ x ] = 42\n"
     ),
     (
-      Box::new(IfStmt::new(
-        Box::new(Identifier::new(Token::from_str("b"), Type::boolean(), 4)),
-        Box::new(AssignStmt::new(
-          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+      IfStmt::new_box(
+        Identifier::new_box(Token::from_str("b"), Type::boolean(), 4),
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
           Box::new(Constant::integer(0)),
-        ).unwrap())
-      ).unwrap()),
+        ).unwrap()
+      ).unwrap(),
       "\tiffalse b goto L2\nL3:\tx = 0\n"
     ),
   ];
