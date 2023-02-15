@@ -16,12 +16,12 @@ pub struct Lexer<T: std::io::Read> {
 }
 
 impl<T: std::io::Read> Lexer<T> {
-  pub fn new(source: T) -> Lexer<T> {
+  pub fn new(source: BufReader<T>) -> Lexer<T> {
     let mut lexer = Lexer {
       line: 1,
       peek: b' ',
       words: HashMap::new(),
-      reader: BufReader::new(source),
+      reader: source,
     };
     // TODO(sambatyon): Check wether String can be replaced with &str
     lexer.words.insert(String::from("if"), Token::Word(String::from("if"), Tag::IF));
@@ -314,7 +314,7 @@ fn lexer_tests() {
   ];
 
   for tc in tests {
-    let mut lexer = Lexer::new(StringReader::new(tc.0));
+    let mut lexer = Lexer::new(BufReader::new(StringReader::new(tc.0)));
     for expected in tc.1 {
       let tok = lexer.scan().unwrap();
       assert_eq!(tok, expected);

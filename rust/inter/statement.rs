@@ -176,6 +176,38 @@ impl Statement for IfStmt {
   }
 }
 
+struct ElseStmt {
+  cond: Box<dyn Expression>,
+  true_stmt: Box<dyn Statement>,
+  false_stmt: Box<dyn Statement>,
+}
+
+impl ElseStmt {
+  pub fn new(cond: Box<dyn Expression>, true_stmt: Box<dyn Statement>, false_stmt: Box<dyn Statement>) -> Result<ElseStmt, String> {
+    if cond.typ() != Type::boolean() {
+      return Err(String::from("If condition should be of bool type"))
+    }
+    Ok(ElseStmt { cond: cond, true_stmt: true_stmt, false_stmt: false_stmt })
+  }
+
+  pub fn new_box(cond: Box<dyn Expression>, true_stmt: Box<dyn Statement>, false_stmt: Box<dyn Statement>) -> Result<Box<ElseStmt>, String> {
+    let es = ElseStmt::new(cond, true_stmt, false_stmt)?;
+    Ok(Box::new(es))
+  }
+}
+
+impl Statement for ElseStmt {
+  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    let label1 = new_label();
+    let label2 = new_label();
+    self.cond.jumps(b, 0, label2)?;
+    emit_label(b, label1);
+    self.true_stmt.generate(b, label1, after)?;
+    emit_label(b, label2);
+    self.false_stmt.generate(b, label2, after)
+  }
+}
+
 #[cfg(test)]
 mod test {
 use crate::{reset_labels, new_label};
@@ -234,6 +266,20 @@ fn statement_tests() {
       ).unwrap(),
       "\tiffalse b goto L2\nL3:\tx = 0\n"
     ),
+    (
+      ElseStmt::new_box(
+        Identifier::new_box(Token::from_str("b"), Type::boolean(), 4),
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
+          Box::new(Constant::integer(0)),
+        ).unwrap(),
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
+          Box::new(Constant::integer(42)),
+        ).unwrap(),
+      ).unwrap(),
+      "\tiffalse b goto L4\nL3:\tx = 0\nL4:\tx = 42\n",
+    )
   ];
 
   for tc in tests {
