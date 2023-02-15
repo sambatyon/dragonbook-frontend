@@ -37,28 +37,30 @@ using lexer::Token;
 
 using symbols::Type;
 
-struct ExprTests {
+namespace {
+struct TestCase {
   std::shared_ptr<Expression> expr;
   std::string str;
   std::string gen;
   std::string red;
 };
+}
 
 TEST(TestExpr, InterTests) {
-  std::vector<ExprTests> test_cases{
-    ExprTests{
+  std::vector<TestCase> test_cases{
+    TestCase{
       Identifier::create(Word::create("example", Token::kIdentifier), Type::integer, 4),
       "example",
       "",
       "",
     },
-    ExprTests{
+    TestCase{
       Temporary::create(Type::integer),
       "t1",
       "",
       "",
     },
-    ExprTests{
+    TestCase{
       Arithmetic::create(
         Token::create('+'),
         Identifier::create(Word::create("x", Token::kIdentifier), Type::integer, 4),
@@ -68,7 +70,7 @@ TEST(TestExpr, InterTests) {
       "",
       "\tt1 = x + y\n",
     },
-    ExprTests{
+    TestCase{
       UnaryOperator::create(
         Token::create('-'),
         Identifier::create(Word::create("x", Token::kIdentifier), Type::integer, 4)
@@ -77,7 +79,7 @@ TEST(TestExpr, InterTests) {
       "",
       "\tt1 = - x\n",
     },
-    ExprTests{
+    TestCase{
       Access::create(
         Identifier::create(Word::create("arr", Token::kIdentifier), Type::real, 4),
         Identifier::create(Word::create("x", Token::kIdentifier), Type::integer, 4),
@@ -87,7 +89,7 @@ TEST(TestExpr, InterTests) {
       "",
       "\tt1 = arr[ x ]\n",
     },
-    ExprTests{
+    TestCase{
       Or::create(
         Word::or_word,
         Identifier::create(Word::create("x", Token::kIdentifier), Type::boolean, 4),
@@ -97,7 +99,7 @@ TEST(TestExpr, InterTests) {
       "\tif x goto L3\n\tiffalse y goto L1\nL3:\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
     },
-    ExprTests{
+    TestCase{
       And::create(
         Word::and_word,
         Identifier::create(Word::create("x", Token::kIdentifier), Type::boolean, 4),
@@ -107,7 +109,7 @@ TEST(TestExpr, InterTests) {
       "\tiffalse x goto L1\n\tiffalse y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
     },
-    ExprTests{
+    TestCase{
       Relational::create(
         Word::equal,
         Identifier::create(Word::create("x", Token::kIdentifier), Type::boolean, 4),

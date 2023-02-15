@@ -174,6 +174,7 @@ func (e *ElseStmt) Generate(b *strings.Builder, begin int, after int) error {
 	if err := e.trStmt.Generate(b, label1, after); err != nil {
 		return err
 	}
+	Emit(b, fmt.Sprintf("goto L%d", after))
 	EmitLabel(b, label2)
 	if err := e.flStmt.Generate(b, label2, after); err != nil {
 		return err

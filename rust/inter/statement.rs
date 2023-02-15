@@ -199,13 +199,14 @@ impl ElseStmt {
 
 impl Statement for ElseStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
-    let label1 = new_label();
-    let label2 = new_label();
-    self.cond.jumps(b, 0, label2)?;
-    emit_label(b, label1);
-    self.true_stmt.generate(b, label1, after)?;
-    emit_label(b, label2);
-    self.false_stmt.generate(b, label2, after)
+    let label_if = new_label();
+    let label_else = new_label();
+    self.cond.jumps(b, 0, label_else)?;
+    emit_label(b, label_if);
+    self.true_stmt.generate(b, label_if, after)?;
+    emit(b, format!("goto L{}", after).as_str());
+    emit_label(b, label_else);
+    self.false_stmt.generate(b, label_else, after)
   }
 }
 
@@ -373,7 +374,7 @@ fn statement_tests() {
           Box::new(Constant::integer(42)),
         ).unwrap(),
       ).unwrap(),
-      "\tiffalse b goto L4\nL3:\tx = 0\nL4:\tx = 42\n",
+      "\tiffalse b goto L4\nL3:\tx = 0\n\tgoto L2\nL4:\tx = 42\n",
     ),
     (
       WhileStmt::new_box(

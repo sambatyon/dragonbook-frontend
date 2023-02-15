@@ -49,6 +49,7 @@ cc_test(
   name = "inter_tests",
   srcs = [
     "expr_tests.cpp",
+    "stmt_tests.cpp",
   ],
   deps = [
     ":inter",
