@@ -14,6 +14,8 @@ rust_library(
   visibility = ["//rust:__subpackages__"]
 )
 
+# Run this test with  --test_arg="--test-threads=1" since the label generator
+# may get reset.
 rust_test(
   name = "inter_test",
   crate = ":inter",

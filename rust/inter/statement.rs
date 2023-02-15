@@ -7,7 +7,8 @@ use super::emit;
 use super::expression::{Identifier, Expression};
 
 pub trait Statement {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
+  // TODO(sambatyon): This should take a label generator
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
   fn after(&self) -> i64 {
     0
   }
@@ -29,7 +30,7 @@ impl NullStmt {
 }
 
 impl Statement for NullStmt {
-  fn generate(&self, b: &mut String, being: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, being: i64, after: i64) -> Result<(), String> {
       Ok(())
   }
   fn is_null(&self) -> bool {
@@ -63,7 +64,7 @@ impl AssignStmt {
 }
 
 impl Statement for AssignStmt {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let expr = self.expr.generate(b)?;
     emit(b, format!("{} = {}", self.id, self.expr).as_str());
     Ok(())
@@ -110,7 +111,7 @@ impl AssingArrayStmt {
 }
 
 impl Statement for AssingArrayStmt {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let idx = self.index.reduce(b)?;
     let expr = self.expr.reduce(b)?;
     emit(b, format!("{} [ {} ] = {}", self.id, self.index, self.expr).as_str());
@@ -134,7 +135,7 @@ impl StmtSeq {
 }
 
 impl Statement for StmtSeq {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     if self.head.is_null() {
       return self.tail.generate(b, begin, after);
     }
@@ -168,7 +169,7 @@ impl IfStmt {
 }
 
 impl Statement for IfStmt {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let label = new_label();
     self.cond.jumps(b, 0, after)?;
     emit_label(b, label);
@@ -197,7 +198,7 @@ impl ElseStmt {
 }
 
 impl Statement for ElseStmt {
-  fn generate(&self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let label1 = new_label();
     let label2 = new_label();
     self.cond.jumps(b, 0, label2)?;
@@ -208,19 +209,113 @@ impl Statement for ElseStmt {
   }
 }
 
+struct WhileStmt {
+  cond: Box<dyn Expression>,
+  body: Box<dyn Statement>,
+  after: i64,
+}
+
+impl WhileStmt {
+  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<WhileStmt, String> {
+    if cond.typ() != Type::boolean() {
+      return Err(String::from("While condition should be of bool type"))
+    }
+    Ok(WhileStmt { cond: cond, body: body, after: 0 })
+  }
+
+  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<WhileStmt>, String> {
+    let ws = WhileStmt::new(cond, body)?;
+    Ok(Box::new(ws))
+  }
+}
+
+impl Statement for WhileStmt {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    self.after = after;
+    self.cond.jumps(b, 0, after)?;
+    let label = new_label();
+    emit_label(b, label);
+    self.body.generate(b, label, begin)?;
+    emit(b, format!("goto L{}", begin).as_str());
+    Ok(())
+  }
+
+  fn after(&self) -> i64 {
+    self.after
+  }
+}
+
+struct DoStmt {
+  cond: Box<dyn Expression>,
+  body: Box<dyn Statement>,
+  after: i64,
+}
+
+impl DoStmt {
+  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<DoStmt, String> {
+    if cond.typ() != Type::boolean() {
+      return Err(String::from("While condition should be of bool type"))
+    }
+    Ok(DoStmt { cond: cond, body: body, after: 0 })
+  }
+
+  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<DoStmt>, String> {
+    let ws = DoStmt::new(cond, body)?;
+    Ok(Box::new(ws))
+  }
+}
+
+impl Statement for DoStmt {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    self.after = after;
+    let label = new_label();
+    self.body.generate(b, begin, label)?;
+    emit_label(b, label);
+    self.cond.jumps(b, begin, 0)
+  }
+
+  fn after(&self) -> i64 {
+    self.after
+  }
+}
+
+struct BreakStmt {
+  enclosing: Box<dyn Statement>
+}
+
+impl BreakStmt {
+  fn new(enclosing: Box<dyn Statement>) -> Result<BreakStmt, String> {
+    if enclosing.is_null() {
+      return Err(String::from("Unenclosed break"))
+    }
+    Ok(BreakStmt { enclosing: enclosing })
+  }
+
+  fn new_box(enclosing: Box<dyn Statement>) -> Result<Box<BreakStmt>, String> {
+    let bs = BreakStmt::new(enclosing)?;
+    Ok(Box::new(bs))
+  }
+}
+
+impl Statement for BreakStmt {
+  fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
+    emit(b, format!("goto L{}", self.enclosing.after()).as_str());
+    Ok(())
+  }
+}
+
 #[cfg(test)]
 mod test {
 use crate::{reset_labels, new_label};
 use crate::expression::{Temp, Constant};
 
-use lexer::tokens::Tag;
-use lexer::tokens::Token;
+use lexer::tokens::{Tag, Token};
 
 use super::*;
 
 #[test]
 fn statement_tests() {
-  let tests: Vec<(Box<dyn Statement>, &str)> = vec![
+  let mut tests: Vec<(Box<dyn Statement>, &str)> = vec![
     (
       AssignStmt::new_box(
         Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
@@ -279,10 +374,30 @@ fn statement_tests() {
         ).unwrap(),
       ).unwrap(),
       "\tiffalse b goto L4\nL3:\tx = 0\nL4:\tx = 42\n",
-    )
+    ),
+    (
+      WhileStmt::new_box(
+        Identifier::new_box(Token::from_str("b"), Type::boolean(), 4),
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
+          Box::new(Constant::integer(0)),
+        ).unwrap(),
+      ).unwrap(),
+      "\tiffalse b goto L2\nL3:\tx = 0\n\tgoto L1\n"
+    ),
+    (
+      DoStmt::new_box(
+        Identifier::new_box(Token::from_str("b"), Type::boolean(), 4),
+        AssignStmt::new_box(
+          Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
+          Box::new(Constant::integer(0)),
+        ).unwrap(),
+      ).unwrap(),
+      "\tx = 0\nL3:\tif b goto L1\n"
+    ),
   ];
 
-  for tc in tests {
+  for mut tc in tests {
     reset_labels();
     Temp::reset_counter();
 
