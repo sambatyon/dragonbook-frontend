@@ -113,6 +113,10 @@ impl Identifier {
   pub fn new(id: Token, typ: &Type, offset: i32) -> Identifier {
     Identifier { id: id, typ: typ.clone(), offset: offset }
   }
+
+  pub fn new_box(id: Token, typ: &Type, offset: i32) -> Box<Identifier> {
+    Box::new(Identifier::new(id, typ, offset))
+  }
 }
 
 impl Expression for Identifier {
@@ -151,6 +155,10 @@ impl Temp {
       typ: typ.clone(),
       num: temp_counter.fetch_add(1, Ordering::Relaxed)
     }
+  }
+
+  pub fn new_box(typ: &Type) -> Box<Temp> {
+    Box::new(Temp::new(typ))
   }
 
   pub fn reset_counter() {
@@ -192,6 +200,11 @@ impl ArithmeticOp {
       None => return Err(String::from("Type error"))
     };
     Ok(ArithmeticOp{ op: tok, typ: typ, left: left, right: right })
+  }
+
+  pub fn new_box(tok: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<ArithmeticOp>, String> {
+    let ao = ArithmeticOp::new(tok, left, right)?;
+    Ok(Box::new(ao))
   }
 }
 
@@ -256,6 +269,11 @@ impl UnaryOp {
     };
     Ok(UnaryOp { op: op, typ: typ, rest: rest })
   }
+
+  pub fn new_box(op: Token, rest: Box<dyn Expression>) -> Result<Box<UnaryOp>, String> {
+    let uo = UnaryOp::new(op, rest)?;
+    Ok(Box::new(uo))
+  }
 }
 
 impl Expression for UnaryOp {
@@ -310,6 +328,10 @@ pub struct AccessOp {
 impl AccessOp {
   pub fn new(array: Box<Identifier>, index: Box<dyn Expression>, typ: &Type) -> AccessOp {
     AccessOp { array: array, index: index, typ: typ.clone() }
+  }
+
+  pub fn new_box(array: Box<Identifier>, index: Box<dyn Expression>, typ: &Type) -> Box<AccessOp> {
+    Box::new(AccessOp::new(array, index, typ))
   }
 }
 
@@ -383,6 +405,11 @@ impl RelationOp {
 
     Ok(RelationOp { op: op, left: left, right: right })
   }
+
+  fn new_box(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<RelationOp>, String> {
+    let ro = RelationOp::new(op, left, right)?;
+    Ok(Box::new(ro))
+  }
 }
 
 impl Expression for RelationOp {
@@ -450,6 +477,11 @@ impl NotLogicOp {
     }
     Ok(NotLogicOp { op: op, expr: expr })
   }
+
+  fn new_box(op: Token, expr: Box<dyn Expression>) -> Result<Box<NotLogicOp>, String> {
+    let nl = NotLogicOp::new(op, expr)?;
+    Ok(Box::new(nl))
+  }
 }
 
 impl Expression for NotLogicOp {
@@ -513,6 +545,11 @@ impl OrLogicOp {
     }
     Ok(OrLogicOp { left: left, right: right })
   }
+
+  fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<OrLogicOp>, String> {
+    let ol = OrLogicOp::new(left, right)?;
+    Ok(Box::new(ol))
+  }
 }
 
 impl Expression for OrLogicOp {
@@ -553,7 +590,6 @@ impl Expression for OrLogicOp {
   fn box_clone(&self) -> Box<dyn Expression> {
     Box::new(self.clone())
   }
-
 }
 
 impl fmt::Display for OrLogicOp {
@@ -579,6 +615,11 @@ impl AndLogicOp {
       return Err(String::from("Type Error"))
     }
     Ok(AndLogicOp { left: left, right: right })
+  }
+
+  fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<AndLogicOp>, String> {
+    let al = AndLogicOp::new(left, right)?;
+    Ok(Box::new(al))
   }
 }
 
@@ -647,79 +688,79 @@ use lexer::tokens::Tag;
 fn expression_tests() {
   let tests: Vec<(Box<dyn Expression>, &str, &str, &str)> = vec![
     (
-      Box::new(Identifier::new(Token::from_str("example"), Type::integer(), 4)),
+      Identifier::new_box(Token::from_str("example"), Type::integer(), 4),
       "example",
       "",
       ""
     ),
     (
-      Box::new(Temp::new(Type::integer())),
+      Temp::new_box(Type::integer()),
       "t1",
       "",
       ""
     ),
     (
-      Box::new(ArithmeticOp::new(
+      ArithmeticOp::new_box(
         Token::Tok('+' as u8),
-        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
-        Box::new(Identifier::new(Token::from_str("y"), Type::integer(), 4)),
-      ).unwrap()),
+        Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
+        Identifier::new_box(Token::from_str("y"), Type::integer(), 4),
+      ).unwrap(),
       "x + y",
       "",
       "\tt1 = x + y\n"
     ),
     (
-      Box::new(UnaryOp::new(
+      UnaryOp::new_box(
         Token::Tok('-' as u8),
-        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4))
-      ).unwrap()),
+        Identifier::new_box(Token::from_str("x"), Type::integer(), 4)
+      ).unwrap(),
       "- x",
       "",
       "\tt1 = - x\n"
     ),
     (
-      Box::new(AccessOp::new(
-        Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
-        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
+      AccessOp::new_box(
+        Identifier::new_box(Token::from_str("arr"), Type::float(), 4),
+        Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
         Type::float()
-      )),
+      ),
       "arr [ x ]",
       "",
       "\tt1 = arr [ x ]\n"
     ),
     (
-      Box::new(NotLogicOp::new(
+      NotLogicOp::new_box(
         Token::Tok('!' as u8),
-        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
-      ).unwrap()),
+        Identifier::new_box(Token::from_str("x"), Type::boolean(), 4),
+      ).unwrap(),
       "! x",
       "\tif x goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
     ),
     (
-      Box::new(OrLogicOp::new(
-        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
-      ).unwrap()),
+      OrLogicOp::new_box(
+        Identifier::new_box(Token::from_str("x"), Type::boolean(), 4),
+        Identifier::new_box(Token::from_str("y"), Type::boolean(), 4),
+      ).unwrap(),
       "x || y",
       "\tif x goto L3\n\tiffalse y goto L1\nL3:\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
     ),
     (
-      Box::new(AndLogicOp::new(
-        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
-      ).unwrap()),
+      AndLogicOp::new_box(
+        Identifier::new_box(Token::from_str("x"), Type::boolean(), 4),
+        Identifier::new_box(Token::from_str("y"), Type::boolean(), 4),
+      ).unwrap(),
       "x && y",
       "\tiffalse x goto L1\n\tiffalse y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
     ),
     (
-      Box::new(RelationOp::new(
+      RelationOp::new_box(
         Token::eq_word().clone(),
-        Box::new(Identifier::new(Token::from_str("x"), Type::boolean(), 4)),
-        Box::new(Identifier::new(Token::from_str("y"), Type::boolean(), 4)),
-      ).unwrap()),
+        Identifier::new_box(Token::from_str("x"), Type::boolean(), 4),
+        Identifier::new_box(Token::from_str("y"), Type::boolean(), 4),
+      ).unwrap(),
       "x == y",
       "\tiffalse x == y goto L1\n\tt1 = true\n\tgoto L2\nL1:\tt1 = false\nL2:",
       "",
