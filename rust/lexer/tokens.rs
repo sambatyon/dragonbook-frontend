@@ -50,8 +50,8 @@ pub enum Token {
 }
 
 impl Token {
-  pub fn from_string(ident: String) -> Token {
-    let tag = match ident.as_str() {
+  pub fn from_str(ident: &str) -> Token {
+    let tag = match ident {
       "if" => Tag::IF,
       "else" => Tag::ELSE,
       "while" => Tag::WHILE,
@@ -66,7 +66,7 @@ impl Token {
       _ => Tag::ID
     };
 
-    Token::Word(ident, tag)
+    Token::Word(ident.to_string(), tag)
   }
 
   pub fn integer() -> &'static Token {

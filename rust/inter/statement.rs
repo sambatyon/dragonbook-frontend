@@ -168,7 +168,7 @@ fn statement_tests() {
   let tests: Vec<(Box<dyn Statement>, &str)> = vec![
     (
       Box::new(AssignStmt::new(
-        Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+        Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
         Box::new(Constant::integer(42)),
       ).unwrap()),
       "\tx = 42\n",
@@ -176,8 +176,8 @@ fn statement_tests() {
     (
       Box::new(AssingArrayStmt::new(
         Box::new(AccessOp::new(
-          Box::new(Identifier::new(Token::Word(String::from("arr"), Tag::ID), Type::float(), 4)),
-          Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+          Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
+          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
           Type::float()
         )),
         Box::new(Constant::float(42.0)),
@@ -187,13 +187,13 @@ fn statement_tests() {
     (
       Box::new(StmtSeq::new(
         Box::new(AssignStmt::new(
-          Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
           Box::new(Constant::integer(42)),
         ).unwrap()),
         Box::new(AssingArrayStmt::new(
           Box::new(AccessOp::new(
-            Box::new(Identifier::new(Token::Word(String::from("arr"), Tag::ID), Type::float(), 4)),
-            Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+            Box::new(Identifier::new(Token::from_str("arr"), Type::float(), 4)),
+            Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
             Type::float()
           )),
           Box::new(Constant::float(42.0)),
@@ -203,9 +203,9 @@ fn statement_tests() {
     ),
     (
       Box::new(IfStmt::new(
-        Box::new(Identifier::new(Token::Word(String::from("b"), Tag::ID), Type::boolean(), 4)),
+        Box::new(Identifier::new(Token::from_str("b"), Type::boolean(), 4)),
         Box::new(AssignStmt::new(
-          Box::new(Identifier::new(Token::Word(String::from("x"), Tag::ID), Type::integer(), 4)),
+          Box::new(Identifier::new(Token::from_str("x"), Type::integer(), 4)),
           Box::new(Constant::integer(0)),
         ).unwrap())
       ).unwrap()),

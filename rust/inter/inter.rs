@@ -104,7 +104,7 @@ impl Type {
         "int" | "float" | "char" => true,
         _ => false
       },
-      Type::Array{of, length} => false,
+      _ => false,
     }
   }
 
