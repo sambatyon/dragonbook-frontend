@@ -1,6 +1,7 @@
 package com.dragon.inter;
 
 import com.dragon.lexer.Num;
+import com.dragon.lexer.Real;
 import com.dragon.lexer.Token;
 import com.dragon.lexer.Word;
 import com.dragon.symbols.Type;
@@ -15,6 +16,10 @@ public class Constant extends Expr {
 
   public Constant(int i) {
     super(new Num(i), Type.Int);
+  }
+
+  public Constant(double d) {
+    super(new Real(d), Type.Float);
   }
 
   @Override
