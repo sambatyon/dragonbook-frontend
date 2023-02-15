@@ -66,7 +66,7 @@ var stmtTests = []struct {
 				intConstant(42),
 			},
 		},
-		"\tiffalse b goto L4\nL3:\tx = 0\nL4:\tx = 42\n",
+		"\tiffalse b goto L4\nL3:\tx = 0\n\tgoto L2\nL4:\tx = 42\n",
 	},
 	{
 		&WhileStmt{
