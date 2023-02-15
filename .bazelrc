@@ -1,5 +1,11 @@
 build --java_language_version=18
-run --java_language_version=18 --java_runtime_version=remotejdk_18
-test --java_language_version=18 --java_runtime_version=remotejdk_18
+
+run --java_language_version=18
+run --java_runtime_version=remotejdk_18
+run --jvmopt="-Dsun.locale.formatasdefault=true"
+
+test --java_language_version=18
+test --java_runtime_version=remotejdk_18
+test --jvmopt="-Dsun.locale.formatasdefault=true"
 
 build --cxxopt='-std=c++20'

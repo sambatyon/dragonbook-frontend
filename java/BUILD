@@ -45,6 +45,7 @@ java_test(
     "com/dragon/main/FrontEndTests.java",
     "com/dragon/lexer/LexerTests.java",
     "com/dragon/inter/ExprTests.java",
+    "com/dragon/inter/StmtTests.java",
   ],
   test_class = "com.dragon.main.FrontEndTests",
   deps = [
