@@ -13,8 +13,8 @@
 #include "cpp/inter/unary.hpp"
 
 #include "cpp/lexer/token.hpp"
-#include "cpp/lexer/word.hpp"
 #include "cpp/lexer/type.hpp"
+#include "cpp/lexer/word.hpp"
 
 #include <string>
 #include <sstream>
@@ -32,8 +32,8 @@ using inter::Relational;
 using inter::Temporary;
 using inter::UnaryOperator;
 
-using lexer::Word;
 using lexer::Token;
+using lexer::Word;
 
 using symbols::Type;
 
