@@ -1,4 +1,5 @@
 use std::fmt;
+use once_cell::sync::Lazy;
 
 #[derive(Copy,Clone,Debug,Eq)]
 pub enum Tag {
@@ -58,58 +59,91 @@ impl Token {
       "break" => Tag::BREAK,
       "true" => Tag::TRUE,
       "false" => Tag::FALSE,
-      "int" => return Self::integer(),
-      "float" => return Self::float(),
-      "char" => return Self::ch(),
-      "bool" => return Self::boolean(),
+      "int" => return Self::integer().clone(),
+      "float" => return Self::float().clone(),
+      "char" => return Self::ch().clone(),
+      "bool" => return Self::boolean().clone(),
       _ => Tag::ID
     };
 
     Token::Word(ident, tag)
   }
 
-  pub fn integer() -> Token {
-    Token::SimpleType(String::from("int"), 4u8)
+  pub fn integer() -> &'static Token {
+    static i: Lazy<Token> = Lazy::new(|| {
+      Token::SimpleType(String::from("int"), 4u8)
+    });
+    &*i
   }
 
-  pub fn float() -> Token {
-    Token::SimpleType(String::from("float"), 8u8)
+  pub fn float() -> &'static Token {
+    static f: Lazy<Token> = Lazy::new(|| {
+      Token::SimpleType(String::from("float"), 8u8)
+    });
+    &*f
   }
 
-  pub fn ch() -> Token {
-    Token::SimpleType(String::from("char"), 1u8)
+  pub fn ch() -> &'static Token {
+    static c: Lazy<Token> = Lazy::new(|| {
+      Token::SimpleType(String::from("char"), 1u8)
+    });
+    &*c
   }
 
-  pub fn boolean() -> Token {
-    Token::SimpleType(String::from("bool"), 1u8)
+  pub fn boolean() -> &'static Token {
+    static b: Lazy<Token> = Lazy::new(|| {
+      Token::SimpleType(String::from("bool"), 1u8)
+    });
+    &*b
   }
 
-  pub fn true_token() -> Token {
-    Token::Word(String::from("true"), Tag::TRUE)
+  pub fn true_token() -> &'static Token {
+    static t: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("true"), Tag::TRUE)
+    });
+    &*t
   }
 
-  pub fn false_token() -> Token {
-    Token::Word(String::from("false"), Tag::FALSE)
+  pub fn false_token() -> &'static Token {
+    static f: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("false"), Tag::FALSE)
+    });
+    &*f
   }
 
-  pub fn temp_word() -> Token {
-    Token::Word(String::from("t"), Tag::TEMP)
+  pub fn temp_word() -> &'static Token {
+    static w: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("t"), Tag::TEMP)
+    });
+    &*w
   }
 
-  pub fn access_word() -> Token {
-    Token::Word(String::from("[]"), Tag::INDEX)
+  pub fn access_word() -> &'static Token {
+    static a: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("[]"), Tag::INDEX)
+    });
+    &*a
   }
 
-  pub fn eq_word() -> Token {
-    Token::Word(String::from("=="), Tag::EQ)
+  pub fn eq_word() -> &'static Token {
+    static e: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("=="), Tag::EQ)
+    });
+    &*e
   }
 
-  pub fn or_word() -> Token {
-    Token::Word(String::from("||"), Tag::OR)
+  pub fn or_word() -> &'static Token {
+    static o: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("||"), Tag::OR)
+    });
+    &*o
   }
 
-  pub fn and_word() -> Token {
-    Token::Word(String::from("&&"), Tag::AND)
+  pub fn and_word() -> &'static Token {
+    static a: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("&&"), Tag::AND)
+    });
+    &*a
   }
 
   pub fn tag(&self) -> u32 {

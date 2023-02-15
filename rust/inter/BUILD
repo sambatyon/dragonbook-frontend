@@ -9,6 +9,7 @@ rust_library(
   ],
   deps = [
     "//rust/lexer",
+    "@crate_index//:once_cell",
   ],
   visibility = ["//rust:__subpackages__"]
 )
