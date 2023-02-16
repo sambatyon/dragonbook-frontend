@@ -1,10 +1,5 @@
-use crate::emit_label;
-use crate::expression::AccessOp;
-use crate::new_label;
-
-use super::Type;
-use super::emit;
-use super::expression::{Identifier, Expression};
+use crate::{emit, emit_label, new_label, Type};
+use super::expression::{AccessOp, Identifier, Expression};
 
 pub trait Statement {
   // TODO(sambatyon): This should take a label generator
@@ -309,7 +304,6 @@ impl Statement for BreakStmt {
 mod test {
 use crate::{reset_labels, new_label};
 use crate::expression::{Temp, Constant};
-
 use lexer::tokens::{Tag, Token};
 
 use super::*;

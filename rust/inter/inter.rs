@@ -1,8 +1,9 @@
-use lexer::tokens::{Tag, Token};
 use std::fmt;
 use std::sync::atomic::{AtomicI64, Ordering};
 
 use once_cell::sync::Lazy;
+
+use lexer::tokens::{Tag, Token};
 
 pub mod expression;
 pub mod statement;
