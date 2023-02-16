@@ -1,12 +1,8 @@
 use std::collections::HashMap;
-use std::io::BufReader;
-use std::io::Read;
-use std::io::Result;
-use std::io::ErrorKind;
+use std::io::{BufReader, ErrorKind, Read, Result};
 
 pub mod tokens;
-use tokens::Token;
-use tokens::Tag;
+use tokens::{Tag, Token};
 
 pub struct Lexer<T: std::io::Read> {
   pub line: u32,

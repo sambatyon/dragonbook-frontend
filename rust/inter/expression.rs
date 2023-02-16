@@ -1,13 +1,10 @@
 use std::fmt;
 use std::sync::atomic::{AtomicI32, Ordering};
+
 use lexer::tokens::Token;
 use lexer;
 
-use super::Type;
-use super::emit;
-use super::emit_jumps;
-use super::emit_label;
-use super::new_label;
+use super::{emit, emit_jumps, emit_label, new_label, Type};
 
 pub trait Expression: fmt::Display {
   fn op(&self) -> &Token;
@@ -682,8 +679,7 @@ mod test {
 use crate::reset_labels;
 use super::*;
 
-use lexer::tokens::Token;
-use lexer::tokens::Tag;
+use lexer::tokens::{Tag, Token};
 
 #[test]
 fn expression_tests() {
