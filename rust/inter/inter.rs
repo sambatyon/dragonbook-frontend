@@ -1,5 +1,5 @@
 use std::fmt;
-use std::sync::atomic::{AtomicI64, Ordering};
+use std::cell::RefCell;
 
 use once_cell::sync::Lazy;
 
@@ -8,14 +8,23 @@ use lexer::tokens::{Tag, Token};
 pub mod expression;
 pub mod statement;
 
-static temp_counter: AtomicI64 = AtomicI64::new(1);
+thread_local! {
+static label_counter: RefCell<i64> = RefCell::new(1);
+}
 
 fn new_label() -> i64 {
-  temp_counter.fetch_add(1, Ordering::Relaxed)
+  let mut res = 0;
+  label_counter.with(|counter| {
+    res = *counter.borrow();
+    *counter.borrow_mut() = res + 1
+  });
+  res
 }
 
 fn reset_labels() {
-  temp_counter.store(1, Ordering::Relaxed);
+  label_counter.with(|counter| {
+    *counter.borrow_mut() = 1;
+  });
 }
 
 fn emit_label(s: &mut String, i: i64) {

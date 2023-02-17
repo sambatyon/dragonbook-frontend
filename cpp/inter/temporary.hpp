@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -25,7 +24,7 @@ class Temporary : public Expression {
   static void reset_temp_count();
 
  private:
-  static std::atomic_uint32_t count_;
+  static thread_local std::uint32_t count_;
   std::uint32_t number_;
 };
 

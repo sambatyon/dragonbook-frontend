@@ -1,5 +1,6 @@
 use std::fmt;
-use std::sync::atomic::{AtomicI32, Ordering};
+
+use std::cell::RefCell;
 
 use lexer::tokens::Token;
 use lexer;
@@ -144,14 +145,21 @@ pub struct Temp {
   num: i32,
 }
 
-static temp_counter: AtomicI32 = AtomicI32::new(1);
+thread_local! {
+static temp_counter: RefCell<i32> = RefCell::new(1);
+}
 
 impl Temp {
   pub fn new(typ: &Type) -> Temp {
+    let mut num: i32 = 0;
+    temp_counter.with(|counter|{
+      num = *counter.borrow();
+      *counter.borrow_mut() = num + 1;
+    });
     Temp{
       op: Token::temp_word().clone(),
       typ: typ.clone(),
-      num: temp_counter.fetch_add(1, Ordering::Relaxed)
+      num: num,
     }
   }
 
@@ -160,7 +168,9 @@ impl Temp {
   }
 
   pub fn reset_counter() {
-    temp_counter.store(1, Ordering::Relaxed)
+    temp_counter.with(|counter| {
+      *counter.borrow_mut() = 1
+    });
   }
 }
 

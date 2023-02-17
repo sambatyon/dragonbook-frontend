@@ -1,5 +1,5 @@
 #include "cpp/inter/node.hpp"
 
 namespace inter {
-std::atomic_uint32_t Node::labels_{};
+thread_local std::uint32_t Node::labels_ = 0;
 }  // namespace inter
