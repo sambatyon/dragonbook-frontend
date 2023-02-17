@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -28,7 +27,7 @@ class Node {
   std::size_t lexline_;
 
  private:
-  static std::atomic_uint32_t labels_;
+  static thread_local std::uint32_t labels_;
 };
 
 inline Node::Node() : lexline_(lexer::Lexer::current_line()) {
