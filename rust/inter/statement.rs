@@ -120,11 +120,11 @@ pub struct StmtSeq {
 }
 
 impl StmtSeq {
-  fn new(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> StmtSeq {
+  pub fn new(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> StmtSeq {
     StmtSeq { head: head, tail: tail }
   }
 
-  fn new_box(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> Box<StmtSeq> {
+  pub fn new_box(head: Box<dyn Statement>, tail: Box<dyn Statement>) -> Box<StmtSeq> {
     Box::new(StmtSeq::new(head, tail))
   }
 }
@@ -212,14 +212,14 @@ struct WhileStmt {
 }
 
 impl WhileStmt {
-  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<WhileStmt, String> {
+  pub fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<WhileStmt, String> {
     if cond.typ() != Type::boolean() {
       return Err(String::from("While condition should be of bool type"))
     }
     Ok(WhileStmt { cond: cond, body: body, after: 0 })
   }
 
-  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<WhileStmt>, String> {
+  pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<WhileStmt>, String> {
     let ws = WhileStmt::new(cond, body)?;
     Ok(Box::new(ws))
   }
@@ -248,14 +248,14 @@ struct DoStmt {
 }
 
 impl DoStmt {
-  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<DoStmt, String> {
+  pub fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<DoStmt, String> {
     if cond.typ() != Type::boolean() {
       return Err(String::from("While condition should be of bool type"))
     }
     Ok(DoStmt { cond: cond, body: body, after: 0 })
   }
 
-  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<DoStmt>, String> {
+  pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<DoStmt>, String> {
     let ws = DoStmt::new(cond, body)?;
     Ok(Box::new(ws))
   }
@@ -280,14 +280,14 @@ struct BreakStmt {
 }
 
 impl BreakStmt {
-  fn new(enclosing: Box<dyn Statement>) -> Result<BreakStmt, String> {
+  pub fn new(enclosing: Box<dyn Statement>) -> Result<BreakStmt, String> {
     if enclosing.is_null() {
       return Err(String::from("Unenclosed break"))
     }
     Ok(BreakStmt { enclosing: enclosing })
   }
 
-  fn new_box(enclosing: Box<dyn Statement>) -> Result<Box<BreakStmt>, String> {
+  pub fn new_box(enclosing: Box<dyn Statement>) -> Result<Box<BreakStmt>, String> {
     let bs = BreakStmt::new(enclosing)?;
     Ok(Box::new(bs))
   }

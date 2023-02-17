@@ -26,6 +26,12 @@ pub enum Tag {
   EOF = std::u32::MAX as isize
 }
 
+impl Tag {
+  pub fn as_u32(&self) -> u32 {
+    *self as u32
+  }
+}
+
 impl PartialEq for Tag {
   fn eq(&self, other: &Self) -> bool {
     (*self as u32) == (*other as u32)
