@@ -12,7 +12,7 @@ thread_local! {
 static label_counter: RefCell<i64> = RefCell::new(1);
 }
 
-fn new_label() -> i64 {
+pub fn new_label() -> i64 {
   let mut res = 0;
   label_counter.with(|counter| {
     res = *counter.borrow();
@@ -21,21 +21,21 @@ fn new_label() -> i64 {
   res
 }
 
-fn reset_labels() {
+pub fn reset_labels() {
   label_counter.with(|counter| {
     *counter.borrow_mut() = 1;
   });
 }
 
-fn emit_label(s: &mut String, i: i64) {
+pub fn emit_label(s: &mut String, i: i64) {
   s.push_str(format!("L{}:", i).as_str());
 }
 
-fn emit(s: &mut String, st: &str) {
+pub fn emit(s: &mut String, st: &str) {
   s.push_str(format!("\t{}\n", st).as_str());
 }
 
-fn emit_jumps(s: &mut String, test: &str, to: i64, from: i64) {
+pub fn emit_jumps(s: &mut String, test: &str, to: i64, from: i64) {
   if to != 0 && from != 0 {
     emit(s, format!("if {} goto L{}", test, to).as_str());
     emit(s, format!("goto L{}", from).as_str());
@@ -53,7 +53,7 @@ pub enum Type {
 }
 
 impl Type {
-  fn new(tok: &Token) -> Result<Type, String> {
+  pub fn new(tok: &Token) -> Result<Type, String> {
     match tok {
       Token::SimpleType(lex, w) =>
         Ok(Type::Simple { lexeme: lex.clone(), width: *w }),
@@ -63,6 +63,10 @@ impl Type {
       },
       _ => Err(format!("Invalid parameters: {}", tok))
     }
+  }
+
+  pub fn array(of: Type, size: u32) -> Type {
+    Type::Array { of: Box::new(of), length: size }
   }
 
   fn integer() -> &'static Type {
@@ -85,7 +89,7 @@ impl Type {
     &*t
   }
 
-  fn token(&self) -> Token {
+  pub fn token(&self) -> Token {
     match &self {
       Type::Simple{lexeme, width} =>
         Token::SimpleType(lexeme.clone(), *width),
@@ -94,14 +98,14 @@ impl Type {
     }
   }
 
-  fn tag(&self) -> Tag {
+  pub fn tag(&self) -> Tag {
     match &self {
       Type::Simple{lexeme, width} => Tag::BASIC,
       Type::Array { of, length } => Tag::INDEX
     }
   }
 
-  fn width(&self) -> u32 {
+  pub fn width(&self) -> u32 {
     match &self {
       Type::Simple{lexeme, width} => *width as u32,
       Type::Array { of, length } => of.width() * length

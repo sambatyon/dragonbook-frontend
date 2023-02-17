@@ -204,7 +204,7 @@ impl<T: std::io::Read> Lexer<T> {
       Err(err) => match err.kind() {
         ErrorKind::UnexpectedEof => {
           self.peek = b'\0';
-          return Err(err)
+          return Ok(())
         }
         _ => return Err(err)
       }
