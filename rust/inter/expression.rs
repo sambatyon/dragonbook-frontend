@@ -398,7 +398,7 @@ pub struct RelationOp {
 }
 
 impl RelationOp {
-  fn new(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<RelationOp, String> {
+  pub fn new(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<RelationOp, String> {
     if left.typ() != right.typ() {
       return Err(String::from("Type error"));
     }
@@ -414,7 +414,7 @@ impl RelationOp {
     Ok(RelationOp { op: op, left: left, right: right })
   }
 
-  fn new_box(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<RelationOp>, String> {
+  pub fn new_box(op: Token, left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<RelationOp>, String> {
     let ro = RelationOp::new(op, left, right)?;
     Ok(Box::new(ro))
   }
@@ -547,14 +547,14 @@ pub struct OrLogicOp {
 }
 
 impl OrLogicOp {
-  fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<OrLogicOp, String> {
+  pub fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<OrLogicOp, String> {
     if !check_booleans(left.typ(), right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(OrLogicOp { left: left, right: right })
   }
 
-  fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<OrLogicOp>, String> {
+  pub fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<OrLogicOp>, String> {
     let ol = OrLogicOp::new(left, right)?;
     Ok(Box::new(ol))
   }
@@ -618,14 +618,14 @@ pub struct AndLogicOp {
 }
 
 impl AndLogicOp {
-  fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<AndLogicOp, String> {
+  pub fn new(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<AndLogicOp, String> {
     if !check_booleans(left.typ(), right.typ()) {
       return Err(String::from("Type Error"))
     }
     Ok(AndLogicOp { left: left, right: right })
   }
 
-  fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<AndLogicOp>, String> {
+  pub fn new_box(left: Box<dyn Expression>, right: Box<dyn Expression>) -> Result<Box<AndLogicOp>, String> {
     let al = AndLogicOp::new(left, right)?;
     Ok(Box::new(al))
   }
