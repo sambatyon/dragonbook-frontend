@@ -144,7 +144,7 @@ impl Statement for StmtSeq {
   }
 }
 
-struct IfStmt {
+pub struct IfStmt {
   cond: Box<dyn Expression>,
   body: Box<dyn Statement>,
 }
@@ -172,7 +172,7 @@ impl Statement for IfStmt {
   }
 }
 
-struct ElseStmt {
+pub struct ElseStmt {
   cond: Box<dyn Expression>,
   true_stmt: Box<dyn Statement>,
   false_stmt: Box<dyn Statement>,
@@ -205,7 +205,7 @@ impl Statement for ElseStmt {
   }
 }
 
-struct WhileStmt {
+pub struct WhileStmt {
   cond: Box<dyn Expression>,
   body: Box<dyn Statement>,
   after: i64,
@@ -241,7 +241,7 @@ impl Statement for WhileStmt {
   }
 }
 
-struct DoStmt {
+pub struct DoStmt {
   cond: Box<dyn Expression>,
   body: Box<dyn Statement>,
   after: i64,
@@ -275,7 +275,7 @@ impl Statement for DoStmt {
   }
 }
 
-struct BreakStmt {
+pub struct BreakStmt {
   enclosing: Box<dyn Statement>
 }
 
@@ -399,7 +399,7 @@ fn statement_tests() {
     let begin = new_label();
     let after = new_label();
     let mut b = String::new();
-    tc.0.generate(&mut b, begin, after);
+    tc.0.generate(&mut b, begin, after).expect("Generate error");
     assert_eq!(tc.1, b);
   }
 }

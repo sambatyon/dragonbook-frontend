@@ -1,8 +1,10 @@
 use std::collections::HashMap;
+use std::convert::Into;
 use std::mem::swap;
 use lexer::tokens as toks;
 use inter::expression as expr;
 use inter::statement as stmt;
+use expr::Expression;
 
 pub struct Environment {
   table: HashMap<String, expr::Identifier>,
@@ -16,6 +18,15 @@ impl Environment {
 
   fn new(prev: Box<Environment>) -> Box<Environment> {
     Box::new(Environment { table: HashMap::new(), previous: Box::new(Some(*prev)) })
+  }
+
+  fn pop(&mut self) -> Result<Box<Environment>, String> {
+    let mut res = Box::new(None);
+    swap(&mut self.previous, &mut res);
+    match *res {
+      Some(env) => Ok(Box::new(env)),
+      None => Err(String::from("Popping empty environment"))
+    }
   }
 
   fn put(&mut self, key: &str, value: expr::Identifier) {
@@ -33,7 +44,7 @@ impl Environment {
   }
 }
 
-struct Parser<T: std::io::Read> {
+pub struct Parser<T: std::io::Read> {
   lexer: lexer::Lexer<T>,
   lookahead: toks::Token,
   top: Box<Environment>,
@@ -55,7 +66,7 @@ impl<T: std::io::Read> Parser<T> {
   }
 
   pub fn program(&mut self, s: &mut String) -> Result<(), String> {
-    let mut stm = self.block(s)?;
+    let mut stm = self.block()?;
     let begin = inter::new_label();
     let after = inter::new_label();
     inter::emit_label(s, begin);
@@ -72,37 +83,34 @@ impl<T: std::io::Read> Parser<T> {
     Ok(())
   }
 
-  fn match_tokens(&mut self, tag: u32) -> Result<(), String> {
-    if self.lookahead.tag() != tag as u32 {
+  fn match_token<U: Into<u32>>(&mut self, tag: U) -> Result<(), String> {
+    if !self.lookahead.match_tag(tag) {
       return Err(format!("Syntax error near line {}", self.lexer.line))
     }
     self.next()
   }
 
-  fn block(&mut self, s: &mut String) -> Result<Box<dyn stmt::Statement>, String> {
-    self.match_tokens(b'{' as u32)?;
+  fn block(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+    self.match_token(b'{')?;
 
-    let mut saved = Environment::empty();
-    swap(&mut saved, &mut self.top);
-    self.top.previous = Box::new(Some(*saved));
+    let mut empty = Environment::empty();
+    swap(&mut self.top, &mut empty);
+    self.top = Environment::new(empty);
 
-    self.decls(s)?;
-    let stmts = self.stmts(s)?;
-    self.match_tokens(b'}' as u32)?;
+    self.decls()?;
+    let stmts = self.stmts()?;
+    self.match_token(b'}')?;
 
-    let mut saved = Box::new(None);
-    swap(&mut saved, &mut self.top.previous);
-    let mut saved = Box::new(saved.expect("Expected environment"));
-    swap(&mut saved, &mut self.top);
+    self.top = self.top.pop()?;
     Ok(stmts)
   }
 
-  fn decls(&mut self, s: &mut String) -> Result<(), String> {
-    while self.lookahead.tag() == toks::Tag::BASIC.as_u32() {
+  fn decls(&mut self) -> Result<(), String> {
+    while self.lookahead.match_tag(toks::Tag::BASIC) {
       let typ = self.typ()?;
       let tok = self.lookahead.clone();
-      self.match_tokens(toks::Tag::ID.as_u32())?;
-      self.match_tokens(b';' as u32)?;
+      self.match_token(toks::Tag::ID)?;
+      self.match_token(b';')?;
       let id = expr::Identifier::new(tok, &typ, self.used as i32);
       self.top.put(id.to_string().as_str(), id);
       self.used += typ.width() as i64;
@@ -112,47 +120,191 @@ impl<T: std::io::Read> Parser<T> {
 
   fn typ(&mut self) -> Result<inter::Type, String> {
     let typ = inter::Type::new(&self.lookahead)?;
-    self.match_tokens(toks::Tag::BASIC.as_u32())?;
-    if self.lookahead.tag() != (b'[' as u32) {
+    self.match_token(toks::Tag::BASIC)?;
+    if !self.lookahead.match_tag(b'[') {
       return Ok(typ)
     }
     self.dims(typ)
   }
 
   fn dims(&mut self, typ: inter::Type) -> Result<inter::Type, String> {
-    self.match_tokens(b'[' as u32)?;
+    self.match_token(b'[')?;
     let tok = self.lookahead.clone();
-    self.match_tokens(toks::Tag::INTEGER.as_u32())?;
+    self.match_token(toks::Tag::INTEGER)?;
     let size = match tok {
       toks::Token::Integer(val) => val,
       _ => return Err(format!("Syntax error near line {}", self.lexer.line))
     };
-    self.match_tokens(b']' as u32)?;
+    self.match_token(b']')?;
 
     let mut of = typ.clone();
-    if self.lookahead.tag() == (b'['  as u32) {
+    if self.lookahead.match_tag(b'[') {
       of = self.dims(typ)?;
     }
     Ok(inter::Type::array(of, size as u32))
   }
 
-  fn stmts(&mut self, s: &mut String) -> Result<Box<dyn stmt::Statement>, String> {
-    if self.lookahead.tag() == '}' as u32 {
+  fn stmts(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+    if self.lookahead.match_tag(b'}') {
       return Ok(stmt::NullStmt::new_box())
     }
-    let head = self.stmt(s)?;
-    let tail = self.stmts(s)?;
+    let head = self.stmt()?;
+    let tail = self.stmts()?;
     Ok(stmt::StmtSeq::new_box(head, tail))
   }
 
-  fn stmt(&mut self, s: &mut String) -> Result<Box<dyn stmt::Statement>, String> {
+  fn stmt(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+    const OPEN_BR: u32 = b'{' as u32;
+    const SEMICOLON: u32 = b';' as u32;
+
     match self.lookahead.tag() {
-      _ => self.assign(s)
+      OPEN_BR => self.block(),
+      SEMICOLON => {
+        self.next()?;
+        Ok(stmt::NullStmt::new_box())
+      }
+      _ => self.assign()
     }
   }
 
-  fn assign(&mut self, s: &mut String) -> Result<Box<dyn stmt::Statement>, String> {
+  fn assign(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+    let tok = self.lookahead.clone();
+    self.match_token(toks::Tag::ID)?;
+
+    let id = self.top.get(tok.to_string().as_str())
+      .ok_or(format!("{} undeclared", tok.to_string()).as_str())?;
+
+    if self.lookahead.match_tag(b'=') {
+      self.next()?;
+      let expr = self.boolean()?;
+      let stm = stmt::AssignStmt::new_box(Box::new(id), expr)?;
+      self.match_token(b';')?;
+      return Ok(stm);
+    }
+
+    let access = self.offset(id)?;
+    self.match_token(b'=')?;
+    let expr = self.boolean()?;
+    let stm = stmt::AssingArrayStmt::new_box(access, expr)?;
+    self.match_token(b';')?;
+    Ok(stm)
+  }
+
+  fn boolean(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let mut ex = self.join()?;
+    while self.lookahead.match_tag(toks::Tag::OR) {
+      self.next()?;
+      let right = self.join()?;
+      ex = expr::OrLogicOp::new_box(ex, right)?;
+    }
+    Ok(ex)
+  }
+
+  fn join(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let mut ex = self.equality()?;
+    while self.lookahead.match_tag(toks::Tag::AND) {
+      self.next()?;
+      let right = self.equality()?;
+      ex = expr::AndLogicOp::new_box(ex, right)?;
+    }
+    Ok(ex)
+  }
+
+  fn equality(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let mut ex = self.relation()?;
+    while self.lookahead.match_tag(toks::Tag::EQ) || self.lookahead.match_tag(toks::Tag::NE) {
+      let tok = self.lookahead.clone();
+      self.next()?;
+      let right = self.relation()?;
+      ex = expr::RelationOp::new_box(tok, ex, right)?;
+    }
+    Ok(ex)
+  }
+
+  fn relation(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let ex = self.expr()?;
+    let tok = self.lookahead.clone();
+
+    const LT: u32 = b'<' as u32;
+    const GT: u32 = b'>' as u32;
+    const LE: u32 = toks::Tag::LE as u32;
+    const GE: u32 = toks::Tag::GE as u32;
+
+    match tok.tag() {
+      LT | GT | LE | GE => {
+        self.next()?;
+        let right = self.expr()?;
+        let rel = expr::RelationOp::new_box(tok, ex, right)?;
+        Ok(rel)
+      },
+      _ => Ok(ex)
+    }
+  }
+
+  fn expr(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let mut ex = self.term()?;
+
+    while self.lookahead.match_tag(b'+') || self.lookahead.match_tag(b'-') {
+      let tok = self.lookahead.clone();
+      self.next()?;
+      let right = self.term()?;
+      ex = expr::ArithmeticOp::new_box(tok, ex, right)?;
+    }
+    Ok(ex)
+  }
+
+  fn term(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    let mut ex = self.unary()?;
+    while self.lookahead.match_tag(b'*') || self.lookahead.match_tag(b'/') {
+      let tok = self.lookahead.clone();
+      self.next()?;
+      let right = self.unary()?;
+      ex = expr::ArithmeticOp::new_box(tok, ex, right)?;
+    }
+    Ok(ex)
+  }
+
+  fn unary(&mut self) -> Result<Box<dyn expr::Expression>, String> {
     Err(String::from("Unimplemented"))
+  }
+
+  fn factor(&mut self) -> Result<Box<dyn expr::Expression>, String> {
+    Err(String::from("Unimplemented"))
+  }
+
+  fn offset(&mut self, id: expr::Identifier) -> Result<Box<expr::AccessOp>, String> {
+    let mut typ = id.typ().clone();
+
+    self.match_token(b'[')?;
+    let index = self.boolean()?;
+    self.match_token(b']')?;
+
+    match typ {
+      inter::Type::Array{of, length: _} => typ = *of.clone(),
+      _ => return Err(String::from("String error"))
+    };
+
+    let width = Box::new(expr::Constant::integer(typ.width() as i64));
+    let t1 = expr::ArithmeticOp::new_box(toks::Token::Tok(b'*'), index, width)?;
+
+    let mut loc = t1;
+    while self.lookahead.match_tag(b'[') {
+      self.match_token(b'[')?;
+      let index = self.boolean()?;
+      self.match_token(b']')?;
+
+      match typ {
+        inter::Type::Array{of, length: _} => typ = *of.clone(),
+        _ => return Err(String::from("String error"))
+      };
+      let width = Box::new(expr::Constant::integer(typ.width() as i64));
+      let t1 = expr::ArithmeticOp::new_box(toks::Token::Tok(b'*'), index, width)?;
+
+      let t2 = expr::ArithmeticOp::new_box(toks::Token::Tok(b'+'), loc, t1)?;
+      loc = t2;
+    }
+
+    Ok(expr::AccessOp::new_box(Box::new(id), loc, &typ))
   }
 }
 
@@ -165,7 +317,7 @@ use stringreader::StringReader;
 
 #[test]
 fn parser_tests() {
-  let mut tests: Vec<(&str, &str)> = vec![
+  let tests: Vec<(&str, &str)> = vec![
     ("{}", "L1:L2:"),
     ("{int i;}", "L1:L2:"),
     ("{int i;float f;bool[100] b;}", "L1:L2:"),
@@ -175,7 +327,7 @@ fn parser_tests() {
     inter::reset_labels();
     expr::Temp::reset_counter();
 
-    let mut lexer = lexer::Lexer::new(
+    let lexer = lexer::Lexer::new(
       BufReader::new(StringReader::new(tc.0))
     );
     let mut parser = Parser::new(lexer).expect("Creating parser");

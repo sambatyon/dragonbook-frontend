@@ -1,4 +1,5 @@
 use std::fmt;
+use std::convert::Into;
 use once_cell::sync::Lazy;
 
 #[derive(Copy,Clone,Debug,Eq)]
@@ -26,9 +27,9 @@ pub enum Tag {
   EOF = std::u32::MAX as isize
 }
 
-impl Tag {
-  pub fn as_u32(&self) -> u32 {
-    *self as u32
+impl Into<u32> for Tag {
+  fn into(self) -> u32 {
+    self as u32
   }
 }
 
@@ -168,6 +169,10 @@ impl Token {
       Token::Array(_, _) => Tag::INDEX as u32,
       Token::Eof => Tag::EOF as u32
     }
+  }
+
+  pub fn match_tag<T: Into<u32>>(&self, o: T) -> bool {
+    self.tag() == o.into()
   }
 }
 
