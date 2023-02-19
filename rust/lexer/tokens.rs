@@ -153,6 +153,13 @@ impl Token {
     &*a
   }
 
+  pub fn minus_word() -> &'static Token {
+    static m: Lazy<Token> = Lazy::new(|| {
+      Token::Word(String::from("minus"), Tag::MINUS)
+    });
+    &*m
+  }
+
   pub fn tag(&self) -> u32 {
     match self {
       Token::Tok(tg) => *tg as u32,

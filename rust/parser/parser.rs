@@ -33,12 +33,12 @@ impl Environment {
     self.table.insert(key.to_string(), value);
   }
 
-  fn get(&self, key: &str) -> Option<expr::Identifier> {
+  fn get(&self, key: &str) -> Result<expr::Identifier, String> {
     match self.table.get(key) {
-      Some(value) => Some(value.clone()),
+      Some(value) => Ok(value.clone()),
       _ => match self.previous.as_ref() {
         Some(env) => env.get(key),
-        _ => None
+        _ => Err(format!("Undeclrared identifier {}", key))
       }
     }
   }
@@ -171,8 +171,7 @@ impl<T: std::io::Read> Parser<T> {
     let tok = self.lookahead.clone();
     self.match_token(toks::Tag::ID)?;
 
-    let id = self.top.get(tok.to_string().as_str())
-      .ok_or(format!("{} undeclared", tok.to_string()).as_str())?;
+    let id = self.top.get(tok.to_string().as_str())?;
 
     if self.lookahead.match_tag(b'=') {
       self.next()?;
@@ -265,11 +264,67 @@ impl<T: std::io::Read> Parser<T> {
   }
 
   fn unary(&mut self) -> Result<Box<dyn expr::Expression>, String> {
-    Err(String::from("Unimplemented"))
+    const MINUS: u32 = b'-' as u32;
+    const EXCL: u32 = b'!' as u32;
+    match self.lookahead.tag() {
+      MINUS => {
+        self.next()?;
+        let mut ex = self.unary()?;
+        ex = expr::UnaryOp::new_box(toks::Token::minus_word().clone(), ex)?;
+        Ok(ex)
+      }
+      EXCL => {
+        let tok = self.lookahead.clone();
+        self.next()?;
+        let mut ex = self.unary()?;
+        ex = expr::NotLogicOp::new_box(tok, ex)?;
+        Ok(ex)
+      }
+      _ => self.factor()
+    }
   }
 
   fn factor(&mut self) -> Result<Box<dyn expr::Expression>, String> {
-    Err(String::from("Unimplemented"))
+    const OPAREN: u32 = b'(' as u32;
+    const INTEGER: u32 = toks::Tag::INTEGER as u32;
+    const REAL: u32 = toks::Tag::REAL as u32;
+    const TRUE: u32 = toks::Tag::TRUE as u32;
+    const FALSE: u32 = toks::Tag::FALSE as u32;
+    const ID: u32 = toks::Tag::ID as u32;
+
+    match self.lookahead.tag() {
+      OPAREN => {
+        self.next()?;
+        let ex = self.boolean()?;
+        self.match_token(b')')?;
+        Ok(ex)
+      },
+      INTEGER | REAL => {
+        let ex = expr::Constant::new_box(self.lookahead.clone())?;
+        self.next()?;
+        Ok(ex)
+      },
+      TRUE => {
+        let ex = expr::Constant::true_constant().box_clone();
+        self.next()?;
+        Ok(ex)
+      },
+      FALSE => {
+        let ex = expr::Constant::true_constant().box_clone();
+        self.next()?;
+        Ok(ex)
+      },
+      ID => {
+        let id = self.top.get(format!("{}", self.lookahead).as_str())?;
+        self.next()?;
+        if self.lookahead.match_tag(b'[') {
+          let ex = self.offset(id)?;
+          return Ok(ex)
+        }
+        Ok(Box::new(id))
+      },
+      _ => Err(String::from("Syntax Error"))
+    }
   }
 
   fn offset(&mut self, id: expr::Identifier) -> Result<Box<expr::AccessOp>, String> {

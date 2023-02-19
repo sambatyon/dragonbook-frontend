@@ -9,12 +9,12 @@ pub mod expression;
 pub mod statement;
 
 thread_local! {
-static label_counter: RefCell<i64> = RefCell::new(1);
+static LABEL_COUNTER: RefCell<i64> = RefCell::new(1);
 }
 
 pub fn new_label() -> i64 {
   let mut res = 0;
-  label_counter.with(|counter| {
+  LABEL_COUNTER.with(|counter| {
     res = *counter.borrow();
     *counter.borrow_mut() = res + 1
   });
@@ -22,7 +22,7 @@ pub fn new_label() -> i64 {
 }
 
 pub fn reset_labels() {
-  label_counter.with(|counter| {
+  LABEL_COUNTER.with(|counter| {
     *counter.borrow_mut() = 1;
   });
 }
@@ -70,23 +70,23 @@ impl Type {
   }
 
   fn integer() -> &'static Type {
-    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::integer()).unwrap());
-    &*t
+    static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::integer()).unwrap());
+    &*TYP
   }
 
   fn float() -> &'static Type {
-    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::float()).unwrap());
-    &*t
+    static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::float()).unwrap());
+    &*TYP
   }
 
   fn ch() -> &'static Type {
-    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::ch()).unwrap());
-    &*t
+    static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::ch()).unwrap());
+    &*TYP
   }
 
   fn boolean() -> &'static Type {
-    static t: Lazy<Type> = Lazy::new(|| Type::new(Token::boolean()).unwrap());
-    &*t
+    static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::boolean()).unwrap());
+    &*TYP
   }
 
   pub fn token(&self) -> Token {
@@ -100,21 +100,21 @@ impl Type {
 
   pub fn tag(&self) -> Tag {
     match &self {
-      Type::Simple{lexeme, width} => Tag::BASIC,
-      Type::Array { of, length } => Tag::INDEX
+      Type::Simple{lexeme: _, width: _} => Tag::BASIC,
+      Type::Array { of: _, length: _ } => Tag::INDEX
     }
   }
 
   pub fn width(&self) -> u32 {
     match &self {
-      Type::Simple{lexeme, width} => *width as u32,
+      Type::Simple{lexeme: _, width} => *width as u32,
       Type::Array { of, length } => of.width() * length
     }
   }
 
   fn is_numeric(&self) -> bool {
     match &self {
-      Type::Simple{lexeme, width} => match lexeme.as_str() {
+      Type::Simple{lexeme, width: _} => match lexeme.as_str() {
         "int" | "float" | "char" => true,
         _ => false
       },
@@ -129,7 +129,6 @@ impl Type {
     if left == Type::float() || right == Type::float() {
       return Some(Type::float().clone())
     }
-    let i = Type::integer();
     if left == Type::integer() || right == Type::integer() {
       return Some(Type::integer().clone())
     }
@@ -140,7 +139,7 @@ impl Type {
 impl fmt::Display for Type {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match &self {
-      Type::Simple{lexeme, width} => write!(f, "{}", lexeme),
+      Type::Simple{lexeme, width: _} => write!(f, "{}", lexeme),
       Type::Array { of, length } => write!(f, "[{}]{}", length, *of)
     }
   }

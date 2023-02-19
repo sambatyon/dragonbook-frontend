@@ -51,6 +51,11 @@ impl Constant {
     }
   }
 
+  pub fn new_box(tok: Token) -> Result<Box<Constant>, String> {
+    let c = Constant::new(tok)?;
+    Ok(Box::new(c))
+  }
+
   pub fn true_constant() -> Constant {
     Constant{token: Token::true_token().clone(), typ: Type::boolean().clone()}
   }
@@ -146,13 +151,13 @@ pub struct Temp {
 }
 
 thread_local! {
-static temp_counter: RefCell<i32> = RefCell::new(1);
+static TEMP_COUNTER: RefCell<i32> = RefCell::new(1);
 }
 
 impl Temp {
   pub fn new(typ: &Type) -> Temp {
     let mut num: i32 = 0;
-    temp_counter.with(|counter|{
+    TEMP_COUNTER.with(|counter|{
       num = *counter.borrow();
       *counter.borrow_mut() = num + 1;
     });
@@ -168,7 +173,7 @@ impl Temp {
   }
 
   pub fn reset_counter() {
-    temp_counter.with(|counter| {
+    TEMP_COUNTER.with(|counter| {
       *counter.borrow_mut() = 1
     });
   }
@@ -476,7 +481,7 @@ pub struct NotLogicOp {
 }
 
 impl NotLogicOp {
-  fn new(op: Token, expr: Box<dyn Expression>) -> Result<NotLogicOp, String> {
+  pub fn new(op: Token, expr: Box<dyn Expression>) -> Result<NotLogicOp, String> {
     if expr.typ() != Type::boolean() {
       return Err(String::from("Type error"));
     }
@@ -486,7 +491,7 @@ impl NotLogicOp {
     Ok(NotLogicOp { op: op, expr: expr })
   }
 
-  fn new_box(op: Token, expr: Box<dyn Expression>) -> Result<Box<NotLogicOp>, String> {
+  pub fn new_box(op: Token, expr: Box<dyn Expression>) -> Result<Box<NotLogicOp>, String> {
     let nl = NotLogicOp::new(op, expr)?;
     Ok(Box::new(nl))
   }
@@ -689,7 +694,7 @@ mod test {
 use crate::reset_labels;
 use super::*;
 
-use lexer::tokens::{Tag, Token};
+use lexer::tokens::Token;
 
 #[test]
 fn expression_tests() {
@@ -780,11 +785,11 @@ fn expression_tests() {
 
     assert_eq!(format!("{}", tc.0), tc.1);
     let mut b = String::new();
-    tc.0.generate(&mut b);
+    tc.0.generate(&mut b).expect("Generating code");
     assert_eq!(b, tc.2);
 
     let mut b = String::new();
-    tc.0.reduce(&mut b);
+    tc.0.reduce(&mut b).expect("Reduce step");
     assert_eq!(b, tc.3);
   }
 }

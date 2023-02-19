@@ -150,14 +150,14 @@ pub struct IfStmt {
 }
 
 impl IfStmt {
-  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<IfStmt, String> {
+  pub fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<IfStmt, String> {
     if cond.typ() != Type::boolean() {
       return Err(String::from("If condition should be of bool type"))
     }
     Ok(IfStmt {cond: cond, body: body})
   }
 
-  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<IfStmt>, String> {
+  pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<IfStmt>, String> {
     let is = IfStmt::new(cond, body)?;
     Ok(Box::new(is))
   }
@@ -310,7 +310,7 @@ use super::*;
 
 #[test]
 fn statement_tests() {
-  let mut tests: Vec<(Box<dyn Statement>, &str)> = vec![
+  let tests: Vec<(Box<dyn Statement>, &str)> = vec![
     (
       AssignStmt::new_box(
         Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
