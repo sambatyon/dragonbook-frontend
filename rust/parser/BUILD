@@ -15,6 +15,7 @@ rust_test(
   name = "parser_test",
   crate = ":parser",
   deps = [
-     "@crate_index//:stringreader",
+    "@crate_index//:once_cell",
+    "@crate_index//:stringreader",
   ],
 )

@@ -69,22 +69,22 @@ impl Type {
     Type::Array { of: Box::new(of), length: size }
   }
 
-  fn integer() -> &'static Type {
+  pub fn integer() -> &'static Type {
     static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::integer()).unwrap());
     &*TYP
   }
 
-  fn float() -> &'static Type {
+  pub fn float() -> &'static Type {
     static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::float()).unwrap());
     &*TYP
   }
 
-  fn ch() -> &'static Type {
+  pub fn ch() -> &'static Type {
     static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::ch()).unwrap());
     &*TYP
   }
 
-  fn boolean() -> &'static Type {
+  pub fn boolean() -> &'static Type {
     static TYP: Lazy<Type> = Lazy::new(|| Type::new(Token::boolean()).unwrap());
     &*TYP
   }

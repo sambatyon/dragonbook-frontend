@@ -61,7 +61,7 @@ impl AssignStmt {
 impl Statement for AssignStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let expr = self.expr.generate(b)?;
-    emit(b, format!("{} = {}", self.id, self.expr).as_str());
+    emit(b, format!("{} = {}", self.id, expr).as_str());
     Ok(())
   }
 }
@@ -206,7 +206,7 @@ impl Statement for ElseStmt {
 }
 
 pub struct WhileStmt {
-  cond: Box<dyn Expression>,
+  cond: Option<Box<dyn Expression>>,
   body: Box<dyn Statement>,
   after: i64,
 }
@@ -216,19 +216,42 @@ impl WhileStmt {
     if cond.typ() != Type::boolean() {
       return Err(String::from("While condition should be of bool type"))
     }
-    Ok(WhileStmt { cond: cond, body: body, after: 0 })
+    Ok(WhileStmt { cond: Some(cond), body: body, after: 0 })
   }
 
   pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<WhileStmt>, String> {
     let ws = WhileStmt::new(cond, body)?;
     Ok(Box::new(ws))
   }
+
+  pub fn empty() -> WhileStmt {
+    WhileStmt { cond: None, body: NullStmt::new_box(), after: 0 }
+  }
+
+  pub fn empty_box() -> Box<WhileStmt> {
+    Box::new(WhileStmt::empty())
+  }
+
+  pub fn init(&mut self, cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<(), String> {
+    match self.cond {
+      Some(_) => Err(String::from("Attempting initialization of already initialized while statement")),
+      None => {
+        self.cond = Some(cond);
+        self.body = body;
+        Ok(())
+      }
+    }
+  }
 }
 
 impl Statement for WhileStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     self.after = after;
-    self.cond.jumps(b, 0, after)?;
+    // self.cond.ok_or(Err(String::from("Generating an uninitialized while stmt")))?.jumps(b, 0, after)?;
+    match &self.cond {
+      Some(c) => (*c).jumps(b, 0, after)?,
+      None => return Err(String::from("Generating an uninitialized while stmt"))
+    }
     let label = new_label();
     emit_label(b, label);
     self.body.generate(b, label, begin)?;
@@ -275,25 +298,25 @@ impl Statement for DoStmt {
   }
 }
 
-pub struct BreakStmt {
-  enclosing: Box<dyn Statement>
+pub struct BreakStmt<'a> {
+  enclosing: &'a Box<dyn Statement>
 }
 
-impl BreakStmt {
-  pub fn new(enclosing: Box<dyn Statement>) -> Result<BreakStmt, String> {
+impl BreakStmt<'_> {
+  pub fn new<'a>(enclosing: &'a Box<dyn Statement>) -> Result<BreakStmt<'a>, String> {
     if enclosing.is_null() {
       return Err(String::from("Unenclosed break"))
     }
     Ok(BreakStmt { enclosing: enclosing })
   }
 
-  pub fn new_box(enclosing: Box<dyn Statement>) -> Result<Box<BreakStmt>, String> {
+  pub fn new_box<'a>(enclosing: &'a Box<dyn Statement>) -> Result<Box<BreakStmt<'a>>, String> {
     let bs = BreakStmt::new(enclosing)?;
     Ok(Box::new(bs))
   }
 }
 
-impl Statement for BreakStmt {
+impl Statement for BreakStmt<'_> {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     emit(b, format!("goto L{}", self.enclosing.after()).as_str());
     Ok(())

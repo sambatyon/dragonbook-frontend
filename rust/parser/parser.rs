@@ -156,13 +156,46 @@ impl<T: std::io::Read> Parser<T> {
   fn stmt(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
     const OPEN_BR: u32 = b'{' as u32;
     const SEMICOLON: u32 = b';' as u32;
+    const IF: u32 = toks::Tag::IF as u32;
+    const WHILE: u32 = toks::Tag::WHILE as u32;
 
     match self.lookahead.tag() {
-      OPEN_BR => self.block(),
       SEMICOLON => {
         self.next()?;
         Ok(stmt::NullStmt::new_box())
+      },
+      IF => {
+        self.match_token(IF)?;
+        self.match_token(b'(')?;
+        let ex = self.boolean()?;
+        self.match_token(b')')?;
+        let body = self.stmt()?;
+        if !self.lookahead.match_tag(toks::Tag::ELSE) {
+          let ifs = stmt::IfStmt::new_box(ex, body)?;
+          return Ok(ifs)
+        }
+        self.match_token(toks::Tag::ELSE)?;
+        let els = self.stmt()?;
+        let r = stmt::ElseStmt::new_box(ex, body, els)?;
+        Ok(r)
+      },
+      WHILE => {
+        self.match_token(WHILE)?;
+        self.match_token(b'(')?;
+
+        let mut wh = stmt::WhileStmt::empty_box();
+
+        let ex = self.boolean()?;
+        if ex.typ() != inter::Type::boolean() {
+          return Err(String::from("Expression in boolean condition is required for while loop."))
+        }
+
+        self.match_token(b')')?;
+        let body = self.stmt()?;
+        wh.init(ex, body)?;
+        Ok(wh)
       }
+      OPEN_BR => self.block(),
       _ => self.assign()
     }
   }
@@ -376,6 +409,19 @@ fn parser_tests() {
     ("{}", "L1:L2:"),
     ("{int i;}", "L1:L2:"),
     ("{int i;float f;bool[100] b;}", "L1:L2:"),
+    ("{int i; i = 10;}", "L1:\ti = 10\nL2:"),
+    ("{int i; i = i + 10;}", "L1:\ti = i + 10\nL2:"),
+    (
+      "{int i; int j; bool a; i = i + 10; j = 11; a = i == j;}",
+      r#"L1:	i = i + 10
+L3:	j = 11
+L4:	iffalse i == j goto L5
+	t1 = true
+	goto L6
+L5:	t1 = false
+L6:	a = t1
+L2:"#,
+    ),
   ];
 
   for tc in tests {
