@@ -15,3 +15,16 @@ cc_library(
     "//cpp:__subpackages__",
   ],
 )
+
+cc_test(
+  name = "parser_tests",
+  srcs = [
+    "parser_test.cpp",
+  ],
+  deps = [
+    ":parser",
+    "@com_google_googletest//:gtest_main"
+  ],
+  data = [],
+  size = "small",
+)

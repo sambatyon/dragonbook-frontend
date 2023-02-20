@@ -3,6 +3,8 @@
 #include "cpp/inter/expression.hpp"
 #include "cpp/inter/statement.hpp"
 
+#include <iostream>
+
 
 namespace inter {
 class While : public Statement {
@@ -44,8 +46,8 @@ inline While::~While() {
 inline void While::init(std::shared_ptr<Expression> expr, std::shared_ptr<Statement> stmt) {
   stmt_ = stmt;
   expr_ = expr;
-  if (expr->type() != symbols::Type::boolean) {
-    expr->error("Boolean required in do");
+  if (*expr->type() != *symbols::Type::boolean) {
+    expr->error("Boolean required in while");
   }
 }
 

@@ -24,8 +24,9 @@ Type *Type::max(Type *type_left, Type *type_right) {
 }
 
 bool Type::operator==(const Type &other) const {
-  if (this == &other)
+  if (this == &other) {
     return true;
+  }
   return width_ == other.width_ && this->lexeme() == other.lexeme() && this->tag() == other.tag();
 }
 
