@@ -34,6 +34,13 @@ L2:`,
 L2:`,
 	},
 	{
+		`{int i;int[20] arr; i = 10; arr[i] = 10;}`,
+		`L1:	i = 10
+L3:	t1 = i * 4
+	arr [ t1 ] = 10
+L2:`,
+	},
+	{
 		`{int i; int j; bool a; i = i + 10; j = 11; a = i == j;}`,
 		`L1:	i = i + 10
 L3:	j = 11
@@ -63,6 +70,22 @@ L2:`,
 		`{int i; int j; while (true) i = i + 1;}`,
 		`L1:L3:	i = i + 1
 	goto L1
+L2:`,
+	},
+	{
+		`{while (true) {break;} }`,
+		`L1:L3:	goto L2
+	goto L1
+L2:`,
+	},
+	{
+		`{int i; int j; i = 10; j = 1; while (j < i) { i = i + 1; break;} }`,
+		`L1:	i = 10
+L3:	j = 1
+L4:	iffalse j < i goto L2
+L5:	i = i + 1
+L6:	goto L2
+	goto L4
 L2:`,
 	},
 	{

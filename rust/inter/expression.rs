@@ -358,7 +358,7 @@ impl Expression for AccessOp {
   }
 
   fn generate(&self, b: &mut String) -> Result<Box<dyn Expression>, String> {
-    let idx = self.index.generate(b)?;
+    let idx = self.index.reduce(b)?;
     Ok(Box::new(AccessOp::new(self.array.clone(), idx, &self.typ)))
   }
 

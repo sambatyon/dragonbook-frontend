@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::convert::Into;
 use std::mem::swap;
-use inter::statement::NullStmt;
-use inter::statement::Statement;
 use lexer::tokens as toks;
 use inter::expression as expr;
 use inter::statement as stmt;
@@ -66,8 +64,7 @@ impl<T: std::io::Read> Parser<T> {
   }
 
   pub fn program(&mut self, s: &mut String) -> Result<(), String> {
-    let topstmt = NullStmt::new();
-    let mut stm = self.block(&topstmt)?;
+    let mut stm = self.block()?;
     let begin = inter::new_label();
     let after = inter::new_label();
     inter::emit_label(s, begin);
@@ -91,7 +88,7 @@ impl<T: std::io::Read> Parser<T> {
     self.next()
   }
 
-  fn block(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
+  fn block(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
     self.match_token(b'{')?;
 
     let mut empty = Environment::empty();
@@ -99,7 +96,7 @@ impl<T: std::io::Read> Parser<T> {
     self.top = Environment::new(empty);
 
     self.decls()?;
-    let stmts = self.stmts(encstmt)?;
+    let stmts = self.stmts()?;
     self.match_token(b'}')?;
 
     self.top = self.top.pop()?;
@@ -145,21 +142,22 @@ impl<T: std::io::Read> Parser<T> {
     Ok(inter::Type::array(of, size as u32))
   }
 
-  fn stmts(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
+  fn stmts(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
     if self.lookahead.match_tag(b'}') {
       return Ok(stmt::NullStmt::new_box())
     }
-    let head = self.stmt(encstmt)?;
-    let tail = self.stmts(encstmt)?;
+    let head = self.stmt()?;
+    let tail = self.stmts()?;
     Ok(stmt::StmtSeq::new_box(head, tail))
   }
 
-  fn stmt(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
+  fn stmt<'a: 'b, 'b>(&mut self) -> Result<Box<dyn stmt::Statement + 'b>, String> {
     const OPEN_BR: u32 = b'{' as u32;
     const SEMICOLON: u32 = b';' as u32;
     const IF: u32 = toks::Tag::IF as u32;
     const WHILE: u32 = toks::Tag::WHILE as u32;
-    // const BREAK: u32 = toks::Tag::BREAK as u32;
+    const DO: u32 = toks::Tag::DO as u32;
+    const BREAK: u32 = toks::Tag::BREAK as u32;
 
     match self.lookahead.tag() {
       SEMICOLON => {
@@ -171,13 +169,13 @@ impl<T: std::io::Read> Parser<T> {
         self.match_token(b'(')?;
         let ex = self.boolean()?;
         self.match_token(b')')?;
-        let body = self.stmt(encstmt)?;
+        let body = self.stmt()?;
         if !self.lookahead.match_tag(toks::Tag::ELSE) {
           let ifs = stmt::IfStmt::new_box(ex, body)?;
           return Ok(ifs)
         }
         self.match_token(toks::Tag::ELSE)?;
-        let els = self.stmt(encstmt)?;
+        let els = self.stmt()?;
         let r = stmt::ElseStmt::new_box(ex, body, els)?;
         Ok(r)
       },
@@ -185,19 +183,38 @@ impl<T: std::io::Read> Parser<T> {
         self.match_token(WHILE)?;
         self.match_token(b'(')?;
 
-        let mut wh = stmt::WhileStmt::empty_box();
-
         let ex = self.boolean()?;
         if ex.typ() != inter::Type::boolean() {
           return Err(String::from("Expression in boolean condition is required for while loop."))
         }
 
         self.match_token(b')')?;
-        let body = self.stmt(wh.as_ref())?;
-        wh.init(ex, body)?;
-        Ok(wh)
-      }
-      OPEN_BR => self.block(encstmt),
+        let body = self.stmt()?;
+        let stm = stmt::WhileStmt::new_box(ex, body)?;
+        Ok(stm)
+      },
+      DO => {
+        self.match_token(DO)?;
+        let body = self.stmt()?;
+
+        self.match_token(WHILE)?;
+        self.match_token(b'(')?;
+        let ex = self.boolean()?;
+        if ex.typ() != inter::Type::boolean() {
+          return Err(String::from("Expression in boolean condition is required for while loop."))
+        }
+        self.match_token(b')')?;
+        self.match_token(b';')?;
+        let stm = stmt::DoStmt::new_box(ex, body)?;
+        Ok(stm)
+      },
+      BREAK => {
+        self.match_token(BREAK)?;
+        self.match_token(b';')?;
+        let brk = stmt::BreakStmt::new_box();
+        Ok(brk)
+      },
+      OPEN_BR => self.block(),
       _ => self.assign()
     }
   }
@@ -414,6 +431,13 @@ fn parser_tests() {
     ("{int i; i = 10;}", "L1:\ti = 10\nL2:"),
     ("{int i; i = i + 10;}", "L1:\ti = i + 10\nL2:"),
     (
+      "{int i;int[20] arr; i = 10; arr[i] = 10;}",
+      r#"L1:	i = 10
+L3:	t1 = i * 4
+	arr [ t1 ] = 10
+L2:"#,
+    ),
+    (
       "{int i; int j; bool a; i = i + 10; j = 11; a = i == j;}",
       r#"L1:	i = i + 10
 L3:	j = 11
@@ -422,6 +446,86 @@ L4:	iffalse i == j goto L5
 	goto L6
 L5:	t1 = false
 L6:	a = t1
+L2:"#,
+    ),
+    (
+      "{int i; int j; j = 12; while (i > j) i = i + 1;}",
+      r#"L1:	j = 12
+L3:	iffalse i > j goto L2
+L4:	i = i + 1
+	goto L3
+L2:"#,
+    ),
+    (
+      "{int i; int j; j = 12; do i = i + 1; while (i > j);}",
+      r#"L1:	j = 12
+L3:	i = i + 1
+L4:	if i > j goto L3
+L2:"#,
+    ),
+    (
+      "{ while (true) { break; } }",
+      r#"L1:L3:	goto L2
+	goto L1
+L2:"#,
+    ),
+    (
+      "{int i; int j; i = 10; j = 1; while (j < i) { i = i + 1; break;} }",
+      r#"L1:	i = 10
+L3:	j = 1
+L4:	iffalse j < i goto L2
+L5:	i = i + 1
+L6:	goto L2
+	goto L4
+L2:"#,
+    ),
+    (
+      "{int i; int j; while (true) i = i + 1;}",
+      r#"L1:L3:	i = i + 1
+	goto L1
+L2:"#,
+    ),
+    (
+      "{int i; int j; i = 10; j = 1; while (j < i) { i = i + 1; break;} }",
+      r#"L1:	i = 10
+L3:	j = 1
+L4:	iffalse j < i goto L2
+L5:	i = i + 1
+L6:	goto L2
+	goto L4
+L2:"#,
+    ),
+    (
+      r#"{
+        int i; int j; float v; float x; float[100] a;
+        while (true) {
+          do i = i + 1; while (a[i] < v);
+          do j = j - 1; while (a[j] > v);
+          if (i >= j) break;
+          x = a[i];
+          a[i] = a[j];
+          a[j] = x;
+        }
+      }"#,
+      r#"L1:L3:	i = i + 1
+L5:	t1 = i * 8
+	t2 = a [ t1 ]
+	if t2 < v goto L3
+L4:	j = j - 1
+L7:	t3 = j * 8
+	t4 = a [ t3 ]
+	if t4 > v goto L4
+L6:	iffalse i >= j goto L8
+L9:	goto L2
+L8:	t5 = i * 8
+	x = a [ t5 ]
+L10:	t6 = i * 8
+	t7 = j * 8
+	t8 = a [ t7 ]
+	a [ t6 ] = t8
+L11:	t9 = j * 8
+	a [ t9 ] = x
+	goto L1
 L2:"#,
     ),
   ];
