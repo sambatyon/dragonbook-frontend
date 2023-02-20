@@ -4,7 +4,7 @@
 
 namespace inter {
 std::shared_ptr<Constant> Constant::kTrue =
-    Constant::create(lexer::Token::create(lexer::Word::kTrue), symbols::Type::boolean);
+    Constant::create(lexer::Word::create("true", lexer::Token::kTrue), symbols::Type::create("bool", lexer::Token::kBasic, 1));
 std::shared_ptr<Constant> Constant::kFalse =
-    Constant::create(lexer::Token::create(lexer::Word::kFalse), symbols::Type::boolean);
+    Constant::create(lexer::Word::create("false", lexer::Token::kFalse), symbols::Type::create("bool", lexer::Token::kBasic, 1));
 }  // namespace inter

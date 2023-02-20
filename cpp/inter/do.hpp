@@ -3,7 +3,6 @@
 #include "cpp/inter/expression.hpp"
 #include "cpp/inter/statement.hpp"
 
-
 namespace inter {
 class Do : public Statement {
  public:
@@ -44,7 +43,7 @@ inline Do::~Do() {
 inline void Do::init(std::shared_ptr<Statement> stmt, std::shared_ptr<Expression> expr) {
   stmt_ = stmt;
   expr_ = expr;
-  if (expr->type() != symbols::Type::boolean) {
+  if (*expr->type() != *symbols::Type::boolean) {
     expr->error("Boolean required in do");
   }
 }
