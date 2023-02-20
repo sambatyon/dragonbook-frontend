@@ -4,9 +4,9 @@ use super::expression::{AccessOp, Identifier, Expression};
 pub trait Statement {
   // TODO(sambatyon): This should take a label generator
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String>;
-  fn after(&self) -> i64 {
-    0
-  }
+
+  fn after(&mut self, label: i64) {}
+
   fn is_null(&self) -> bool {
     false
   }
@@ -61,7 +61,7 @@ impl AssignStmt {
 impl Statement for AssignStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let expr = self.expr.generate(b)?;
-    emit(b, format!("{} = {}", self.id, self.expr).as_str());
+    emit(b, format!("{} = {}", self.id, expr).as_str());
     Ok(())
   }
 }
@@ -109,7 +109,7 @@ impl Statement for AssingArrayStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
     let idx = self.index.reduce(b)?;
     let expr = self.expr.reduce(b)?;
-    emit(b, format!("{} [ {} ] = {}", self.id, self.index, self.expr).as_str());
+    emit(b, format!("{} [ {} ] = {}", self.id, idx, expr).as_str());
     Ok(())
   }
 }
@@ -142,6 +142,11 @@ impl Statement for StmtSeq {
     emit_label(b, label);
     self.tail.generate(b, label, after)
   }
+
+  fn after(&mut self, label: i64) {
+    self.head.after(label);
+    self.tail.after(label);
+  }
 }
 
 pub struct IfStmt {
@@ -150,14 +155,14 @@ pub struct IfStmt {
 }
 
 impl IfStmt {
-  fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<IfStmt, String> {
+  pub fn new(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<IfStmt, String> {
     if cond.typ() != Type::boolean() {
       return Err(String::from("If condition should be of bool type"))
     }
     Ok(IfStmt {cond: cond, body: body})
   }
 
-  fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<IfStmt>, String> {
+  pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<IfStmt>, String> {
     let is = IfStmt::new(cond, body)?;
     Ok(Box::new(is))
   }
@@ -169,6 +174,10 @@ impl Statement for IfStmt {
     self.cond.jumps(b, 0, after)?;
     emit_label(b, label);
     self.body.generate(b, label, after)
+  }
+
+  fn after(&mut self, label: i64) {
+    self.body.after(label);
   }
 }
 
@@ -203,12 +212,16 @@ impl Statement for ElseStmt {
     emit_label(b, label_else);
     self.false_stmt.generate(b, label_else, after)
   }
+
+  fn after(&mut self, label: i64) {
+    self.true_stmt.after(label);
+    self.false_stmt.after(label);
+  }
 }
 
 pub struct WhileStmt {
   cond: Box<dyn Expression>,
   body: Box<dyn Statement>,
-  after: i64,
 }
 
 impl WhileStmt {
@@ -216,7 +229,7 @@ impl WhileStmt {
     if cond.typ() != Type::boolean() {
       return Err(String::from("While condition should be of bool type"))
     }
-    Ok(WhileStmt { cond: cond, body: body, after: 0 })
+    Ok(WhileStmt { cond: cond, body: body })
   }
 
   pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<WhileStmt>, String> {
@@ -227,7 +240,7 @@ impl WhileStmt {
 
 impl Statement for WhileStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
-    self.after = after;
+    self.after(after);
     self.cond.jumps(b, 0, after)?;
     let label = new_label();
     emit_label(b, label);
@@ -236,15 +249,14 @@ impl Statement for WhileStmt {
     Ok(())
   }
 
-  fn after(&self) -> i64 {
-    self.after
+  fn after(&mut self, label: i64) {
+    self.body.after(label);
   }
 }
 
 pub struct DoStmt {
   cond: Box<dyn Expression>,
   body: Box<dyn Statement>,
-  after: i64,
 }
 
 impl DoStmt {
@@ -252,7 +264,7 @@ impl DoStmt {
     if cond.typ() != Type::boolean() {
       return Err(String::from("While condition should be of bool type"))
     }
-    Ok(DoStmt { cond: cond, body: body, after: 0 })
+    Ok(DoStmt { cond: cond, body: body })
   }
 
   pub fn new_box(cond: Box<dyn Expression>, body: Box<dyn Statement>) -> Result<Box<DoStmt>, String> {
@@ -263,40 +275,42 @@ impl DoStmt {
 
 impl Statement for DoStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
-    self.after = after;
+    self.after(after);
     let label = new_label();
     self.body.generate(b, begin, label)?;
     emit_label(b, label);
     self.cond.jumps(b, begin, 0)
   }
 
-  fn after(&self) -> i64 {
-    self.after
+  fn after(&mut self, label: i64) {
+    self.body.after(label);
   }
 }
 
 pub struct BreakStmt {
-  enclosing: Box<dyn Statement>
+  enc_after: i64,
 }
 
 impl BreakStmt {
-  pub fn new(enclosing: Box<dyn Statement>) -> Result<BreakStmt, String> {
-    if enclosing.is_null() {
-      return Err(String::from("Unenclosed break"))
-    }
-    Ok(BreakStmt { enclosing: enclosing })
+  pub fn new() -> BreakStmt {
+    BreakStmt { enc_after: 0 }
   }
 
-  pub fn new_box(enclosing: Box<dyn Statement>) -> Result<Box<BreakStmt>, String> {
-    let bs = BreakStmt::new(enclosing)?;
-    Ok(Box::new(bs))
+  pub fn new_box() -> Box<BreakStmt> {
+    Box::new(BreakStmt::new())
   }
 }
 
 impl Statement for BreakStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
-    emit(b, format!("goto L{}", self.enclosing.after()).as_str());
+    if self.enc_after > 0 {
+      emit(b, format!("goto L{}", self.enc_after).as_str());
+    }
     Ok(())
+  }
+
+  fn after(&mut self, label: i64) {
+    self.enc_after = label;
   }
 }
 
@@ -310,7 +324,7 @@ use super::*;
 
 #[test]
 fn statement_tests() {
-  let mut tests: Vec<(Box<dyn Statement>, &str)> = vec![
+  let tests: Vec<(Box<dyn Statement>, &str)> = vec![
     (
       AssignStmt::new_box(
         Identifier::new_box(Token::from_str("x"), Type::integer(), 4),
