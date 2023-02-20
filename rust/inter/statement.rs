@@ -303,9 +303,10 @@ impl BreakStmt {
 
 impl Statement for BreakStmt {
   fn generate(&mut self, b: &mut String, begin: i64, after: i64) -> Result<(), String> {
-    if self.enc_after > 0 {
-      emit(b, format!("goto L{}", self.enc_after).as_str());
+    if self.enc_after == 0 {
+      Err(String::from("Unenclosed break"))
     }
+    emit(b, format!("goto L{}", self.enc_after).as_str());
     Ok(())
   }
 
