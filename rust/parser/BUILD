@@ -9,6 +9,7 @@ rust_library(
     "//rust/lexer",
     "//rust/inter",
   ],
+  visibility = ["//rust:__subpackages__"],
 )
 
 rust_test(
