@@ -299,18 +299,18 @@ impl Statement for DoStmt {
 }
 
 pub struct BreakStmt<'a> {
-  enclosing: &'a Box<dyn Statement>
+  enclosing: &'a dyn Statement
 }
 
 impl BreakStmt<'_> {
-  pub fn new<'a>(enclosing: &'a Box<dyn Statement>) -> Result<BreakStmt<'a>, String> {
+  pub fn new<'a>(enclosing: &'a dyn Statement) -> Result<BreakStmt<'a>, String> {
     if enclosing.is_null() {
       return Err(String::from("Unenclosed break"))
     }
     Ok(BreakStmt { enclosing: enclosing })
   }
 
-  pub fn new_box<'a>(enclosing: &'a Box<dyn Statement>) -> Result<Box<BreakStmt<'a>>, String> {
+  pub fn new_box<'a>(enclosing: &'a dyn Statement) -> Result<Box<BreakStmt<'a>>, String> {
     let bs = BreakStmt::new(enclosing)?;
     Ok(Box::new(bs))
   }

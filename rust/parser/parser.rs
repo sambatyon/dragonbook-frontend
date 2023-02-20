@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::convert::Into;
 use std::mem::swap;
+use inter::statement::NullStmt;
+use inter::statement::Statement;
 use lexer::tokens as toks;
 use inter::expression as expr;
 use inter::statement as stmt;
@@ -49,7 +51,6 @@ pub struct Parser<T: std::io::Read> {
   lookahead: toks::Token,
   top: Box<Environment>,
   used: i64,
-  encstmt: Box<dyn stmt::Statement>,
 }
 
 impl<T: std::io::Read> Parser<T> {
@@ -59,14 +60,14 @@ impl<T: std::io::Read> Parser<T> {
       lookahead: toks::Token::Eof,
       top: Environment::empty(),
       used: 0,
-      encstmt: Box::new(stmt::NullStmt::new())
     };
     res.next()?;
     Ok(res)
   }
 
   pub fn program(&mut self, s: &mut String) -> Result<(), String> {
-    let mut stm = self.block()?;
+    let topstmt = NullStmt::new();
+    let mut stm = self.block(&topstmt)?;
     let begin = inter::new_label();
     let after = inter::new_label();
     inter::emit_label(s, begin);
@@ -90,7 +91,7 @@ impl<T: std::io::Read> Parser<T> {
     self.next()
   }
 
-  fn block(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+  fn block(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
     self.match_token(b'{')?;
 
     let mut empty = Environment::empty();
@@ -98,7 +99,7 @@ impl<T: std::io::Read> Parser<T> {
     self.top = Environment::new(empty);
 
     self.decls()?;
-    let stmts = self.stmts()?;
+    let stmts = self.stmts(encstmt)?;
     self.match_token(b'}')?;
 
     self.top = self.top.pop()?;
@@ -144,20 +145,21 @@ impl<T: std::io::Read> Parser<T> {
     Ok(inter::Type::array(of, size as u32))
   }
 
-  fn stmts(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+  fn stmts(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
     if self.lookahead.match_tag(b'}') {
       return Ok(stmt::NullStmt::new_box())
     }
-    let head = self.stmt()?;
-    let tail = self.stmts()?;
+    let head = self.stmt(encstmt)?;
+    let tail = self.stmts(encstmt)?;
     Ok(stmt::StmtSeq::new_box(head, tail))
   }
 
-  fn stmt(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
+  fn stmt(&mut self, encstmt: &dyn Statement) -> Result<Box<dyn stmt::Statement>, String> {
     const OPEN_BR: u32 = b'{' as u32;
     const SEMICOLON: u32 = b';' as u32;
     const IF: u32 = toks::Tag::IF as u32;
     const WHILE: u32 = toks::Tag::WHILE as u32;
+    // const BREAK: u32 = toks::Tag::BREAK as u32;
 
     match self.lookahead.tag() {
       SEMICOLON => {
@@ -169,13 +171,13 @@ impl<T: std::io::Read> Parser<T> {
         self.match_token(b'(')?;
         let ex = self.boolean()?;
         self.match_token(b')')?;
-        let body = self.stmt()?;
+        let body = self.stmt(encstmt)?;
         if !self.lookahead.match_tag(toks::Tag::ELSE) {
           let ifs = stmt::IfStmt::new_box(ex, body)?;
           return Ok(ifs)
         }
         self.match_token(toks::Tag::ELSE)?;
-        let els = self.stmt()?;
+        let els = self.stmt(encstmt)?;
         let r = stmt::ElseStmt::new_box(ex, body, els)?;
         Ok(r)
       },
@@ -191,11 +193,11 @@ impl<T: std::io::Read> Parser<T> {
         }
 
         self.match_token(b')')?;
-        let body = self.stmt()?;
+        let body = self.stmt(wh.as_ref())?;
         wh.init(ex, body)?;
         Ok(wh)
       }
-      OPEN_BR => self.block(),
+      OPEN_BR => self.block(encstmt),
       _ => self.assign()
     }
   }
