@@ -121,3 +121,36 @@ maven_install(
     ],
 )
 
+# Python Config
+
+http_archive(
+    name = "rules_python",
+    sha256 = "0a8003b044294d7840ac7d9d73eef05d6ceb682d7516781a4ec62eeb34702578",
+    strip_prefix = "rules_python-0.24.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.24.0/rules_python-0.24.0.tar.gz",
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+python_register_toolchains(
+    name = "python_3_11",
+    # Available versions are listed in @rules_python//python:versions.bzl.
+    # We recommend using the same version your team is already standardized on.
+    python_version = "3.11",
+)
+
+load("@python_3_11//:defs.bzl", "interpreter")
+
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+pip_parse(
+   name = "pydeps",
+   python_interpreter_target = interpreter,
+   requirements = "//tools/python:requirements.txt",
+   # requirements_lock = "//python:requirements_lock.txt",
+)
+
+load("@pydeps//:requirements.bzl", "install_deps")
+install_deps()
+
+py_repositories()
