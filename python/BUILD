@@ -9,21 +9,26 @@ py_library(
     "dragon/lexer/__init__.py",
     "dragon/lexer/lexer.py",
     "dragon/lexer/tokens.py",
+    "dragon/parser/__init__.py",
+    "dragon/parser/parser.py",
   ],
 )
 
 pytest_test(
-  name = "test_lexer",
-  srcs = ["dragon/lexer/test_lexer.py"],
-  legacy_create_init = 0,
+  name = "test_dragon",
+  srcs = [
+    "dragon/lexer/test_lexer.py",
+    "dragon/parser/test_parser.py",
+  ],
   deps = [
     ":dragon",
   ],
+  legacy_create_init = 0,
 )
 
 py_binary(
   name = "frontend",
+  deps = [":dragon"],
   srcs = ["frontend.py"],
   main = "frontend.py",
-  deps = [":dragon"],
 )
