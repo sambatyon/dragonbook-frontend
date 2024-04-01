@@ -1,7 +1,8 @@
 import io
 import pytest
+from typing import List
 
-from dragon.lexer import lexer
+import dragon.lexer as lexer
 from dragon.lexer import tokens
 
 
@@ -52,7 +53,7 @@ from dragon.lexer import tokens
         tokens.Token(ord('}'))
     ])
 ])
-def test_lexer(source, want):
+def test_lexer(source: str, want: List[tokens.Token]):
   lex = lexer.Lexer(io.StringIO(source))
   for tk in want:
     tok = lex.scan()
