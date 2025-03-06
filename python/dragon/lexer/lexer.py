@@ -4,7 +4,6 @@ from dragon.lexer import tokens
 import io
 
 
-
 class Lexer:
   def __init__(self, source: io.TextIOBase) -> None:
     self.__line: int = 1
