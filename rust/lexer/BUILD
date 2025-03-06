@@ -7,7 +7,7 @@ rust_library(
     "tokens.rs",
   ],
   deps = [
-    "@crate_index//:once_cell",
+    "@crates//:once_cell",
   ],
   visibility = ["//rust:__subpackages__"],
 )
@@ -16,6 +16,6 @@ rust_test(
   name = "lexer_test",
   crate = ":lexer",
   deps = [
-     "@crate_index//:stringreader",
+     "@crates//:stringreader",
   ],
 )

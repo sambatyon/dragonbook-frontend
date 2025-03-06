@@ -1,0 +1,70 @@
+module(name="dragonbook", version = "0.0.1")
+
+# C++ CONFIG
+bazel_dep(name = "googletest", version = "1.15.2")
+
+# GO CONFIG
+bazel_dep(name = "rules_go", version = "0.50.1")
+go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(version = "1.23.4")
+
+# Rust CONFIG
+bazel_dep(name = "rules_rust", version = "0.57.1")
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.83.0"],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.spec(
+    package = "stringreader",
+    version = "0.1.1",
+)
+crate.spec(
+    package = "once_cell",
+    version = "1.20.3",
+)
+crate.from_specs()
+use_repo(crate, "crates")
+
+# Java CONFIG
+bazel_dep(name = "rules_java", version = "8.9.0")
+bazel_dep(name = "rules_jvm_external", version = "6.5")
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+  repositories = [
+    "https://maven.google.com",
+    "https://repo1.maven.org/maven2",
+  ],
+)
+maven.artifact(
+  testonly = True,
+  artifact = "junit",
+  group = "junit",
+  version = "4.13",
+)
+use_repo(maven, "maven")
+java_toolchains = use_extension("@rules_java//java:extensions.bzl", "toolchains")
+use_repo(
+  java_toolchains,
+  "local_jdk",
+  "remotejdk21_macos",
+  "remotejdk21_macos_aarch64",
+)
+
+# Python CONFIG
+bazel_dep(name = "rules_python", version = "1.2.0")
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = "3.12",
+)
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+  hub_name = "pydeps",
+  python_version = "3.12",
+  requirements_lock = "//tools/python:requirements.txt",
+)
+use_repo(pip, "pydeps")

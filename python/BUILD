@@ -14,16 +14,16 @@ py_library(
 
 pytest_test(
   name = "test_lexer",
+  srcs = ["dragon/lexer/test_lexer.py"],
+  legacy_create_init = 0,
   deps = [
     ":dragon",
   ],
-  srcs = ["dragon/lexer/test_lexer.py"],
-  legacy_create_init = 0,
 )
 
 py_binary(
   name = "frontend",
-  deps = [":dragon"],
   srcs = ["frontend.py"],
   main = "frontend.py",
+  deps = [":dragon"],
 )

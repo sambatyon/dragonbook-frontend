@@ -1,11 +1,15 @@
-build --java_language_version=18
+build --java_language_version=21
+build --tool_java_language_version=21
+build --tool_java_runtime_version=21
 
-run --java_language_version=18
-run --java_runtime_version=remotejdk_18
-run --jvmopt="-Dsun.locale.formatasdefault=true"
+run --java_language_version=21
+run --java_runtime_version=21
+run --tool_java_language_version=21
+run --tool_java_runtime_version=21
 
-test --java_language_version=18
-test --java_runtime_version=remotejdk_18
-test --jvmopt="-Dsun.locale.formatasdefault=true"
+test --java_language_version=21
+test --java_runtime_version=21
+test --tool_java_language_version=21
+test --tool_java_runtime_version=21
 
 build --cxxopt='-std=c++20'

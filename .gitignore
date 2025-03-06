@@ -2,3 +2,4 @@ build/
 bazel-*
 .vscode/
 rust-project.json
+MODULE.bazel.lock
