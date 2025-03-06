@@ -53,7 +53,7 @@ cc_test(
   ],
   deps = [
     ":inter",
-    "@com_google_googletest//:gtest_main"
+    "@googletest//:gtest_main"
   ],
   data = [],
   size = "small",

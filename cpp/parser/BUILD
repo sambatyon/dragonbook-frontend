@@ -23,7 +23,7 @@ cc_test(
   ],
   deps = [
     ":parser",
-    "@com_google_googletest//:gtest_main"
+    "@googletest//:gtest_main"
   ],
   data = [],
   size = "small",
