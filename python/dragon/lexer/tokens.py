@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Optional
+
+from typing import Optional, override
 
 Tag = int
 
@@ -46,8 +47,7 @@ class Integer(Token):
   def value(self) -> int:
     return self.__value
 
-  # TODO(sambatyon): Enable override in 3.12
-  # @override
+  @override
   def __str__(self) -> str:
     return str(self.__value)
 
@@ -61,8 +61,7 @@ class Real(Token):
   def value(self) -> float:
     return self.__value
 
-  # TODO(sambatyon): Enable override in 3.12
- # @override
+  @override
   def __str__(self) -> str:
     return f"{self.__value:.3f}"
 
@@ -76,8 +75,7 @@ class Word(Token):
   def lexeme(self) -> str:
     return self.__lexeme
 
-  # TODO(sambatyon): Enable override in 3.12
-  # @override
+  @override
   def __str__(self) -> str:
     return self.__lexeme
 
@@ -118,7 +116,7 @@ class Type(Word):
   def width(self) -> int:
     return self.__width
 
-Type.INT: Type = Type("int", BASIC, 4)
-Type.FLOAT: Type = Type("float", BASIC, 8)
-Type.CHAR: Type = Type("char", BASIC, 1)
-Type.BOOL: Type = Type("bool", BASIC, 1)
+Type.INT = Type("int", BASIC, 4)
+Type.FLOAT = Type("float", BASIC, 8)
+Type.CHAR = Type("char", BASIC, 1)
+Type.BOOL = Type("bool", BASIC, 1)

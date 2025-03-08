@@ -1,14 +1,24 @@
-from . import inter
+from typing import override
 
 from dragon.lexer import tokens
 
+from . import inter
+
 class Expression(inter.Node):
-  op: tokens.Token
-  typ: tokens.Type
+  __op: tokens.Token
+  __typ: tokens.Type
 
   def __init__(self, op: tokens.Token, typ: tokens.Type):
-    self.op = op
-    self.typ = typ
+    self.__op = op
+    self.__typ = typ
+
+  @property
+  def op(self) -> tokens.Token:
+    return self.__op
+
+  @property
+  def type(self) -> tokens.Type:
+    return self.__typ
 
   def gen(self) -> tuple["Expression", str]:
     return (self, "")
@@ -17,7 +27,7 @@ class Expression(inter.Node):
     return (self, "")
 
   def __str__(self):
-    return str(self.op)
+    return str(self.__op)
 
   def jumping(self, t: int, f: int) -> str:
     return self.emit_jumps(str(self), t, f)
@@ -36,11 +46,12 @@ class Expression(inter.Node):
       return ""
 
 class Ident(Expression):
-  _offset: int
+  __offset: int
 
   def __init__(self, id: tokens.Word, type: tokens.Type, b: int):
     super().__init__(id, type)
-    self._offset = b
+    self.__offset = b
 
+  @property
   def offset(self) -> int:
-    return self._offset
+    return self.__offset
