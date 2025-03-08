@@ -8,7 +8,12 @@ def __label_init() -> threading.local:
 __l: threading.local = __label_init()
 
 def reset_labels() -> None:
-  Node.l.count = 0
+  __l.count = 0
+
+def new_label() -> int:
+  lbl: int = __l.count
+  __l.count += 1
+  return lbl
 
 def emit_label(i: int) -> str:
   return f"L{i}:"

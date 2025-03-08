@@ -11,6 +11,7 @@ py_library(
     "dragon/lexer/tokens.py",
     "dragon/inter/__init__.py",
     "dragon/inter/expression.py",
+    "dragon/inter/statement.py",
     "dragon/inter/inter.py",
     "dragon/parser/__init__.py",
     "dragon/parser/parser.py",

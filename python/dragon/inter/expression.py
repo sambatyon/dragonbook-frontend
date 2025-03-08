@@ -45,7 +45,7 @@ class Expression(inter.Node):
     else:
       return ""
 
-class Ident(Expression):
+class Identifier(Expression):
   __offset: int
 
   def __init__(self, id: tokens.Word, type: tokens.Type, b: int):
@@ -55,3 +55,56 @@ class Ident(Expression):
   @property
   def offset(self) -> int:
     return self.__offset
+
+
+class Temp(Expression):
+  __count: int = 1
+  __number: int
+
+  def __init__(self, t: tokens.Type):
+    super().__init__(tokens.Word.TEMP, t)
+    self.__number = Temp.__count
+    Temp.__count += 1
+
+  @override
+  def __str__(self) -> str:
+    return f"t{self.__number}"
+
+  @staticmethod
+  def reset_count() -> None:
+    Temp.__count = 1
+
+
+class Operator(Expression):
+  def __init__(self, tok: tokens.Token, p: tokens.Type):
+    super().__init__(tok, p)
+
+  @override
+  def reduce(self) -> tuple[Expression, str]:
+    x, _ = self.gen()
+    tmp = Temp(self.type)
+    return tmp, inter.emit(f"{tmp} = {x}")
+
+class Arithmetic(Operator):
+  __left: Expression
+  __right: Expression
+
+  def __init__(self, tok: tokens.Token, xl: Expression, xr: Expression):
+    super().__init__(tok, None)
+    self.__left = xl
+    self.__right = xr
+    typ = tokens.Type.max(xl.type, xr.type)
+    if typ is None:
+      self.error("type error")
+
+  @override
+  def gen(self) -> tuple[Expression, str]:
+    return Arithmetic(
+      self.op,
+      self.__left.reduce()[0],
+      self.__right.reduce()[0]
+    ), ""
+
+  @override
+  def __str__(self) -> str:
+    return f"{self.__left} {self.op} {self.__right}"
