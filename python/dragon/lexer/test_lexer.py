@@ -2,7 +2,7 @@ import io
 import pytest
 from typing import List
 
-import dragon.lexer as lexer
+from dragon import lexer
 from dragon.lexer import tokens
 
 
