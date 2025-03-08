@@ -34,8 +34,9 @@ class Token:
   def tag(self) -> Tag:
     return self.__tag
 
+  @override
   def __str__(self) -> str:
-    return str(self.__tag)
+    return str(chr(self.__tag))
 
 
 class Integer(Token):
@@ -90,7 +91,7 @@ Word.MINUS: Word = Word('minus', MINUS)
 Word.TRUE: Word = Word('true', TRUE)
 Word.FALSE: Word = Word('false', FALSE)
 Word.TEMP: Word = Word('t', TEMP)
-Word.TEMP: Word = Word('[]', INDEX)
+Word.ACCESS: Word = Word('[]', INDEX)
 
 
 class Type(Word):
