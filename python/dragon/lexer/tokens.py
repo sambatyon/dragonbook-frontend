@@ -121,3 +121,24 @@ Type.INT = Type("int", BASIC, 4)
 Type.FLOAT = Type("float", BASIC, 8)
 Type.CHAR = Type("char", BASIC, 1)
 Type.BOOL = Type("bool", BASIC, 1)
+
+class Array(Type):
+  __of: Type
+  __size: int
+
+  def __init__(self, size: int, typ: Type):
+    super().__init__("[]", INDEX, size * p.width)
+    self.__size = size
+    self.__of = typ
+
+  @property
+  def size(self) -> int:
+    return self.__size
+
+  @property
+  def of(self) -> Type:
+    return self.__of
+
+  @override
+  def __str__(self) -> str:
+    return f"[{self.__size}] {self.__of}"

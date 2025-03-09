@@ -11,9 +11,8 @@ def reset_labels() -> None:
   __l.count = 0
 
 def new_label() -> int:
-  lbl: int = __l.count
   __l.count += 1
-  return lbl
+  return __l.count
 
 def emit_label(i: int) -> str:
   return f"L{i}:"
