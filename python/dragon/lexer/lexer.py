@@ -1,9 +1,7 @@
-from typing import Mapping, List
-from dragon.lexer import tokens
-
 import io
+from typing import Mapping, List
 
-
+from dragon.lexer import tokens
 class Lexer:
   def __init__(self, source: io.TextIOBase) -> None:
     self.__line: int = 1

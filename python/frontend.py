@@ -1,5 +1,5 @@
-from typing import List
 import sys
+from typing import List
 
 def main(_: List[str]) -> None:
     print("Hello world")
