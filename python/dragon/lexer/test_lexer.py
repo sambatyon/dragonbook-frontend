@@ -1,6 +1,7 @@
 import io
-import pytest
 from typing import List
+
+import pytest
 
 from dragon import lexer
 from dragon.lexer import tokens

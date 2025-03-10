@@ -1,8 +1,8 @@
 from typing import Optional, override
 
+from dragon import inter
 from dragon.lexer import tokens
 
-from . import inter
 
 class Expression(inter.Node):
   __op: tokens.Token
@@ -56,6 +56,33 @@ class Identifier(Expression):
   def offset(self) -> int:
     return self.__offset
 
+class Constant(Expression):
+  def __init__(self, op: tokens.Token, typ: tokens.Type):
+    super().__init__(op, typ)
+
+  @override
+  def jumping(self, to: int, fr: int) -> str:
+    if self == Constant.true() and to != 0:
+      return inter.emit(f"goto L{to}")
+    if self == Constant.false() and fr != 0:
+      return inter.emit(f"goto L{fr}")
+    return ""
+
+  @staticmethod
+  def true() -> "Constant":
+    return Constant(tokens.Word.TRUE, tokens.Type.BOOL)
+
+  @staticmethod
+  def false() -> "Constant":
+    return Constant(tokens.Word.FALSE, tokens.Type.BOOL)
+
+  @staticmethod
+  def integer(value: int) -> "Constant":
+    return Constant(tokens.Integer(value), tokens.Type.INT)
+
+  @staticmethod
+  def real(value: float) -> "Constant":
+    return Constant(tokens.Real(value), tokens.Type.REAL)
 
 class Temp(Expression):
   __count: int = 1

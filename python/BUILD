@@ -23,6 +23,7 @@ pytest_test(
   srcs = [
     "dragon/lexer/test_lexer.py",
     "dragon/inter/test_expression.py",
+    "dragon/inter/test_statement.py",
     "dragon/parser/test_parser.py",
   ],
   deps = [
