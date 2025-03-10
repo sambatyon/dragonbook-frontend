@@ -7,7 +7,7 @@
     "GOPACKAGESDRIVER": "${workspaceFolder}/tools/gopackagesdriver.sh"
   },
   "go.enableCodeLens": {
-    "references": false,
+    "references": true,
     "runtest": false
   },
   "gopls": {
