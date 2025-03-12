@@ -27,8 +27,10 @@ WHILE: Tag = 275
 
 
 class Token:
+  __tag: Tag
+
   def __init__(self, tag: Tag):
-    self.__tag: Tag = tag
+    self.__tag = tag
 
   @property
   def tag(self) -> Tag:
@@ -40,9 +42,11 @@ class Token:
 
 
 class Integer(Token):
+  __value: int
+
   def __init__(self, value: int):
     super().__init__(NUM)
-    self.__value: int = value
+    self.__value = value
 
   @property
   def value(self) -> int:
@@ -54,9 +58,11 @@ class Integer(Token):
 
 
 class Real(Token):
+  __value: float
+
   def __init__(self, value: float):
     super().__init__(REAL)
-    self.__value: float = value
+    self.__value = value
 
   @property
   def value(self) -> float:
@@ -68,6 +74,8 @@ class Real(Token):
 
 
 class Word(Token):
+  __lexeme: str
+
   def __init__(self, lexeme: str, tag: Tag):
     super().__init__(tag)
     self.__lexeme = lexeme
@@ -81,17 +89,17 @@ class Word(Token):
     return self.__lexeme
 
 
-Word.AND: Word = Word('&&', AND)
-Word.OR: Word = Word('||', OR)
-Word.EQ: Word = Word('==', EQ)
-Word.NE: Word = Word('!=', NE)
-Word.LE: Word = Word('<=', LE)
-Word.GE: Word = Word('>=', GE)
-Word.MINUS: Word = Word('minus', MINUS)
-Word.TRUE: Word = Word('true', TRUE)
-Word.FALSE: Word = Word('false', FALSE)
-Word.TEMP: Word = Word('t', TEMP)
-Word.ACCESS: Word = Word('[]', INDEX)
+Word.AND = Word('&&', AND)
+Word.OR = Word('||', OR)
+Word.EQ = Word('==', EQ)
+Word.NE = Word('!=', NE)
+Word.LE = Word('<=', LE)
+Word.GE = Word('>=', GE)
+Word.MINUS = Word('minus', MINUS)
+Word.TRUE = Word('true', TRUE)
+Word.FALSE = Word('false', FALSE)
+Word.TEMP = Word('t', TEMP)
+Word.ACCESS = Word('[]', INDEX)
 
 
 class Type(Word):
