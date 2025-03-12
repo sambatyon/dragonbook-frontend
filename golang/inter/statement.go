@@ -56,13 +56,13 @@ func (a *AssignStmt) after() int {
 	return 0
 }
 
-type AssingArrayStmt struct {
+type AssignArrayStmt struct {
 	id    *Identifier
 	index Expression
 	expr  Expression
 }
 
-func NewAssignArrayStmt(access *AccessOp, expr Expression) (*AssingArrayStmt, error) {
+func NewAssignArrayStmt(access *AccessOp, expr Expression) (*AssignArrayStmt, error) {
 	_, aok := access.Type().(*lexer.Array)
 	_, eok := expr.Type().(*lexer.Array)
 	if (aok || eok) || (access.Type() != expr.Type()) {
@@ -72,10 +72,10 @@ func NewAssignArrayStmt(access *AccessOp, expr Expression) (*AssingArrayStmt, er
 		return nil, errors.New("Type error")
 	}
 
-	return &AssingArrayStmt{id: access.Array, index: access.Index, expr: expr}, nil
+	return &AssignArrayStmt{id: access.Array, index: access.Index, expr: expr}, nil
 }
 
-func (aa *AssingArrayStmt) Generate(b *strings.Builder, begin int, after int) error {
+func (aa *AssignArrayStmt) Generate(b *strings.Builder, begin int, after int) error {
 	idx, err := aa.index.Reduce(b)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (aa *AssingArrayStmt) Generate(b *strings.Builder, begin int, after int) er
 	return nil
 }
 
-func (aa *AssingArrayStmt) after() int {
+func (aa *AssignArrayStmt) after() int {
 	return 0
 }
 
