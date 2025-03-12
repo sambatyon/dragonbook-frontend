@@ -2,12 +2,15 @@ import io
 from typing import Mapping, List
 
 from dragon.lexer import tokens
+
 class Lexer:
+  __line: int = 1
+  __peek: str = ' '
+  __words: map[str, tokens.Word] = {}
+  __source: io.TextIOBase
+
   def __init__(self, source: io.TextIOBase) -> None:
-    self.__line: int = 1
-    self.__peek: str = ' '
-    self.__words: Mapping[str, tokens.Word] = {}
-    self.__source: io.TextIOBase = source
+    self.__source = source
 
     self._reserve(tokens.Word('if', tokens.IF))
     self._reserve(tokens.Word('else', tokens.ELSE))
