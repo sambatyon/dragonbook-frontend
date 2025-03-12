@@ -23,7 +23,7 @@ var stmtTests = []struct {
 		"\tx = 42\n",
 	},
 	{
-		&AssingArrayStmt{
+		&AssignArrayStmt{
 			&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
 			intConstant(0),
 			intConstant(42),
@@ -36,7 +36,7 @@ var stmtTests = []struct {
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
 				intConstant(42),
 			},
-			&AssingArrayStmt{
+			&AssignArrayStmt{
 				&Identifier{lexer.NewWord(lexer.ID, "x"), lexer.IntType(), 4},
 				intConstant(0),
 				intConstant(42),
