@@ -1,9 +1,9 @@
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
 rust_library(
-  name = "inter",
+  name = "ast",
   srcs = [
-    "inter.rs",
+    "ast.rs",
     "expression.rs",
     "statement.rs",
   ],
@@ -17,8 +17,8 @@ rust_library(
 # Run this test with  --test_arg="--test-threads=1" since the label generator
 # may get reset.
 rust_test(
-  name = "inter_test",
-  crate = ":inter",
+  name = "ast_test",
+  crate = ":ast",
   deps = [
   ],
 )

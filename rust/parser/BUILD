@@ -7,7 +7,7 @@ rust_library(
   ],
   deps = [
     "//rust/lexer",
-    "//rust/inter",
+    "//rust/ast",
   ],
   visibility = ["//rust:__subpackages__"],
 )
