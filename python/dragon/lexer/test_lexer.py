@@ -52,7 +52,8 @@ from dragon.lexer import tokens
         tokens.Word("a", tokens.ID), tokens.Token(ord('[')), tokens.Word("j", tokens.ID), tokens.Token(ord(']')), tokens.Token(ord('=')), tokens.Word("x", tokens.ID), tokens.Token(ord(';')),
         tokens.Token(ord('}')),
         tokens.Token(ord('}'))
-    ])
+    ]),
+    ("{}", [tokens.Token(ord('{')), tokens.Token(ord('}'))]),
 ])
 def test_lexer(source: str, want: List[tokens.Token]):
   lex = lexer.Lexer(io.StringIO(source))
