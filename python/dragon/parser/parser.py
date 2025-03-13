@@ -2,9 +2,9 @@ from typing import Optional
 
 from dragon import lexer
 from dragon.lexer import tokens
-from dragon import inter
-from dragon.inter import expression as expr
-from dragon.inter import statement as stmt
+from dragon import ast
+from dragon.ast import expression as expr
+from dragon.ast import statement as stmt
 
 
 class Environment:
@@ -58,12 +58,12 @@ class Parser:
 
   def program(self) -> str:
     s: Optional[stmt.Statement] = self.__block()
-    begin: int = inter.new_label()
-    after: int = inter.new_label()
+    begin: int = ast.new_label()
+    after: int = ast.new_label()
     return ''.join([
-      inter.emit_label(begin),
+      ast.emit_label(begin),
       s.gen(begin, after) if s is not None else "",
-      inter.emit_label(after)
+      ast.emit_label(after)
     ])
 
   def __block(self) -> Optional[stmt.Statement]:

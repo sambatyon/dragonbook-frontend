@@ -1,8 +1,8 @@
 import pytest
 
-from dragon import inter
+from dragon import ast
 from dragon.lexer import tokens
-from dragon.inter import expression as expr
+from dragon.ast import expression as expr
 
 @pytest.mark.parametrize("exp,s,gen,red", [
   (
@@ -85,7 +85,7 @@ from dragon.inter import expression as expr
   ),
 ])
 def test_expression(exp: expr.Expression, s: str, gen: str, red: str):
-  inter.reset_labels()
+  ast.reset_labels()
   expr.Temp.reset_count()
   assert str(exp) == s
   assert exp.gen()[1] == gen

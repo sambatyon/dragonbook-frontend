@@ -1,10 +1,10 @@
 from typing import Optional, override
 
-from dragon import inter
+from dragon import ast
 from dragon.lexer import tokens
-from dragon.inter import expression as expr
+from dragon.ast import expression as expr
 
-class Statement(inter.Node):
+class Statement(ast.Node):
   _after: int = 0
 
   def gen(self, begin: int, after: int) -> str:
@@ -32,7 +32,7 @@ class Assign(Statement):
     ex, exstr = self.__expr.gen()
     return "".join([
       exstr,
-      inter.emit(f"{self.__id} = {ex}")
+      ast.emit(f"{self.__id} = {ex}")
     ])
 
 class AssignArray(Statement):
@@ -64,7 +64,7 @@ class AssignArray(Statement):
     return "".join([
       idxstr,
       exstr,
-      inter.emit(f"{self.__array} [ {idx} ] = {ex}")
+      ast.emit(f"{self.__array} [ {idx} ] = {ex}")
     ])
 
 class Sequence(Statement):
@@ -81,10 +81,10 @@ class Sequence(Statement):
       return self.__tail.gen(begin, after)
     if self.__tail is None:
       return self.__head.gen(begin, after)
-    label = inter.new_label()
+    label = ast.new_label()
     return "".join([
       self.__head.gen(begin, label),
-      inter.emit_label(label),
+      ast.emit_label(label),
       self.__tail.gen(label, after)
     ])
 
@@ -100,10 +100,10 @@ class If(Statement):
 
   @override
   def gen(self, begin: int, after: int) -> str:
-    label: int = inter.new_label()
+    label: int = ast.new_label()
     return "".join([
       self.__cond.jumping(0, after),
-      inter.emit_label(label),
+      ast.emit_label(label),
       self.__stmt.gen(label, after)
     ])
 
@@ -121,14 +121,14 @@ class Else(Statement):
 
   @override
   def gen(self, begin: int, after: int) -> str:
-    label1: int = inter.new_label()
-    label2: int = inter.new_label()
+    label1: int = ast.new_label()
+    label2: int = ast.new_label()
     return "".join([
       self.__cond.jumping(0, label2),
-      inter.emit_label(label1),
+      ast.emit_label(label1),
       self.__true_stmt.gen(label1, after),
-      inter.emit(f"goto L{after}"),
-      inter.emit_label(label2),
+      ast.emit(f"goto L{after}"),
+      ast.emit_label(label2),
       self.__false_stmt.gen(label2, after)
     ])
 
@@ -153,12 +153,12 @@ class While(Statement):
   @override
   def gen(self, begin: int, after: int) -> str:
     self._after = after
-    label: int = inter.new_label()
+    label: int = ast.new_label()
     return "".join([
       self.__cond.jumping(0, after),
-      inter.emit_label(label),
+      ast.emit_label(label),
       self.__body.gen(label, begin),
-      inter.emit(f"goto L{begin}")
+      ast.emit(f"goto L{begin}")
     ])
 
 class Do(Statement):
@@ -182,10 +182,10 @@ class Do(Statement):
   @override
   def gen(self, begin: int, after: int) -> str:
     self._after = after
-    label: int = inter.new_label()
+    label: int = ast.new_label()
     return "".join([
       self.__body.gen(begin, label),
-      inter.emit_label(label),
+      ast.emit_label(label),
       self.__cond.jumping(begin, 0),
     ])
 
@@ -199,4 +199,4 @@ class Break(Statement):
 
   @override
   def gen(self, begin: int, end: int) -> str:
-    return inter.emit(f"goto L{self.__stmt._after}")
+    return ast.emit(f"goto L{self.__stmt._after}")

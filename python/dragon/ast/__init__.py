@@ -1,1 +1,1 @@
-from .inter import *
+from .ast import *

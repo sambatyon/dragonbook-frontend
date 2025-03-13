@@ -1,9 +1,9 @@
 import pytest
 
-from dragon import inter
+from dragon import ast
 from dragon.lexer import tokens
-from dragon.inter import expression as expr
-from dragon.inter import statement as stmt
+from dragon.ast import expression as expr
+from dragon.ast import statement as stmt
 
 @pytest.mark.parametrize("st,want", [
   (
@@ -84,8 +84,8 @@ from dragon.inter import statement as stmt
   ),
 ])
 def test_statement(st: stmt.Statement, want: str) -> None:
-  inter.reset_labels()
+  ast.reset_labels()
   expr.Temp.reset_count()
-  begin = inter.new_label()
-  after = inter.new_label()
+  begin = ast.new_label()
+  after = ast.new_label()
   assert st.gen(begin, after) == want

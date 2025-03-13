@@ -5,8 +5,8 @@ import pytest
 
 from dragon import parser
 from dragon import lexer
-from dragon import inter
-from dragon.inter import expression as expr
+from dragon import ast
+from dragon.ast import expression as expr
 
 @pytest.mark.parametrize("source,want", [
   ("{}", "L1:L2:"),
@@ -109,7 +109,7 @@ from dragon.inter import expression as expr
   ),
 ])
 def test_parser(source: str, want: str):
-  inter.reset_labels()
+  ast.reset_labels()
   expr.Temp.reset_count()
   prs = parser.Parser(lexer.Lexer(io.StringIO(source)))
   assert prs.program() == want
