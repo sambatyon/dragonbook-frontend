@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"dragonbook/inter"
+	"dragonbook/ast"
 	"dragonbook/lexer"
 	"errors"
 	"fmt"
@@ -9,19 +9,19 @@ import (
 )
 
 type environment struct {
-	table    map[string]*inter.Identifier
+	table    map[string]*ast.Identifier
 	previous *environment
 }
 
 func NewEnvironment(top *environment) *environment {
-	return &environment{make(map[string]*inter.Identifier), top}
+	return &environment{make(map[string]*ast.Identifier), top}
 }
 
-func (e *environment) put(key string, value *inter.Identifier) {
+func (e *environment) put(key string, value *ast.Identifier) {
 	e.table[key] = value
 }
 
-func (e *environment) get(key string) (*inter.Identifier, bool) {
+func (e *environment) get(key string) (*ast.Identifier, bool) {
 	for cur := e; cur != nil; cur = cur.previous {
 		found, ok := cur.table[key]
 		if ok {
@@ -36,14 +36,14 @@ type Parser struct {
 	lookahead lexer.Token
 	top       *environment
 	used      int
-	encstmt   inter.Statement
+	encstmt   ast.Statement
 }
 
 func NewParser(lex *lexer.Lexer) (*Parser, error) {
 	if lex == nil {
 		return nil, errors.New("lexer is nil")
 	}
-	res := &Parser{lex, nil, nil, 0, inter.NullStmt()}
+	res := &Parser{lex, nil, nil, 0, ast.NullStmt()}
 	if err := res.move(); err != nil {
 		return nil, err
 	}
@@ -74,17 +74,17 @@ func (p *Parser) Program(b *strings.Builder) error {
 	if err != nil {
 		return err
 	}
-	begin := inter.NewLabel()
-	after := inter.NewLabel()
-	inter.EmitLabel(b, begin)
+	begin := ast.NewLabel()
+	after := ast.NewLabel()
+	ast.EmitLabel(b, begin)
 	if err := stmt.Generate(b, begin, after); err != nil {
 		return err
 	}
-	inter.EmitLabel(b, after)
+	ast.EmitLabel(b, after)
 	return nil
 }
 
-func (p *Parser) block() (inter.Statement, error) {
+func (p *Parser) block() (ast.Statement, error) {
 	if err := p.match(lexer.Tag('{')); err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (p *Parser) decls() error {
 		if err := p.match(lexer.Tag(';')); err != nil {
 			return err
 		}
-		id := inter.NewIdentifier(tok, t, p.used)
+		id := ast.NewIdentifier(tok, t, p.used)
 		p.top.put(tok.String(), id)
 		p.used += t.Width()
 	}
@@ -158,9 +158,9 @@ func (p *Parser) dims(of lexer.Type) (lexer.Type, error) {
 	return &lexer.Array{Of: of, Length: int(sz.Value)}, nil
 }
 
-func (p *Parser) stmts() (inter.Statement, error) {
+func (p *Parser) stmts() (ast.Statement, error) {
 	if p.lookahead.Tag() == lexer.Tag('}') {
-		return inter.NullStmt(), nil
+		return ast.NullStmt(), nil
 	}
 	head, err := p.stmt()
 	if err != nil {
@@ -170,16 +170,16 @@ func (p *Parser) stmts() (inter.Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	return inter.NewStmtSeq(head, tail), nil
+	return ast.NewStmtSeq(head, tail), nil
 }
 
-func (p *Parser) stmt() (inter.Statement, error) {
+func (p *Parser) stmt() (ast.Statement, error) {
 	switch p.lookahead.Tag() {
 	case lexer.Tag(';'):
 		if err := p.move(); err != nil {
 			return nil, err
 		}
-		return inter.NullStmt(), nil
+		return ast.NullStmt(), nil
 
 	case lexer.IF:
 		if err := p.match(lexer.IF); err != nil {
@@ -200,7 +200,7 @@ func (p *Parser) stmt() (inter.Statement, error) {
 			return nil, err
 		}
 		if p.lookahead.Tag() != lexer.ELSE {
-			return inter.NewIfStmt(expr, body)
+			return ast.NewIfStmt(expr, body)
 		}
 		if err := p.match(lexer.ELSE); err != nil {
 			return nil, err
@@ -209,10 +209,10 @@ func (p *Parser) stmt() (inter.Statement, error) {
 		if err != nil {
 			return nil, err
 		}
-		return inter.NewElseStmt(expr, body, els)
+		return ast.NewElseStmt(expr, body, els)
 
 	case lexer.WHILE:
-		while := &inter.WhileStmt{nil, nil, 0}
+		while := &ast.WhileStmt{nil, nil, 0}
 		saved := p.encstmt
 		p.encstmt = while
 		if err := p.match(lexer.WHILE); err != nil {
@@ -243,7 +243,7 @@ func (p *Parser) stmt() (inter.Statement, error) {
 		return while, nil
 
 	case lexer.DO:
-		do := &inter.DoStmt{nil, nil, 0}
+		do := &ast.DoStmt{nil, nil, 0}
 		saved := p.encstmt
 		p.encstmt = do
 		if err := p.match(lexer.DO); err != nil {
@@ -286,7 +286,7 @@ func (p *Parser) stmt() (inter.Statement, error) {
 		if err := p.match(lexer.Tag(';')); err != nil {
 			return nil, err
 		}
-		return inter.NewBreakStmt(p.encstmt)
+		return ast.NewBreakStmt(p.encstmt)
 
 	case lexer.Tag('{'):
 		return p.block()
@@ -296,7 +296,7 @@ func (p *Parser) stmt() (inter.Statement, error) {
 	}
 }
 
-func (p *Parser) assign() (inter.Statement, error) {
+func (p *Parser) assign() (ast.Statement, error) {
 	tok := p.lookahead
 	if err := p.match(lexer.ID); err != nil {
 		return nil, err
@@ -305,7 +305,7 @@ func (p *Parser) assign() (inter.Statement, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("%s undeclared", tok.String()))
 	}
-	var stmt inter.Statement
+	var stmt ast.Statement
 	if p.lookahead.Tag() == lexer.Tag('=') {
 		if err := p.move(); err != nil {
 			return nil, err
@@ -314,7 +314,7 @@ func (p *Parser) assign() (inter.Statement, error) {
 		if err != nil {
 			return nil, err
 		}
-		stmt, err = inter.NewAssignStmt(id, expr)
+		stmt, err = ast.NewAssignStmt(id, expr)
 		if err != nil {
 			return nil, err
 		}
@@ -330,7 +330,7 @@ func (p *Parser) assign() (inter.Statement, error) {
 		if err != nil {
 			return nil, err
 		}
-		stmt, err = inter.NewAssignArrayStmt(access, expr)
+		stmt, err = ast.NewAssignArrayStmt(access, expr)
 		if err != nil {
 			return nil, err
 		}
@@ -341,7 +341,7 @@ func (p *Parser) assign() (inter.Statement, error) {
 	return stmt, nil
 }
 
-func (p *Parser) bool() (inter.Expression, error) {
+func (p *Parser) bool() (ast.Expression, error) {
 	expr, err := p.join()
 	if err != nil {
 		return nil, err
@@ -354,7 +354,7 @@ func (p *Parser) bool() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err = inter.NewOrLogicOp(expr, right)
+		expr, err = ast.NewOrLogicOp(expr, right)
 		if err != nil {
 			return nil, err
 		}
@@ -362,7 +362,7 @@ func (p *Parser) bool() (inter.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) join() (inter.Expression, error) {
+func (p *Parser) join() (ast.Expression, error) {
 	expr, err := p.equality()
 	if err != nil {
 		return nil, err
@@ -375,7 +375,7 @@ func (p *Parser) join() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err = inter.NewAndLogicOp(expr, right)
+		expr, err = ast.NewAndLogicOp(expr, right)
 		if err != nil {
 			return nil, err
 		}
@@ -383,7 +383,7 @@ func (p *Parser) join() (inter.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) equality() (inter.Expression, error) {
+func (p *Parser) equality() (ast.Expression, error) {
 	expr, err := p.relation()
 	if err != nil {
 		return nil, err
@@ -397,7 +397,7 @@ func (p *Parser) equality() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err = inter.NewRelationOp(tok, expr, right)
+		expr, err = ast.NewRelationOp(tok, expr, right)
 		if err != nil {
 			return nil, err
 		}
@@ -405,7 +405,7 @@ func (p *Parser) equality() (inter.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) relation() (inter.Expression, error) {
+func (p *Parser) relation() (ast.Expression, error) {
 	expr, err := p.expr()
 	if err != nil {
 		return nil, err
@@ -420,13 +420,13 @@ func (p *Parser) relation() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return inter.NewRelationOp(tok, expr, right)
+		return ast.NewRelationOp(tok, expr, right)
 	default:
 		return expr, nil
 	}
 }
 
-func (p *Parser) expr() (inter.Expression, error) {
+func (p *Parser) expr() (ast.Expression, error) {
 	expr, err := p.term()
 	if err != nil {
 		return nil, err
@@ -440,7 +440,7 @@ func (p *Parser) expr() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err = inter.NewArithmeticOperator(tok, expr, right)
+		expr, err = ast.NewArithmeticOperator(tok, expr, right)
 		if err != nil {
 			return nil, err
 		}
@@ -448,7 +448,7 @@ func (p *Parser) expr() (inter.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) term() (inter.Expression, error) {
+func (p *Parser) term() (ast.Expression, error) {
 	expr, err := p.unary()
 	if err != nil {
 		return nil, err
@@ -462,7 +462,7 @@ func (p *Parser) term() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err = inter.NewArithmeticOperator(tok, expr, right)
+		expr, err = ast.NewArithmeticOperator(tok, expr, right)
 		if err != nil {
 			return nil, err
 		}
@@ -470,7 +470,7 @@ func (p *Parser) term() (inter.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) unary() (inter.Expression, error) {
+func (p *Parser) unary() (ast.Expression, error) {
 	if p.lookahead.Tag() == lexer.Tag('-') {
 		if err := p.move(); err != nil {
 			return nil, err
@@ -479,7 +479,7 @@ func (p *Parser) unary() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return inter.NewUnaryOp(lexer.MinusWord(), expr)
+		return ast.NewUnaryOp(lexer.MinusWord(), expr)
 	}
 	if p.lookahead.Tag() == lexer.Tag('!') {
 		tok := p.lookahead
@@ -490,12 +490,12 @@ func (p *Parser) unary() (inter.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return inter.NewNotLogicOp(tok, expr)
+		return ast.NewNotLogicOp(tok, expr)
 	}
 	return p.factor()
 }
 
-func (p *Parser) factor() (inter.Expression, error) {
+func (p *Parser) factor() (ast.Expression, error) {
 	switch p.lookahead.Tag() {
 	case lexer.Tag('('):
 		if err := p.move(); err != nil {
@@ -512,7 +512,7 @@ func (p *Parser) factor() (inter.Expression, error) {
 		return expr, nil
 
 	case lexer.INTEGER:
-		expr, err := inter.NewIntConstant(p.lookahead)
+		expr, err := ast.NewIntConstant(p.lookahead)
 		if err != nil {
 			return nil, err
 		}
@@ -522,7 +522,7 @@ func (p *Parser) factor() (inter.Expression, error) {
 		return expr, nil
 
 	case lexer.REAL:
-		expr, err := inter.NewFloatConstant(p.lookahead)
+		expr, err := ast.NewFloatConstant(p.lookahead)
 		if err != nil {
 			return nil, err
 		}
@@ -532,14 +532,14 @@ func (p *Parser) factor() (inter.Expression, error) {
 		return expr, nil
 
 	case lexer.TRUE:
-		expr := inter.TrueConstant()
+		expr := ast.TrueConstant()
 		if err := p.move(); err != nil {
 			return nil, err
 		}
 		return expr, nil
 
 	case lexer.FALSE:
-		expr := inter.FalseConstant()
+		expr := ast.FalseConstant()
 		if err := p.move(); err != nil {
 			return nil, err
 		}
@@ -563,7 +563,7 @@ func (p *Parser) factor() (inter.Expression, error) {
 	}
 }
 
-func (p *Parser) offset(id *inter.Identifier) (*inter.AccessOp, error) {
+func (p *Parser) offset(id *ast.Identifier) (*ast.AccessOp, error) {
 	typ := id.Type()
 	if err := p.match(lexer.Tag('[')); err != nil {
 		return nil, err
@@ -580,11 +580,11 @@ func (p *Parser) offset(id *inter.Identifier) (*inter.AccessOp, error) {
 		return nil, errors.New("Type error")
 	}
 	typ = arr.Of
-	width, err := inter.NewIntConstant(&lexer.Integer{int64(typ.Width())})
+	width, err := ast.NewIntConstant(&lexer.Integer{int64(typ.Width())})
 	if err != nil {
 		return nil, err
 	}
-	t1, err := inter.NewArithmeticOperator(lexer.NewToken(lexer.Tag('*')), index, width)
+	t1, err := ast.NewArithmeticOperator(lexer.NewToken(lexer.Tag('*')), index, width)
 	if err != nil {
 		return nil, err
 	}
@@ -606,19 +606,19 @@ func (p *Parser) offset(id *inter.Identifier) (*inter.AccessOp, error) {
 			return nil, errors.New("Type error")
 		}
 		typ = arr.Of
-		width, err = inter.NewIntConstant(&lexer.Integer{int64(typ.Width())})
+		width, err = ast.NewIntConstant(&lexer.Integer{int64(typ.Width())})
 		if err != nil {
 			return nil, err
 		}
-		t1, err = inter.NewArithmeticOperator(lexer.NewToken(lexer.Tag('*')), index, width)
+		t1, err = ast.NewArithmeticOperator(lexer.NewToken(lexer.Tag('*')), index, width)
 		if err != nil {
 			return nil, err
 		}
-		t2, err := inter.NewArithmeticOperator(lexer.NewToken(lexer.Tag('+')), loc, t1)
+		t2, err := ast.NewArithmeticOperator(lexer.NewToken(lexer.Tag('+')), loc, t1)
 		if err != nil {
 			return nil, err
 		}
 		loc = t2
 	}
-	return inter.NewAccessOp(id, loc, typ)
+	return ast.NewAccessOp(id, loc, typ)
 }

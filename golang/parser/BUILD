@@ -6,8 +6,8 @@ go_library(
     "parser.go",
   ],
   deps = [
-    "//golang/lexer:lexer",
-    "//golang/inter:inter",
+    "//golang/lexer",
+    "//golang/ast",
   ],
   importpath = "dragonbook/parser",
   visibility = ["//golang:__subpackages__"],
@@ -18,7 +18,7 @@ go_test(
   srcs = ["parser_test.go"],
   embed = [":parser"],
   deps = [
-    "//golang/lexer:lexer",
-    "//golang/inter:inter",
+    "//golang/lexer",
+    "//golang/ast",
   ],
 )

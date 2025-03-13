@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"dragonbook/inter"
+	"dragonbook/ast"
 	"dragonbook/lexer"
 	"strings"
 	"testing"
@@ -125,8 +125,8 @@ L2:`,
 
 func TestParser(t *testing.T) {
 	for _, test := range parserTests {
-		inter.ResetLabels()
-		inter.ResetTempCount()
+		ast.ResetLabels()
+		ast.ResetTempCount()
 		rd := strings.NewReader(test.source)
 		lex := lexer.NewLexer(rd)
 		p, err := NewParser(lex)

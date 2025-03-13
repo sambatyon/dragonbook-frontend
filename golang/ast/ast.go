@@ -1,4 +1,4 @@
-package inter
+package ast
 
 import (
 	"fmt"
