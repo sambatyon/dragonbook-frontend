@@ -1,10 +1,10 @@
 from typing import Optional, override
 
-from dragon import inter
+from dragon import ast
 from dragon.lexer import tokens
 
 
-class Expression(inter.Node):
+class Expression(ast.Node):
   __op: tokens.Token
   __typ: tokens.Type
 
@@ -35,13 +35,13 @@ class Expression(inter.Node):
   def emit_jumps(self, test: str, to: int, fr: int) -> str:
     if to != 0 and fr != 0:
       return ''.join([
-        inter.emit(f"if {test} goto L{to}"),
-        inter.emit(f"goto L{fr}")
+        ast.emit(f"if {test} goto L{to}"),
+        ast.emit(f"goto L{fr}")
       ])
     elif to != 0:
-      return inter.emit(f"if {test} goto L{to}")
+      return ast.emit(f"if {test} goto L{to}")
     elif fr != 0:
-      return inter.emit(f"iffalse {test} goto L{fr}")
+      return ast.emit(f"iffalse {test} goto L{fr}")
     else:
       return ""
 
@@ -63,9 +63,9 @@ class Constant(Expression):
   @override
   def jumping(self, to: int, fr: int) -> str:
     if self == Constant.true() and to != 0:
-      return inter.emit(f"goto L{to}")
+      return ast.emit(f"goto L{to}")
     if self == Constant.false() and fr != 0:
-      return inter.emit(f"goto L{fr}")
+      return ast.emit(f"goto L{fr}")
     return ""
 
   @staticmethod
@@ -110,7 +110,7 @@ class Operator(Expression):
   def reduce(self) -> tuple[Expression, str]:
     x, xstr = self.gen()
     tmp = Temp(self.type)
-    return tmp, "".join([xstr, inter.emit(f"{tmp} = {x}")])
+    return tmp, "".join([xstr, ast.emit(f"{tmp} = {x}")])
 
 class Arithmetic(Operator):
   __left: Expression
@@ -211,16 +211,16 @@ class Logical(Expression):
 
   @override
   def gen(self) -> tuple[Expression, str]:
-    f = inter.new_label()
-    a = inter.new_label()
+    f = ast.new_label()
+    a = ast.new_label()
     tmp = Temp(self.type)
     return tmp, "".join([
       self.jumping(0, f),
-      inter.emit(f"{tmp} = true"),
-      inter.emit(f"goto L{a}"),
-      inter.emit_label(f),
-      inter.emit(f"{tmp} = false"),
-      inter.emit_label(a),
+      ast.emit(f"{tmp} = true"),
+      ast.emit(f"goto L{a}"),
+      ast.emit_label(f),
+      ast.emit(f"{tmp} = false"),
+      ast.emit_label(a),
     ])
 
   @override
@@ -245,11 +245,11 @@ class Or(Logical):
 
   @override
   def jumping(self, to: int, fr: int) -> str:
-    label: int = to if to != 0 else inter.new_label()
+    label: int = to if to != 0 else ast.new_label()
     return "".join([
       self._left.jumping(label, 0),
       self._right.jumping(to, fr),
-      inter.emit_label(label) if to == 0 else ""
+      ast.emit_label(label) if to == 0 else ""
     ])
 
 class And(Logical):
@@ -258,11 +258,11 @@ class And(Logical):
 
   @override
   def jumping(self, to: int, fr: int) -> str:
-    label: int = fr if fr != 0 else inter.new_label()
+    label: int = fr if fr != 0 else ast.new_label()
     return "".join([
       self._left.jumping(0, label),
       self._right.jumping(to, fr),
-      inter.emit_label(label) if fr == 0 else ""
+      ast.emit_label(label) if fr == 0 else ""
     ])
 
 class RelationOp(Logical):

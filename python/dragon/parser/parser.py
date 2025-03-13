@@ -2,9 +2,9 @@ from typing import Optional
 
 from dragon import lexer
 from dragon.lexer import tokens
-from dragon import inter
-from dragon.inter import expression as expr
-from dragon.inter import statement as stmt
+from dragon import ast
+from dragon.ast import expression as expr
+from dragon.ast import statement as stmt
 
 
 class Environment:
@@ -36,6 +36,8 @@ class Parser:
   __top: Optional[Environment] = None
   __used: int = 0
 
+  __enclosing: Optional[stmt.Statement] = None
+
   def __init__(self, lex: lexer.Lexer) -> None:
     self.__lex = lex
     self.__move()
@@ -56,12 +58,12 @@ class Parser:
 
   def program(self) -> str:
     s: Optional[stmt.Statement] = self.__block()
-    begin: int = inter.new_label()
-    after: int = inter.new_label()
+    begin: int = ast.new_label()
+    after: int = ast.new_label()
     return ''.join([
-      inter.emit_label(begin),
+      ast.emit_label(begin),
       s.gen(begin, after) if s is not None else "",
-      inter.emit_label(after)
+      ast.emit_label(after)
     ])
 
   def __block(self) -> Optional[stmt.Statement]:
@@ -137,8 +139,8 @@ class Parser:
         return stmt.Else(x, s1, s2)
       case tokens.WHILE:
         w = stmt.While()
-        saved = stmt.enclosing
-        stmt.enclosing = w
+        saved = self.__enclosing
+        self.__enclosing = w
         self.__match(tokens.WHILE)
         self.__match('(')
         x: expr.Expression = self.__bool()
@@ -147,12 +149,12 @@ class Parser:
         if s1 is None:
           s1 = stmt.Statement()
         w.init(x, s1)
-        stmt.enclosing = saved
+        self.__enclosing = saved
         return w
       case tokens.DO:
         do = stmt.Do()
-        saved = stmt.enclosing
-        stmt.enclosing = do
+        saved = self.__enclosing
+        self.__enclosing = do
         self.__match(tokens.DO)
         s1: Optional[stmt.Statement] = self.__stmt()
         if s1 is None:
@@ -163,12 +165,12 @@ class Parser:
         self.__match(')')
         self.__match(';')
         do.init(x, s1)
-        stmt.enclosing = saved
+        self.__enclosing = saved
         return do
       case tokens.BREAK:
         self.__match(tokens.BREAK)
         self.__match(';')
-        return stmt.Break()
+        return stmt.Break(self.__enclosing)
       case Parser.__OPEN_BRACE:
         return self.__block()
       case _:
