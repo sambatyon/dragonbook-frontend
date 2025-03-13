@@ -1,4 +1,4 @@
-package com.dragon.inter;
+package com.dragon.ast;
 
 public class Stmt extends Node {
   public static Stmt Null = new Stmt();

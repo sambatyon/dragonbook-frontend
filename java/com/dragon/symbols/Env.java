@@ -2,7 +2,7 @@ package com.dragon.symbols;
 
 import java.util.HashMap;
 
-import com.dragon.inter.Id;
+import com.dragon.ast.Id;
 import com.dragon.lexer.Token;
 
 public class Env {

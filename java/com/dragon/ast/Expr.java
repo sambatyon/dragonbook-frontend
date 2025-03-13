@@ -1,4 +1,4 @@
-package com.dragon.inter;
+package com.dragon.ast;
 
 import com.dragon.lexer.Token;
 import com.dragon.symbols.Type;

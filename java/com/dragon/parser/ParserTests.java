@@ -7,8 +7,8 @@ import java.util.Arrays;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import com.dragon.inter.Node;
-import com.dragon.inter.Temp;
+import com.dragon.ast.Node;
+import com.dragon.ast.Temp;
 import com.dragon.lexer.Lexer;
 
 public class ParserTests {

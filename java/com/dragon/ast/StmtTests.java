@@ -1,4 +1,4 @@
-package com.dragon.inter;
+package com.dragon.ast;
 
 import static org.junit.Assert.assertEquals;
 
