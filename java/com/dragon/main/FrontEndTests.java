@@ -5,8 +5,8 @@ import org.junit.runners.Suite;
 
 import com.dragon.lexer.LexerTests;
 import com.dragon.parser.ParserTests;
-import com.dragon.inter.ExprTests;
-import com.dragon.inter.StmtTests;
+import com.dragon.ast.ExprTests;
+import com.dragon.ast.StmtTests;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({

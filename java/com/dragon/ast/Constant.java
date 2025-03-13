@@ -1,4 +1,4 @@
-package com.dragon.inter;
+package com.dragon.ast;
 
 import com.dragon.lexer.Num;
 import com.dragon.lexer.Real;

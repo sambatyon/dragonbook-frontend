@@ -1,19 +1,20 @@
-package com.dragon.inter;
+package com.dragon.ast;
 
 import com.dragon.lexer.Token;
 
-public class Or extends Logical {
-  public Or(Token tok, Expr left, Expr right) {
+public class And extends Logical {
+  public And(Token tok, Expr left, Expr right) {
     super(tok, left, right);
   }
 
   @Override
   public void jumping(StringBuilder b, int to, int from) {
-    var label = to != 0 ? to : newLabel();
-    left.jumping(b, label, 0);
+    var label = from != 0 ? from : newLabel();
+    left.jumping(b, 0, label);
     right.jumping(b, to, from);
-    if (to == 0) {
+    if (from == 0) {
       emitLabel(b, label);
     }
   }
+
 }
