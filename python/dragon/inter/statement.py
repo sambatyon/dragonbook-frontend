@@ -10,8 +10,6 @@ class Statement(inter.Node):
   def gen(self, begin: int, after: int) -> str:
     return ""
 
-enclosing: Optional[Statement] = None
-
 class Assign(Statement):
   __id: expr.Identifier
   __expr: expr.Expression
@@ -194,7 +192,7 @@ class Do(Statement):
 class Break(Statement):
   __stmt: Statement
 
-  def __init__(self) -> None:
+  def __init__(self, enclosing: Optional[Statement]) -> None:
     if enclosing is None:
       self.error("unenclosed break")
     self.__stmt = enclosing
