@@ -6,7 +6,7 @@ from dragon.lexer import tokens
 class Lexer:
   __line: int = 1
   __peek: str = ' '
-  __words: map[str, tokens.Word] = {}
+  __words: dict[str, tokens.Word] = {}
   __source: io.TextIOBase
 
   def __init__(self, source: io.TextIOBase) -> None:
@@ -111,7 +111,10 @@ class Lexer:
       self.__words[s] = w
       return w
 
-    tok = tokens.Token(ord(self.__peek))
+    if self.__peek == '':
+      tok = tokens.Token(0)
+    else:
+      tok = tokens.Token(ord(self.__peek))
     self.__peek = " "
     return tok
 

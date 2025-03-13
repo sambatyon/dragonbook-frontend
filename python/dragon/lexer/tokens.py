@@ -29,7 +29,9 @@ WHILE: Tag = 275
 class Token:
   __tag: Tag
 
-  def __init__(self, tag: Tag):
+  def __init__(self, tag: Tag|str):
+    if isinstance(tag, str):
+      tag = ord(tag)
     self.__tag = tag
 
   @property
@@ -135,7 +137,7 @@ class Array(Type):
   __size: int
 
   def __init__(self, size: int, typ: Type):
-    super().__init__("[]", INDEX, size * p.width)
+    super().__init__("[]", INDEX, size * typ.width)
     self.__size = size
     self.__of = typ
 

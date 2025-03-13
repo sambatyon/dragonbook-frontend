@@ -10,8 +10,7 @@ class Statement(inter.Node):
   def gen(self, begin: int, after: int) -> str:
     return ""
 
-NULL_STMT = Statement()
-enclosing: Statement = NULL_STMT
+enclosing: Optional[Statement] = None
 
 class Assign(Statement):
   __id: expr.Identifier
@@ -63,7 +62,7 @@ class AssignArray(Statement):
   @override
   def gen(self, begin: int, after: int) -> str:
     idx, idxstr = self.__index.reduce()
-    ex, exstr = self.__expr.gen()
+    ex, exstr = self.__expr.reduce()
     return "".join([
       idxstr,
       exstr,
@@ -80,9 +79,9 @@ class Sequence(Statement):
 
   @override
   def gen(self, begin: int, after: int) -> str:
-    if self.__head is NULL_STMT:
+    if self.__head is None:
       return self.__tail.gen(begin, after)
-    if self.__tail is NULL_STMT:
+    if self.__tail is None:
       return self.__head.gen(begin, after)
     label = inter.new_label()
     return "".join([
@@ -139,7 +138,7 @@ class While(Statement):
   __cond: expr.Expression
   __body: Statement
 
-  def __init__(self, cond: Optional[expr.Expression], stmt: Optional[Statement]) -> None:
+  def __init__(self, cond: Optional[expr.Expression] = None, stmt: Optional[Statement] = None) -> None:
     if cond is None and stmt is not None:
       cond.error("missing condition in while expression")
     if cond is not None and stmt is None:
@@ -155,6 +154,7 @@ class While(Statement):
 
   @override
   def gen(self, begin: int, after: int) -> str:
+    self._after = after
     label: int = inter.new_label()
     return "".join([
       self.__cond.jumping(0, after),
@@ -167,7 +167,7 @@ class Do(Statement):
   __cond: expr.Expression
   __body: Statement
 
-  def __init__(self, cond: Optional[expr.Expression], stmt: Optional[Statement]) -> None:
+  def __init__(self, cond: Optional[expr.Expression] = None, stmt: Optional[Statement] = None) -> None:
     if cond is None and stmt is not None:
       cond.error("missing condition in do expression")
     if cond is not None and stmt is None:
@@ -183,9 +183,22 @@ class Do(Statement):
 
   @override
   def gen(self, begin: int, after: int) -> str:
+    self._after = after
     label: int = inter.new_label()
     return "".join([
       self.__body.gen(begin, label),
       inter.emit_label(label),
       self.__cond.jumping(begin, 0),
     ])
+
+class Break(Statement):
+  __stmt: Statement
+
+  def __init__(self) -> None:
+    if enclosing is None:
+      self.error("unenclosed break")
+    self.__stmt = enclosing
+
+  @override
+  def gen(self, begin: int, end: int) -> str:
+    return inter.emit(f"goto L{self.__stmt._after}")
