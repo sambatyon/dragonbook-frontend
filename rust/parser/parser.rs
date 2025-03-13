@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::convert::Into;
 use std::mem::swap;
 use lexer::tokens as toks;
-use inter::expression as expr;
-use inter::statement as stmt;
+use ast::expression as expr;
+use ast::statement as stmt;
 use expr::Expression;
 
 pub struct Environment {
@@ -65,11 +65,11 @@ impl<T: std::io::Read> Parser<T> {
 
   pub fn program(&mut self, s: &mut String) -> Result<(), String> {
     let mut stm = self.block()?;
-    let begin = inter::new_label();
-    let after = inter::new_label();
-    inter::emit_label(s, begin);
+    let begin = ast::new_label();
+    let after = ast::new_label();
+    ast::emit_label(s, begin);
     stm.generate(s, begin, after)?;
-    inter::emit_label(s, after);
+    ast::emit_label(s, after);
     Ok(())
   }
 
@@ -116,8 +116,8 @@ impl<T: std::io::Read> Parser<T> {
     Ok(())
   }
 
-  fn typ(&mut self) -> Result<inter::Type, String> {
-    let typ = inter::Type::new(&self.lookahead)?;
+  fn typ(&mut self) -> Result<ast::Type, String> {
+    let typ = ast::Type::new(&self.lookahead)?;
     self.match_token(toks::Tag::BASIC)?;
     if !self.lookahead.match_tag(b'[') {
       return Ok(typ)
@@ -125,7 +125,7 @@ impl<T: std::io::Read> Parser<T> {
     self.dims(typ)
   }
 
-  fn dims(&mut self, typ: inter::Type) -> Result<inter::Type, String> {
+  fn dims(&mut self, typ: ast::Type) -> Result<ast::Type, String> {
     self.match_token(b'[')?;
     let tok = self.lookahead.clone();
     self.match_token(toks::Tag::INTEGER)?;
@@ -139,7 +139,7 @@ impl<T: std::io::Read> Parser<T> {
     if self.lookahead.match_tag(b'[') {
       of = self.dims(typ)?;
     }
-    Ok(inter::Type::array(of, size as u32))
+    Ok(ast::Type::array(of, size as u32))
   }
 
   fn stmts(&mut self) -> Result<Box<dyn stmt::Statement>, String> {
@@ -184,7 +184,7 @@ impl<T: std::io::Read> Parser<T> {
         self.match_token(b'(')?;
 
         let ex = self.boolean()?;
-        if ex.typ() != inter::Type::boolean() {
+        if ex.typ() != ast::Type::boolean() {
           return Err(String::from("Expression in boolean condition is required for while loop."))
         }
 
@@ -200,7 +200,7 @@ impl<T: std::io::Read> Parser<T> {
         self.match_token(WHILE)?;
         self.match_token(b'(')?;
         let ex = self.boolean()?;
-        if ex.typ() != inter::Type::boolean() {
+        if ex.typ() != ast::Type::boolean() {
           return Err(String::from("Expression in boolean condition is required for while loop."))
         }
         self.match_token(b')')?;
@@ -387,7 +387,7 @@ impl<T: std::io::Read> Parser<T> {
     self.match_token(b']')?;
 
     match typ {
-      inter::Type::Array{of, length: _} => typ = *of.clone(),
+      ast::Type::Array{of, length: _} => typ = *of.clone(),
       _ => return Err(String::from("String error"))
     };
 
@@ -401,7 +401,7 @@ impl<T: std::io::Read> Parser<T> {
       self.match_token(b']')?;
 
       match typ {
-        inter::Type::Array{of, length: _} => typ = *of.clone(),
+        ast::Type::Array{of, length: _} => typ = *of.clone(),
         _ => return Err(String::from("String error"))
       };
       let width = Box::new(expr::Constant::integer(typ.width() as i64));
@@ -531,7 +531,7 @@ L2:"#,
   ];
 
   for tc in tests {
-    inter::reset_labels();
+    ast::reset_labels();
     expr::Temp::reset_counter();
 
     let lexer = lexer::Lexer::new(
