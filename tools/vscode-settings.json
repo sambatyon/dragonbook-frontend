@@ -117,7 +117,14 @@
     "any": "cpp",
     "condition_variable": "cpp",
     "forward_list": "cpp",
-    "list": "cpp"
+    "list": "cpp",
+    "__verbose_abort": "cpp",
+    "charconv": "cpp",
+    "csignal": "cpp",
+    "execution": "cpp",
+    "print": "cpp",
+    "queue": "cpp",
+    "span": "cpp"
   },
   "[go]": {
     "editor.rulers": [100],
